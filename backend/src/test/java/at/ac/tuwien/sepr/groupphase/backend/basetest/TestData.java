@@ -1,32 +1,51 @@
 package at.ac.tuwien.sepr.groupphase.backend.basetest;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.UserCreateDto;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.UserLoginDto;
 
 public interface TestData {
 
-    Long ID = 1L;
-    String TEST_NEWS_TITLE = "Title";
-    String TEST_NEWS_SUMMARY = "Summary";
-    String TEST_NEWS_TEXT = "TestMessageText";
-    LocalDateTime TEST_NEWS_PUBLISHED_AT =
-        LocalDateTime.of(2019, 11, 13, 12, 15, 0, 0);
+    static UserCreateDto getDefaultUserCreateDto() {
+        UserCreateDto dto = new UserCreateDto();
+        dto.setUsername("testuser");
+        dto.setEmail("test@example.com");
+        dto.setPassword("password123");
+        return dto;
+    }
 
-    String BASE_URI = "/api/v1";
+    static UserLoginDto getDefaultUserLoginDto() {
+        return new UserLoginDto("testuser", "password123");
+    }
 
-    String ADMIN_USER = "admin@email.com";
-    List<String> ADMIN_ROLES = new ArrayList<>() {
-        {
-            add("ROLE_ADMIN");
-            add("ROLE_USER");
-        }
-    };
-    String DEFAULT_USER = "admin@email.com";
-    List<String> USER_ROLES = new ArrayList<>() {
-        {
-            add("ROLE_USER");
-        }
-    };
+    static UserCreateDto withUsername(UserCreateDto original, String username) {
+        UserCreateDto copy = new UserCreateDto();
+        copy.setUsername(username);
+        copy.setEmail(original.getEmail());
+        copy.setPassword(original.getPassword());
+        return copy;
+    }
 
+    static UserCreateDto withEmail(UserCreateDto original, String email) {
+        UserCreateDto copy = new UserCreateDto();
+        copy.setUsername(original.getUsername());
+        copy.setEmail(email);
+        copy.setPassword(original.getPassword());
+        return copy;
+    }
+
+    static UserCreateDto withPassword(UserCreateDto original, String password) {
+        UserCreateDto copy = new UserCreateDto();
+        copy.setUsername(original.getUsername());
+        copy.setEmail(original.getEmail());
+        copy.setPassword(password);
+        return copy;
+    }
+
+    static UserLoginDto withUsername(UserLoginDto original, String username) {
+        return new UserLoginDto(username, original.password());
+    }
+
+    static UserLoginDto withPassword(UserLoginDto original, String password) {
+        return new UserLoginDto(original.username(), password);
+    }
 }

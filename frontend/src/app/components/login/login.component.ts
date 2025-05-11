@@ -1,30 +1,40 @@
-import {Component, OnInit} from '@angular/core';
-import {UntypedFormBuilder, UntypedFormGroup, Validators} from '@angular/forms';
-import {Router} from '@angular/router';
-import {AuthService} from '../../services/auth.service';
-import {AuthRequest} from '../../dtos/auth-request';
-
+import { Component, OnInit } from "@angular/core";
+import {
+  UntypedFormBuilder,
+  UntypedFormGroup,
+  Validators,
+} from "@angular/forms";
+import { ActivatedRoute, Router } from "@angular/router";
+import { AuthService } from "../../services/auth.service";
+import { UserLoginDto } from "../../dtos/auth";
 
 @Component({
-    selector: 'app-login',
-    templateUrl: './login.component.html',
-    styleUrls: ['./login.component.scss'],
-    standalone: false
+  selector: "app-login",
+  templateUrl: "./login.component.html",
+  styleUrls: ["./login.component.scss"],
+  standalone: false,
 })
 export class LoginComponent implements OnInit {
-
   loginForm: UntypedFormGroup;
   // After first submission attempt, form validation will start
   submitted = false;
   // Error flag
   error = false;
-  errorMessage = '';
+  errorMessage = "";
 
-  constructor(private formBuilder: UntypedFormBuilder, private authService: AuthService, private router: Router) {
+  gotoAfterSuccess: string = "/";
+
+  constructor(
+    private formBuilder: UntypedFormBuilder,
+    private authService: AuthService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {
     this.loginForm = this.formBuilder.group({
-      username: ['', [Validators.required]],
-      password: ['', [Validators.required, Validators.minLength(8)]]
+      username: ["", [Validators.required]],
+      password: ["", [Validators.required]],
     });
+    /* Validators.minLength(8) makes sense for create but not login */
   }
 
   /**
@@ -33,35 +43,38 @@ export class LoginComponent implements OnInit {
   loginUser() {
     this.submitted = true;
     if (this.loginForm.valid) {
-      const authRequest: AuthRequest = new AuthRequest(this.loginForm.controls.username.value, this.loginForm.controls.password.value);
-      this.authenticateUser(authRequest);
+      const loginDto: UserLoginDto = {
+        username: this.loginForm.controls.username.value,
+        password: this.loginForm.controls.password.value,
+      };
+      this.authenticateUser(loginDto);
     } else {
-      console.log('Invalid input');
+      console.log("Invalid input");
     }
   }
 
   /**
    * Send authentication data to the authService. If the authentication was successfully, the user will be forwarded to the message page
    *
-   * @param authRequest authentication data from the user login form
+   * @param loginDto authentication data from the user login form
    */
-  authenticateUser(authRequest: AuthRequest) {
-    console.log('Try to authenticate user: ' + authRequest.email);
-    this.authService.loginUser(authRequest).subscribe({
+  authenticateUser(loginDto: UserLoginDto) {
+    console.log("Try to authenticate user: " + loginDto.username);
+    this.authService.loginUser(loginDto).subscribe({
       next: () => {
-        console.log('Successfully logged in user: ' + authRequest.email);
-        this.router.navigate(['/message']);
+        console.log("Successfully logged in user: " + loginDto.username);
+        this.router.navigate([this.gotoAfterSuccess]);
       },
-      error: error => {
-        console.log('Could not log in due to:');
+      error: (error) => {
+        console.log("Could not log in due to:");
         console.log(error);
         this.error = true;
-        if (typeof error.error === 'object') {
+        if (typeof error.error === "object") {
           this.errorMessage = error.error.error;
         } else {
           this.errorMessage = error.error;
         }
-      }
+      },
     });
   }
 
@@ -73,6 +86,6 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.gotoAfterSuccess = this.route.snapshot.queryParams["returnUrl"] || "/";
   }
-
 }
