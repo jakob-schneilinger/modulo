@@ -4,8 +4,8 @@ import at.ac.tuwien.sepr.groupphase.backend.security.JwtAuthorizationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -34,22 +34,22 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
-            .csrf(AbstractHttpConfigurer::disable)
-            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .headers(httpSecurityHeadersConfigurer -> httpSecurityHeadersConfigurer
-                .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                    "/api/v1/authentication/**",
-                    "/health",
-                    "/api/v1/user/register",
-                    "/h2-console/**")
-                .permitAll()
-                .anyRequest().authenticated())
-            .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
-            .exceptionHandling(exceptions -> exceptions
-                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
-            .build();
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .headers(httpSecurityHeadersConfigurer -> httpSecurityHeadersConfigurer
+                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/api/v1/authentication/**",
+                                "/health",
+                                "/api/v1/user/register",
+                                "/h2-console/**")
+                        .permitAll()
+                        .anyRequest().authenticated())
+                .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+                .build();
     }
 
     @Bean
@@ -62,8 +62,10 @@ public class SecurityConfig {
         @Override
         public void addCorsMappings(CorsRegistry registry) {
             registry.addMapping("/**")
-                .allowedOriginPatterns("http://localhost:4200", "https://*.apps.student.inso-w.at")
-                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "HEAD");
+                    .allowedOriginPatterns("http://localhost:4200", "https://*.apps.student.inso-w.at")
+                    .allowedMethods("GET", "POST", "OPTIONS", "HEAD", "DELETE", "PUT", "PATCH")
+                    .allowedHeaders("*")
+                    .allowCredentials(true);
         }
     }
 }

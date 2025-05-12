@@ -1,17 +1,18 @@
 import { Component, OnInit } from "@angular/core";
 import {
+  ReactiveFormsModule,
   UntypedFormBuilder,
   UntypedFormGroup,
   Validators,
 } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
-import { AuthService } from "../../services/auth.service";
-import { UserLoginDto } from "../../dtos/auth";
+import { AuthService } from "../../../services/auth.service";
+import { UserLoginDto } from "../../../dtos/auth";
 
 @Component({
   selector: "app-login",
   templateUrl: "./login.component.html",
-  styleUrls: ["./login.component.scss"],
+  styleUrls: ["./login.component.scss", "../auth.scss"],
   standalone: false,
 })
 export class LoginComponent implements OnInit {
@@ -34,7 +35,6 @@ export class LoginComponent implements OnInit {
       username: ["", [Validators.required]],
       password: ["", [Validators.required]],
     });
-    /* Validators.minLength(8) makes sense for create but not login */
   }
 
   /**

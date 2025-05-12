@@ -51,7 +51,7 @@ public class ApplicationUser {
     }
 
     public void setDisplayName(String name) {
-        this.username = name;
+        this.displayName = name;
     }
 
     public String getEmail() {

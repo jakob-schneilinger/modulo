@@ -1,15 +1,23 @@
 package at.ac.tuwien.sepr.groupphase.backend.exception;
 
-public class ValidationException extends Exception {
-    public ValidationException(String message) {
-        super(message);
-    }
+import java.util.List;
 
-    public ValidationException(String message, Throwable cause) {
-        super(message, cause);
-    }
+/**
+ * Exception that signals, that data,
+ * that came from outside the backend, is invalid.
+ * The data violates some invariant constraint
+ * (rather than one, that is imposed by the current data in the system).
+ * Contains a list of all validations that failed when validating the piece of data in question.
+ */
+public class ValidationException extends ErrorListException {
 
-    public ValidationException(Exception e) {
-        super(e);
+    /**
+     * Constructs a new ValidationException with the specified summary message and list of validation errors.
+     *
+     * @param messageSummary A summary message describing which validation failed
+     * @param errors A list of specific error messages indicating the failed validations
+     */
+    public ValidationException(String messageSummary, List<String> errors) {
+        super("Failed validations", messageSummary, errors);
     }
 }

@@ -20,8 +20,10 @@ public interface AuthService {
      * Creates a new user and logs them in.
      *
      * @param userLoginDto login credentials
+     * @return the JWT, if successful
+     * 
      * @throws ValidationException if the user input is invalid
      * @throws ConflictException   if the user already exists
      */
-    void create(UserCreateDto userLoginDto) throws ValidationException, ConflictException;
+    String create(UserCreateDto userLoginDto) throws ValidationException, ConflictException;
 }
