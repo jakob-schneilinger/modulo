@@ -1,0 +1,24 @@
+@use "@styles/variables.scss" as *;
+@use "@styles/global.scss" as *;
+
+.avatar {
+  position: relative;
+  aspect-ratio: 1;
+  background-color: coral;
+  border-radius: 50%;
+}
+
+.avatar-edit {
+  position: absolute;
+  background-color: lightcoral;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+
+  width: 3rem;
+  aspect-ratio: 1;
+
+  > span {
+    margin: auto;
+  }
+}

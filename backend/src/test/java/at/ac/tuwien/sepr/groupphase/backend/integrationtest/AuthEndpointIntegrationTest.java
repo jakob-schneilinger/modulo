@@ -2,8 +2,8 @@ package at.ac.tuwien.sepr.groupphase.backend.integrationtest;
 
 import at.ac.tuwien.sepr.groupphase.backend.basetest.TestData;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.JwtResponseDto;
-import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.UserCreateDto;
-import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.UserLoginDto;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.user.UserCreateDto;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.user.UserLoginDto;
 import at.ac.tuwien.sepr.groupphase.backend.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,12 +44,18 @@ public class AuthEndpointIntegrationTest {
 
     @Test
     public void register_withValidData_createsUserAndReturnsOk() throws Exception {
-        mockMvc.perform(post("/api/v1/user/register")
+        MvcResult result = mockMvc.perform(post("/api/v1/user/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(TestData.getDefaultUserCreateDto())))
-            .andExpect(status().isOk())
-            .andExpect(content().string("User registered successfully"));
+                .andExpect(status().isOk())
+                .andReturn();
 
+        JwtResponseDto response = objectMapper.readValue(
+                result.getResponse().getContentAsString(),
+                JwtResponseDto.class);
+
+        assertNotNull(response.token());
+        assertFalse(response.token().isEmpty());
         assertTrue(userRepository.findByUsername("testuser").isPresent());
     }
 
@@ -60,7 +66,7 @@ public class AuthEndpointIntegrationTest {
         mockMvc.perform(post("/api/v1/user/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidDto)))
-            .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -70,50 +76,51 @@ public class AuthEndpointIntegrationTest {
         mockMvc.perform(post("/api/v1/user/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidDto)))
-            .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest());
     }
 
     @Test
     public void login_withValidCredentials_returnsJwtToken() throws Exception {
         mockMvc.perform(post("/api/v1/user/register")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(TestData.getDefaultUserCreateDto())));
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(TestData.getDefaultUserCreateDto())));
 
         MvcResult result = mockMvc.perform(post("/api/v1/authentication")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(TestData.getDefaultUserLoginDto())))
-            .andExpect(status().isOk())
-            .andReturn();
+                .andExpect(status().isOk())
+                .andReturn();
 
         JwtResponseDto response = objectMapper.readValue(
-            result.getResponse().getContentAsString(),
-            JwtResponseDto.class
-        );
+                result.getResponse().getContentAsString(),
+                JwtResponseDto.class);
         assertNotNull(response.token());
         assertFalse(response.token().isEmpty());
     }
 
     @Test
     public void login_withInvalidUsername_returnsUnauthorized() throws Exception {
-        UserLoginDto invalidCredentials = TestData.withUsername(TestData.getDefaultUserLoginDto(), "nonexistent");
+        UserLoginDto invalidCredentials = TestData.withUsername(TestData.getDefaultUserLoginDto(),
+                "nonexistent");
 
         mockMvc.perform(post("/api/v1/authentication")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidCredentials)))
-            .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     public void login_withInvalidPassword_returnsUnauthorized() throws Exception {
         mockMvc.perform(post("/api/v1/user/register")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(TestData.getDefaultUserCreateDto())));
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(TestData.getDefaultUserCreateDto())));
 
-        UserLoginDto invalidCredentials = TestData.withPassword(TestData.getDefaultUserLoginDto(), "wrongpassword");
+        UserLoginDto invalidCredentials = TestData.withPassword(TestData.getDefaultUserLoginDto(),
+                "wrongpassword");
 
         mockMvc.perform(post("/api/v1/authentication")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidCredentials)))
-            .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized());
     }
 }

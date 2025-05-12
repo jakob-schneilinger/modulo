@@ -78,6 +78,9 @@ export class LoginComponent implements OnInit {
     });
   }
 
+  // TODO: insert in Home when Login finished
+  createBoard() {}
+
   /**
    * Error flag will be deactivated, which clears the error message
    */

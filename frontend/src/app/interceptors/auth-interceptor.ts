@@ -6,15 +6,20 @@ import {
   HttpRequest,
 } from "@angular/common/http";
 import { AuthService } from "../services/auth.service";
-import { Observable } from "rxjs";
+import { catchError, Observable, throwError } from "rxjs";
 import { Globals } from "../global/globals";
+import { Router } from "@angular/router";
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
-  ignoreUrls: string[];
+  unauthorized: string[];
 
-  constructor(private authService: AuthService, private globals: Globals) {
-    this.ignoreUrls = [
+  constructor(
+    private authService: AuthService,
+    private globals: Globals,
+    private router: Router
+  ) {
+    this.unauthorized = [
       this.globals.backendUri + "/authentication",
       this.globals.backendUri + "/user/register",
     ];
@@ -24,8 +29,8 @@ export class AuthInterceptor implements HttpInterceptor {
     req: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
-    // Do not intercept authentication requests
-    if (this.ignoreUrls.includes(req.url)) {
+    // Do not intercept unauthorized requests
+    if (this.unauthorized.includes(req.url)) {
       return next.handle(req);
     }
 
@@ -33,6 +38,27 @@ export class AuthInterceptor implements HttpInterceptor {
       headers: req.headers.set("Authorization", this.authService.getToken()),
     });
 
-    return next.handle(authReq);
+    //console.log("Intercepted", this.authService.getToken());
+
+    return next.handle(authReq).pipe(
+      catchError((e, caught) => {
+        console.log("Error", e);
+
+        if (e.error instanceof ErrorEvent) {
+          // client error
+          console.error("An error occurred:", e.error.message);
+        } else {
+          //server error
+          const { status, error } = e;
+          if (status == 401) {
+            this.router.navigate(["/login"], {
+              queryParams: { goto: this.router.url },
+            });
+          }
+          console.error(`Backend returned code ${status}, body was: ${error}`);
+        }
+        return throwError(() => new Error(e));
+      })
+    );
   }
 }

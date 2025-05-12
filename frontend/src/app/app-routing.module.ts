@@ -6,6 +6,7 @@ import { HomeComponent } from "./components/home/home.component";
 
 import { LoginComponent } from "./components/user/login/login.component";
 import { CreateComponent } from "./components/user/create/create.component";
+import { UserComponent } from "./components/user/user.component";
 
 import { NotFoundComponent } from "./components/not-found/not-found.component";
 
@@ -13,6 +14,7 @@ const routes: Routes = [
   { path: "", component: HomeComponent, canActivate: [AuthGuard] },
   { path: "login", component: LoginComponent },
   { path: "signup", component: CreateComponent },
+  { path: "user/:name", component: UserComponent, canActivate: [AuthGuard] },
   { path: "**", component: NotFoundComponent, canActivate: [AuthGuard] },
 ];
 

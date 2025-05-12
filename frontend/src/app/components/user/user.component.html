@@ -1,0 +1,41 @@
+<div class="container">
+
+    <form class="form" [formGroup]="updateForm" (ngSubmit)="onSubmit()">
+
+
+        <!-- big round avatar -->
+        <div class="avatar col-sm-3">
+            <div class="avatar-edit"><span>E</span></div>
+        </div>
+
+        <!-- username -->
+        <span>{{user.username}}</span>
+        <h3>{{user.displayName}}</h3>
+
+        <div *ngIf="canManage">
+            <!-- Change data -->
+            <div class="form-group">
+                <label for="tbxDisplayName">Display name</label>
+                <input *ngIf="canManage;name" type="text" id="tbxDisplayName" class="form-control"
+                    formControlName="displayName">
+            </div>
+
+
+            <div class="form-group">
+                <label for="tbxEmail">Email</label>
+                <input *ngIf="canManage" type="email" id="tbxEmail" class="form-control" formControlName="email">
+            </div>
+            <button *ngIf="isChanged" type="submit" class="btn btn-primary">Save</button>
+            <br>
+            <button type="button" class="btn btn-secondary">Change Password</button>
+            <br>
+            <button type="button" (click)="onDelete()" class="btn btn-danger">Delete</button>
+        </div>
+
+        <div *ngIf="!isOwn">
+            <button type="button">Add friend</button>
+        </div>
+
+    </form>
+
+</div>
