@@ -10,12 +10,24 @@ public class UserCreateDto {
     @NotNull(message = "Name must not be null")
     private String username;
 
-    @NotNull(message = "Email must not be null")
+    private String displayName;
+
     @Email
+    @NotNull(message = "Email must not be null")
     private String email;
 
     @NotNull(message = "Password must not be null")
     private String password;
+
+    public UserCreateDto() {
+    }
+
+    public UserCreateDto(String username, String displayName, String email, String password) {
+        this.username = username;
+        this.displayName = displayName;
+        this.email = email;
+        this.password = password;
+    }
 
     public String getUsername() {
         return username;
@@ -23,6 +35,14 @@ public class UserCreateDto {
 
     public void setUsername(String name) {
         this.username = name;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public String getEmail() {

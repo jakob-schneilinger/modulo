@@ -1,0 +1,53 @@
+@use "@styles/variables.scss" as *;
+@use "@styles/global.scss" as *;
+
+:host {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+
+  background: $gradient-light;
+}
+
+.container,
+.container > .row {
+  height: 100vh;
+}
+
+.card {
+  h1 {
+    font-size: 4rem;
+    font-weight: bold;
+    color: transparent;
+    background-clip: text;
+    background: $gradient;
+    -webkit-background-clip: text;
+  }
+
+  padding: 2rem;
+  margin: auto;
+
+  form,
+  .form-group {
+    margin: 1rem 0;
+  }
+}
+
+div.notification {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  button {
+    display: inline;
+    box-sizing: content-box;
+    border: none;
+    background: none;
+    font-size: 1.5rem;
+    color: inherit;
+  }
+}

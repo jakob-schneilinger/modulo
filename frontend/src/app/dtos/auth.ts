@@ -5,6 +5,7 @@ export interface UserLoginDto {
 
 export interface UserCreateDto {
   username: string;
+  displayName?: string;
   email: string;
   password: string;
 }

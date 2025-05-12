@@ -1,8 +1,8 @@
 import { Injectable } from "@angular/core";
-import { UserLoginDto } from "../dtos/auth";
+import { UserCreateDto, UserLoginDto } from "../dtos/auth";
 import { Observable } from "rxjs";
 import { HttpClient } from "@angular/common/http";
-import { tap } from "rxjs/operators";
+import { tap, map } from "rxjs/operators";
 import { jwtDecode } from "jwt-decode";
 import { Globals } from "../global/globals";
 
@@ -11,6 +11,7 @@ import { Globals } from "../global/globals";
 })
 export class AuthService {
   private authBaseUri: string = this.globals.backendUri + "/authentication";
+  private userBaseUri: string = this.globals.backendUri + "/user";
 
   constructor(private httpClient: HttpClient, private globals: Globals) {}
 
@@ -21,8 +22,21 @@ export class AuthService {
    */
   loginUser(loginDto: UserLoginDto): Observable<string> {
     return this.httpClient
-      .post(this.authBaseUri, loginDto, { responseType: "text" })
-      .pipe(tap((authResponse: string) => this.setToken(authResponse)));
+      .post<{ token: string }>(this.authBaseUri, loginDto)
+      .pipe(map((res) => res.token))
+      .pipe(tap((token) => this.setToken(token)));
+  }
+
+  /**
+   * Creates an user.
+   *
+   * @param createDto User data
+   */
+  createUser(createDto: UserCreateDto): Observable<any> {
+    return this.httpClient
+      .post<{ token: string }>(this.userBaseUri + "/register", createDto)
+      .pipe(map((res) => res.token))
+      .pipe(tap((token) => this.setToken(token)));
   }
 
   /**

@@ -42,9 +42,26 @@ public class JwtUtils {
                     .parseSignedClaims(token.replace(securityProperties.getAuthTokenPrefix(), ""))
                     .getPayload();
 
-            return claims.getSubject();
+            return claims.get("email", String.class);
         } catch (Exception e) {
             logger.error("Error extracting email from token: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    public String getUsernameFromJwtToken(String token) {
+        try {
+            byte[] signingKey = securityProperties.getJwtSecret().getBytes();
+
+            Claims claims = Jwts.parser()
+                    .verifyWith(Keys.hmacShaKeyFor(signingKey))
+                    .build()
+                    .parseSignedClaims(token.replace(securityProperties.getAuthTokenPrefix(), ""))
+                    .getPayload();
+
+            return claims.getSubject();
+        } catch (Exception e) {
+            logger.error("Error extracting username from token: {}", e.getMessage());
             return null;
         }
     }

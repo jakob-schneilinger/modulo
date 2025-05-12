@@ -1,0 +1,80 @@
+<div *ngIf="error" class="notification alert alert-warning alert-dismissible fade show" role="alert">
+    {{ errorMessage }}
+    <button type="button" (click)="error = false" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 col-lg-4 card align-self-center">
+
+            <h1>Modulo</h1>
+
+            <form class="form" [formGroup]="createForm" (ngSubmit)="onSubmit()">
+
+                <h3>Create Account</h3>
+
+                <!-- Username input -->
+                <div class="form-group">
+                    <label for="inputUsername">Username*</label>
+                    <input type="text" name="username" formControlName="username" class="form-control"
+                        id="inputUsername" aria-describedby="usernameHelp" placeholder="Enter username"
+                        pattern="[a-z0-9._-]+" required (input)="onUsernameInput($event)">
+                    <div *ngIf="(submitted || createForm.controls.username.touched) && createForm.controls.username.errors"
+                        class="error">
+                        <small class="form-text text-warning" *ngIf="createForm.controls.username.errors.required">
+                            Your username is required!
+                        </small>
+                        <small class="form-text text-warning" *ngIf="createForm.controls.username.errors.pattern">
+                            Your username must only contain characters a-z or 0-9!
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Display name (optional) -->
+                <div class="form-group">
+                    <label for="inputDisplayName">Display name</label>
+                    <input type="text" name="displayName" formControlName="displayName" class="form-control"
+                        id="inputDisplayName" aria-describedby="displayNameHelp" placeholder="Enter display name">
+                </div>
+
+                <!-- Username input -->
+                <div class="form-group">
+                    <label for="inputEmail">Email*</label>
+                    <input type="text" name="email" formControlName="email" class="form-control" id="inputEmail"
+                        aria-describedby="emailHelp" placeholder="Enter email" required type="email">
+                    <div *ngIf="(submitted || createForm.controls.email.touched) && createForm.controls.email.errors"
+                        class="error">
+                        <small class="form-text text-warning" *ngIf="createForm.controls.email.errors.required">
+                            Your email is required!
+                        </small>
+                        <small class="form-text text-warning" *ngIf="createForm.controls.email.errors.email">
+                            Wrong email format!
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Password input -->
+                <div class="form-group">
+                    <label for="password">Password*</label>
+                    <input type="password" name="password" formControlName="password" class="form-control" id="password"
+                        placeholder="Password">
+                    <div *ngIf="(submitted || createForm.controls.password.touched) && createForm.controls.password.errors"
+                        class="error">
+                        <small class="form-text text-warning" *ngIf="createForm.controls.password.errors.required">
+                            Your password is required!
+                        </small>
+                        <small class="form-text text-warning" *ngIf="createForm.controls.password.errors.minlength">
+                            Your password must be at least 8 characters long!
+                        </small>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Create</button>
+
+            </form>
+            <span>Already have an account? <a routerLink="/login">Login here</a></span>
+        </div>
+    </div>
+</div>
