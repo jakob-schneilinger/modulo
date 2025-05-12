@@ -1,6 +1,7 @@
 package at.ac.tuwien.sepr.groupphase.backend.security;
 
 import at.ac.tuwien.sepr.groupphase.backend.config.properties.SecurityProperties;
+import at.ac.tuwien.sepr.groupphase.backend.exception.UnauthorizedException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,6 +13,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -28,25 +31,50 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     private final JwtUtils jwtUtils;
     private final SecurityProperties securityProperties;
 
+    private String basePath = "/api/v1/";
+    private RequestMatcher[] ignorePaths = new RequestMatcher[] {
+        new AntPathRequestMatcher(basePath + "authentication"),
+        new AntPathRequestMatcher(basePath + "user/register"),
+        new AntPathRequestMatcher("/health") };
+
     public JwtAuthorizationFilter(JwtUtils jwtUtils, SecurityProperties securityProperties) {
         this.jwtUtils = jwtUtils;
         this.securityProperties = securityProperties;
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-        throws IOException, ServletException {
-        try {
-            String token = extractToken(request);
-            if (token != null && jwtUtils.validateJwtToken(token)) {
-                String email = jwtUtils.getEmailFromJwtToken(token);
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        for (RequestMatcher requestMatcher : ignorePaths) {
+            if (requestMatcher.matches(request)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-                UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(
-                        email,
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
+        try {
+            /* if (request.getMethod().equals("OPTIONS")) {
+                response.setStatus(HttpServletResponse.SC_OK);
+                return;
+            } */
+
+            String token = extractToken(request);
+
+            if (token == null) {
+                throw new UnauthorizedException("No token attached");
+            }
+
+            if (token != null && jwtUtils.validateJwtToken(token)) {
+                String username = jwtUtils.getUsernameFromJwtToken(token);
+
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                        username,
                         null,
                         List.of(new SimpleGrantedAuthority("ROLE_USER")) // Default role
-                    );
+                );
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }

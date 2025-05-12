@@ -16,6 +16,7 @@ import { httpInterceptorProviders } from "./interceptors";
 import { LoginComponent as UserLoginComponent } from "./components/user/login/login.component";
 import { CreateComponent as UserCreateComponent } from "./components/user/create/create.component";
 import { RouterLink } from "@angular/router";
+import { UserComponent } from "./components/user/user.component";
 
 @NgModule({
   declarations: [
@@ -25,6 +26,7 @@ import { RouterLink } from "@angular/router";
     HomeComponent,
     UserLoginComponent,
     UserCreateComponent,
+    UserComponent,
   ],
   bootstrap: [AppComponent],
   imports: [

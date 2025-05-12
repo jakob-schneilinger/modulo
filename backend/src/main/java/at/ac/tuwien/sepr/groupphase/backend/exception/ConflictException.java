@@ -21,3 +21,4 @@ public class ConflictException extends ErrorListException {
         super("Conflicts", messageSummary, errors);
     }
 }
+

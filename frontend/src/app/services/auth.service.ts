@@ -5,6 +5,7 @@ import { HttpClient } from "@angular/common/http";
 import { tap, map } from "rxjs/operators";
 import { jwtDecode } from "jwt-decode";
 import { Globals } from "../global/globals";
+import { User } from "../dtos/user";
 
 @Injectable({
   providedIn: "root",
@@ -57,6 +58,15 @@ export class AuthService {
 
   getToken() {
     return localStorage.getItem("authToken");
+  }
+
+  getLoggedInUser(): User {
+    let token = jwtDecode(this.getToken());
+    return {
+      username: token.sub,
+      displayName: token["displayName"],
+      email: token["email"],
+    };
   }
 
   /**

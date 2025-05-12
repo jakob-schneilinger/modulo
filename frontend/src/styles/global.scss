@@ -5,14 +5,21 @@ a {
   color: $primary;
 }
 
-button {
+/* button.btn {
+  background-color: lightgray;
+  color: black;
+
+  &:hover {
+    background-color: color.adjust(lightgray, $lightness: -5%);
+  }
+} */
+
+button.btn-primary {
   background-color: $primary;
   color: white;
-  border: none;
-}
+  border: 1px solid $primary;
 
-button:hover {
-  background-color: color.adjust($primary, $lightness: -5%);
-  color: white;
-  border: none;
+  &:hover {
+    background-color: color.adjust($primary, $lightness: -5%);
+  }
 }

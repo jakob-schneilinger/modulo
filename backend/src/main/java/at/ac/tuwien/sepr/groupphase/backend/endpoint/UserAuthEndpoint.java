@@ -1,8 +1,7 @@
 package at.ac.tuwien.sepr.groupphase.backend.endpoint;
 
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.JwtResponseDto;
-import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.UserCreateDto;
-import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.UserLoginDto;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.user.UserLoginDto;
 import at.ac.tuwien.sepr.groupphase.backend.service.AuthService;
 import jakarta.annotation.security.PermitAll;
 
@@ -25,11 +24,5 @@ public class UserAuthEndpoint {
     @PostMapping("/authentication")
     public ResponseEntity<JwtResponseDto> login(@RequestBody UserLoginDto userLoginDto) {
         return ResponseEntity.ok(new JwtResponseDto(authService.login(userLoginDto)));
-    }
-
-    @PermitAll
-    @PostMapping("/user/register")
-    public ResponseEntity<JwtResponseDto> register(@RequestBody UserCreateDto userCreateDto) {
-        return ResponseEntity.ok(new JwtResponseDto(authService.create(userCreateDto)));
     }
 }

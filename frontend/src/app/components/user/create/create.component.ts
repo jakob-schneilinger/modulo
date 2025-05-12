@@ -44,6 +44,8 @@ export class CreateComponent implements OnInit {
   }
 
   onSubmit() {
+    console.log("OK!");
+
     this.submitted = true;
     if (!this.createForm.valid) {
       console.log("invalid input!");
@@ -63,7 +65,7 @@ export class CreateComponent implements OnInit {
         this.router.navigate(["/users/me"]);
       },
       error: (err) => {
-        console.log("Could not log in due to:");
+        console.log("Could not sign up due to:");
         console.log(err);
         this.error = true;
         if (typeof err.error === "object") {
