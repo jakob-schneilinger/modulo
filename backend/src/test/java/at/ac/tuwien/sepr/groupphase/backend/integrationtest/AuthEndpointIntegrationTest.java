@@ -5,6 +5,8 @@ import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.JwtResponseDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.user.UserCreateDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.user.UserLoginDto;
 import at.ac.tuwien.sepr.groupphase.backend.repository.UserRepository;
+import jakarta.transaction.Transactional;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,6 +45,7 @@ public class AuthEndpointIntegrationTest {
     }
 
     @Test
+    @Transactional
     public void register_withValidData_createsUserAndReturnsOk() throws Exception {
         MvcResult result = mockMvc.perform(post("/api/v1/user/register")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -80,6 +83,7 @@ public class AuthEndpointIntegrationTest {
     }
 
     @Test
+    @Transactional
     public void login_withValidCredentials_returnsJwtToken() throws Exception {
         mockMvc.perform(post("/api/v1/user/register")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -110,6 +114,7 @@ public class AuthEndpointIntegrationTest {
     }
 
     @Test
+    @Transactional
     public void login_withInvalidPassword_returnsUnauthorized() throws Exception {
         mockMvc.perform(post("/api/v1/user/register")
                 .contentType(MediaType.APPLICATION_JSON)

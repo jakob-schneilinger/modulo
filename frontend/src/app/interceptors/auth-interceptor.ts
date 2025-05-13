@@ -42,11 +42,9 @@ export class AuthInterceptor implements HttpInterceptor {
 
     return next.handle(authReq).pipe(
       catchError((e, caught) => {
-        console.log("Error", e);
-
         if (e.error instanceof ErrorEvent) {
           // client error
-          console.error("An error occurred:", e.error.message);
+          // console.error("An error occurred:", e.error.message);
         } else {
           //server error
           const { status, error } = e;
@@ -55,9 +53,9 @@ export class AuthInterceptor implements HttpInterceptor {
               queryParams: { goto: this.router.url },
             });
           }
-          console.error(`Backend returned code ${status}, body was: ${error}`);
+          // console.error(`Backend returned code ${status}, body was: ${error}`);
         }
-        return throwError(() => new Error(e));
+        return throwError(() => e);
       })
     );
   }

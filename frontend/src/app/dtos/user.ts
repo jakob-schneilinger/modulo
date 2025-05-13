@@ -7,4 +7,5 @@ export interface User {
 export interface UserUpdateDto {
   email?: string;
   displayName?: string;
+  password?: string;
 }
