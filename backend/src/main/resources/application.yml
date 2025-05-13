@@ -1,3 +1,7 @@
+global:
+  location:
+    avatars: res/avatars/
+
 logging:
   file.name: ./log/backend.log
   level:

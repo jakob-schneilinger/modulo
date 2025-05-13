@@ -62,7 +62,7 @@ export class CreateComponent implements OnInit {
     this.authService.createUser(dto).subscribe({
       next: () => {
         console.log("Successfully created user");
-        this.router.navigate(["/users/me"]);
+        this.router.navigate(["/user/me"]);
       },
       error: (err) => {
         console.log("Could not sign up due to:");

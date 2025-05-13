@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
-import { Observable, of, tap } from "rxjs";
-import { User } from "../dtos/user";
+import { map, Observable, of, tap } from "rxjs";
+import { User, UserUpdateDto } from "../dtos/user";
 import { AuthService } from "./auth.service";
 import { HttpClient } from "@angular/common/http";
 import { Globals } from "../global/globals";
@@ -26,17 +26,15 @@ export class UserService {
   }
 
   get(username: String): Observable<User> {
-    if (username == "me") return of(this.authService.getLoggedInUser());
+    if (username == "me")
+      username = this.authService.getLoggedInUser().username;
 
     return this.httpClient.get<User>(this.userBaseUri + "/" + username);
   }
 
-  updateDisplayName(displayName: String): Observable<null> {
-    throw "not implemented!";
-  }
-
-  updatePassword(oldPassword: String, newPassword: String): Observable<null> {
-    throw "not implemented!";
+  update(user: User, updateDto: UserUpdateDto): Observable<void> {
+    let url = `${this.userBaseUri}/${user.username}`;
+    return this.httpClient.patch<void>(url, updateDto);
   }
 
   delete(user: User) {
@@ -45,5 +43,26 @@ export class UserService {
       .pipe(
         tap(() => this.isCurrentLoggedIn(user) && this.authService.logoutUser())
       );
+  }
+
+  getAvatarSrc(user: User): Observable<string> {
+    const url = `${this.userBaseUri}/${user.username}/avatar`;
+    return this.httpClient
+      .get(url, { responseType: "blob" })
+      .pipe(
+        map((blob?: Blob) => (!blob ? "" : window.URL.createObjectURL(blob)))
+      );
+  }
+
+  uploadAvatar(user: User, file: File) {
+    const form = new FormData();
+    form.append("file", file, "Test");
+    const url = `${this.userBaseUri}/${user.username}/avatar`;
+    return this.httpClient.post<void>(url, form);
+  }
+
+  removeAvatar(user: User) {
+    const url = `${this.userBaseUri}/${user.username}/avatar`;
+    return this.httpClient.delete<void>(url);
   }
 }

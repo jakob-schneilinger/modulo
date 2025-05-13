@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import at.ac.tuwien.sepr.groupphase.backend.repository.UserRepository;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.user.UserCreateDto;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.user.UserUpdateDto;
 import at.ac.tuwien.sepr.groupphase.backend.exception.ConflictException;
 import at.ac.tuwien.sepr.groupphase.backend.exception.ValidationException;
 
@@ -92,4 +93,56 @@ public class UserValidator {
             throw new ConflictException("Conflicts in user data", conflicts);
         }
     }
+
+    public void validateUserUpdate(UserUpdateDto updateDto) {
+        List<String> validations = new LinkedList<>();
+
+        if (updateDto.displayName() != null) {
+            // NOTE: empty name is possible
+            if (updateDto.displayName().length() > 200) {
+                validations.add("Display name to long");
+            }
+        }
+
+        if (updateDto.email() != null) {
+            if (updateDto.email().isEmpty()) {
+                validations.add("Email required");
+            } else {
+                if (!emailPattern.matcher(updateDto.email()).matches()) {
+                    validations.add("Invalid email format");
+                }
+                if (updateDto.email().length() > 200) {
+                    validations.add("Email to long");
+                }
+            }
+        }
+
+        if (updateDto.password() != null) {
+            if (updateDto.password().isEmpty()) {
+                validations.add("Password required");
+            } else {
+                if (updateDto.password().length() < 8) {
+                    validations.add("Password must be at least 8 characters");
+                }
+                if (updateDto.password().length() > 200) {
+                    validations.add("Password to long");
+                }
+            }
+        }
+
+        if (!validations.isEmpty()) {
+            throw new ValidationException("Validation of user failed", validations);
+        }
+
+        List<String> conflicts = new LinkedList<>();
+
+        if (userRepository.existsByEmail(updateDto.email())) {
+            conflicts.add("Email already taken");
+        }
+
+        if (!conflicts.isEmpty()) {
+            throw new ConflictException("Conflicts in user data", conflicts);
+        }
+    }
+
 }
