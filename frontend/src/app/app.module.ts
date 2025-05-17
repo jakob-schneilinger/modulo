@@ -6,17 +6,23 @@ import {
   withInterceptorsFromDi,
 } from "@angular/common/http";
 
-import { AppRoutingModule } from "./app-routing.module";
-import { AppComponent } from "./app.component";
-import { HeaderComponent } from "./components/header/header.component";
-import { FooterComponent } from "./components/footer/footer.component";
-import { HomeComponent } from "./components/home/home.component";
-import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
-import { httpInterceptorProviders } from "./interceptors";
 import { LoginComponent as UserLoginComponent } from "./components/user/login/login.component";
 import { CreateComponent as UserCreateComponent } from "./components/user/create/create.component";
 import { RouterLink } from "@angular/router";
 import { UserComponent } from "./components/user/user.component";
+
+import {AppRoutingModule} from './app-routing.module';
+import {AppComponent} from './app.component';
+import {HeaderComponent} from './components/header/header.component';
+import {FooterComponent} from './components/footer/footer.component';
+import {HomeComponent} from './components/home/home.component';
+import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
+import {httpInterceptorProviders} from './interceptors';
+import {TextComponent} from "./components/comp/containers/text/text.component";
+import {ContainerComponent} from "./components/comp/containers/container.component";
+import { ResizeService } from './interaction-services/resize.service';
+import { DragService } from './interaction-services/drag.service';
+
 
 @NgModule({
   declarations: [
@@ -36,10 +42,14 @@ import { UserComponent } from "./components/user/user.component";
     NgbModule,
     FormsModule,
     RouterLink,
+    ContainerComponent,
+    TextComponent
   ],
   providers: [
     httpInterceptorProviders,
     provideHttpClient(withInterceptorsFromDi()),
+    ResizeService,
+    DragService
   ],
 })
 export class AppModule {}

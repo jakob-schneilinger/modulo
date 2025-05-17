@@ -3,6 +3,9 @@ CREATE TABLE IF NOT EXISTS components (
 	type ENUM('text', 'image', 'board') NOT NULL,
 	owner_id INT NOT NULL,
 	width INT NOT NULL,
+    height INT NOT NULL,
+    component_column INT NOT NULL,
+    component_row INT NOT NULL,
 	PRIMARY KEY(id)
 );
 

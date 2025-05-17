@@ -1,9 +1,32 @@
 <div class="jumbotron mt-5">
-  <h1 class="display-4">Welcome to the SE PR group phase!</h1>
-  <hr class="my-4">
   <a *ngIf="!authService.isLoggedIn()" class="btn btn-primary btn-lg" routerLink="/login" role="button">Login</a>
+  <div class="justify-content-between d-flex flex-row align-items-center">
+    <button class="btn btn-primary" (click)="createBoard()">Create</button>
+    <div class="form-check form-switch">
+      <input
+        class="form-check-input"
+        type="checkbox"
+        role="switch"
+        id="flexSwitchCheckDefault"
+        [(ngModel)]="inEditMode"
+      >
+      <label class="form-check-label" for="flexSwitchCheckDefault">Enable Edit Mode to Drag and Resize Components</label>
+    </div>
+
+  </div>
   <div *ngIf="authService.isLoggedIn()">
-    <p>Home.</p>
+      <app-container-component
+        [id]="'board-' + containers[0].id"
+        [depth]=0
+        [container]="containers[0]"
+        [inEditMode]="inEditMode"
+        (widthChanged)="onWidthChanged($event)"
+        (startDraggingContainer)="startDragging($event)"
+        (stopDraggingContainer)="stopDragging(undefined)"
+      >
+      </app-container-component>
+
+
   </div>
 </div>
 
