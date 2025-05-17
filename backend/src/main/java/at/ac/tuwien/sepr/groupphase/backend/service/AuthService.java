@@ -21,7 +21,7 @@ public interface AuthService {
      *
      * @param userLoginDto login credentials
      * @return the JWT, if successful
-     * 
+     *
      * @throws ValidationException if the user input is invalid
      * @throws ConflictException   if the user already exists
      */

@@ -1,0 +1,157 @@
+@use "src/styles/global.scss" as *;
+@use "src/styles/variables.scss" as *;
+
+// ------ CARD/CONTAINER ------ //
+
+.home-container {
+}
+
+.container-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-auto-rows: 150px;  // TODO: also change in home.component.ts preview
+  position: relative;
+  grid-auto-flow: row dense;
+  overflow: visible;
+}
+
+.card-component {
+  padding: 4px;
+}
+
+.card .preview-card {
+  min-width: 0;
+}
+
+.card {
+  min-height: 100%;
+  height: 100%;
+  overflow: auto;
+  overflow-x: hidden;
+  position: relative;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  transition: box-shadow 0.2s linear;
+}
+
+.card:hover {
+  box-shadow: 0 0 8px $primary;
+}
+
+.d-flex {
+  display: flex;
+  min-width: 0;
+}
+
+.container-header {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.container-header h5 {
+  font-size: 1.1rem;
+  white-space: normal;
+  word-break: break-word;
+  margin-bottom: 0.1rem;
+}
+
+.card[data-id="-1"] {
+  pointer-events: none;
+}
+
+a {
+  color: black;
+}
+
+// ------ PREVIEW ------ //
+
+// for resizing
+.preview-card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background-color: rgba(0, 123, 255, 0.15);
+  border: 2px dashed rgba(0, 123, 255, 0.5);
+  border-radius: 10px;
+  pointer-events: none;
+  z-index: 1;
+  display: none;
+}
+
+// for dragging
+.preview-container {
+  opacity: 0.5;
+  background-color: rgba(0, 123, 255, 0.15);
+  border: 2px dashed rgba(0, 123, 255, 0.5);
+  border-radius: 10px;
+  z-index: 20;
+}
+
+// ------ DROPDOWN & RESIZE/DRAGGING ------ //
+
+.resizer {
+  position: sticky;
+  top: 100%;
+  left: 100%;
+  width: 16px;
+  height: 16px;
+  cursor: nwse-resize;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background-color: white;
+}
+/* old resizer
+.resizer {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  width: 20px;
+  height: 20px;
+  cursor: nwse-resize;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background-color: white;
+}
+ */
+
+.resizer i {
+  font-size: 10px;
+  color: #555;
+  pointer-events: none;
+  transform: rotate(90deg);
+}
+
+.resizing {
+  user-select: none;
+}
+
+.grab {
+  cursor: grab;
+}
+
+.point {
+  cursor: pointer;
+}
+
+.dropdown-menu {
+  z-index: 100;
+  padding: 0.1rem 0;
+}
+
+.dropdown-menu .dropdown-item {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  margin: 0.1rem 0;
+  font-size: 0.875rem;
+}
+
+.dropdown-menu .dropdown-divider {
+  margin: 0.0rem 0;
+}

@@ -1,0 +1,77 @@
+<!-- absolutely‑positioned so the board can move it around later -->
+
+<div #previewCard class="preview-card" [attr.data-preview-id]="text.id"></div>
+<div #card class="card p-2" [attr.data-id]="text.id">
+  <div class="d-flex justify-content-end align-items-start">
+    <div
+      class="three-dots dropdown"
+      (mousedown)="startContainerDrag(text, $event)"
+      (mouseup)="stopContainerDrag()"
+      (click)="$event.stopPropagation()"
+      [hidden]="editing"
+    >
+      <i class="bi text-secondary"
+         [ngClass]="{
+           'bi-arrows-move': inEditMode,
+           'bi-three-dots': !inEditMode,
+           'grab': inEditMode,
+           'point': !inEditMode
+         }"
+         id="dropdownMenuButton-{{text.id}}"
+         data-bs-toggle="dropdown"
+         aria-expanded="false"
+      ></i>
+      <ul class="dropdown-menu"
+          [attr.aria-labelledby]="'dropdownMenuButton-' + text.id"
+          [hidden]="inEditMode || editing">
+        <li><a class="dropdown-item" (click)="startEdit()" data-bs-dismiss="dropdown">Edit Text</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item" >Enable Edit Mode</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item" href="#">Delete Text</a></li>
+      </ul>
+    </div>
+  </div>
+
+
+
+  <div class="text-box" (dblclick)="startEdit()">
+    <!-- normal display -->
+    <ng-container *ngIf="!editing; else editor">
+      <p class="mb-0" [style.fontSize.px]="fontSize">
+        {{ text.text || 'Double‑click to edit…' }}
+      </p>
+    </ng-container>
+
+    <!-- edit mode -->
+    <ng-template #editor>
+      <textarea
+        class="form-control mb-1"
+        [style.fontSize.px]="fontSize"
+        [(ngModel)]="buffer"
+        rows="3"
+      ></textarea>
+
+      <!-- size picker -->
+      <label class="d-block small text-muted mb-1">Font size: {{ fontSize }}px</label>
+      <input
+        type="range"
+        class="form-range mb-2"
+        min="12"
+        max="48"
+        step="1"
+        [(ngModel)]="fontSize"
+      />
+
+      <div class="d-flex gap-1">
+        <button class="btn btn-sm btn-primary" (click)="save()">Save</button>
+        <button class="btn btn-sm btn-outline-secondary" (click)="cancel()">
+          Cancel
+        </button>
+      </div>
+    </ng-template>
+  </div>
+  <div *ngIf="text.id !== -1 && inEditMode" class="resizer" [id]="'resizer-' + text.id">
+    <i class="bi bi-arrows-angle-expand" ></i>
+  </div>
+</div>
