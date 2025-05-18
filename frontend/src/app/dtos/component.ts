@@ -1,6 +1,6 @@
 export interface Component {
   id?: number;
-  type: 'board' | 'task' | 'note' | 'text' | 'image' | 'video' | 'sketch' | 'calender';
+  type: "board" | "task" | "note" | "text" | "image" | "video" | "sketch" | "calender";
   owner_id?: number;
   parent_id?: number;
   width: number;
@@ -17,34 +17,33 @@ export interface Container extends Component {
   children: Component[];
 }
 
-export interface Board extends Container{
-  type: 'board';
+export interface Board extends Container {
+  type: "board";
 }
 
-export interface Task extends Container{
-  type: 'task';
+export interface Task extends Container {
+  type: "task";
   // TODO: implement something with time/deadlines
 }
 
-export interface Note extends Container{
-  type: 'note';
+export interface Note extends Container {
+  type: "note";
   tags: string[];
 }
 
 export interface BoardCreate {
   name: string;
   parentId?: number;
-  width: number;
-  height: number;
+  width?: number;
+  height?: number;
 }
 
 export interface Text extends Component {
-  type: 'text';
+  type: "text";
   text: string;
   title: "Text-Box";
 }
 
-
 export function isText(component: Component): component is Text {
-  return component.type === 'text';
+  return component.type === "text";
 }

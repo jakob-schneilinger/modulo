@@ -1,4 +1,5 @@
 import { Component } from "@angular/core";
+import { NavigationStart, Router } from "@angular/router";
 
 @Component({
   selector: "app-root",
@@ -8,4 +9,15 @@ import { Component } from "@angular/core";
 })
 export class AppComponent {
   title = "Modulo";
+
+  showHeader: boolean = true;
+
+  constructor(private router: Router) {
+    const disableHeaderOn = ["/login", "/signup"];
+    router.events.forEach((event) => {
+      if (event instanceof NavigationStart) {
+        this.showHeader = !disableHeaderOn.includes(event["url"].split("?")[0]);
+      }
+    });
+  }
 }

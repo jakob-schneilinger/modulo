@@ -1,13 +1,14 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark ">
-  <a class="navbar-brand ml-lg-5" href="">SE PR Group Phase</a>
+<!-- <nav class="navbar navbar-expand-lg navbar-dark bg-dark ">
+  <a class="navbar-brand ml-lg-5" href="">Modulo</a>
   <button class="navbar-toggler ml-5" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-          aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
 
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav mr-auto">
       <li class="nav-item">
+        <a class="nav-link" *ngIf="!authService.isLoggedIn()" routerLink="/login" routerLinkActive="active">Login</a>
       </li>
     </ul>
     <ul class="navbar-nav mr-5">
@@ -15,4 +16,35 @@
       <a class="nav-link" *ngIf="authService.isLoggedIn()" routerLink="/" (click)="authService.logoutUser()">Logout</a>
     </ul>
   </div>
+</nav> -->
+
+<nav>
+
+  <h1>Modulo</h1>
+
+  <ul>
+    <li routerLink="/user/me" class="flex between" (mouseenter)="hoverProfile=true" (mouseleave)="hoverProfile=false">
+      <span class="flex"><img [src]="profileImgSrc" class="profile"><a>Profile</a></span>
+      <span><i *ngIf="hoverProfile" (click)="logout()" class="bi bi-box-arrow-right profile"></i></span>
+    </li>
+    <li class="flex">
+      <i class="bi bi-people-fill"></i>
+      <a>Friends</a>
+    </li>
+  </ul>
+
+  <hr>
+
+  <div class="control">
+    <button class="primary" (click)="createBoard()"><i class="bi bi-plus-square-fill"></i>Create board</button>
+  </div>
+
+  <ul id="nav-components" *ngIf="!!roots">
+    <li *ngFor="let item of roots" [routerLink]="'component/'+item.id">
+      <a>{{item.name}}</a>
+    </li>
+  </ul>
+
+
+
 </nav>

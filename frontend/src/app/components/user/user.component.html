@@ -10,13 +10,17 @@
         <!-- big round avatar -->
         <div class="avatar">
             <img id="avatar">
-            <div *ngIf="canManage" class="avatar-ctrl remove" (click)="onRemoveAvatar()"><span>X</span></div>
-            <div *ngIf="canManage" class="avatar-ctrl edit" (click)="changeAvatar()"><span>E</span></div>
+            <div *ngIf="canManage" class="avatar-ctrl remove" (click)="onRemoveAvatar()">
+                <i class="bi bi-x-circle-fill"></i>
+            </div>
+            <div *ngIf="canManage" class="avatar-ctrl edit" (click)="changeAvatar()">
+                <i class="bi bi-pencil-fill"></i>
+            </div>
         </div>
 
         <!-- username -->
-        <span>{{user.username}}</span>
-        <h3>{{user.displayName}}</h3>
+        <span>{{user?.username}}</span>
+        <h3>{{user?.displayName}}</h3>
 
         <div *ngIf="canManage">
             <!-- Change data -->

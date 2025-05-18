@@ -1,33 +1,33 @@
-<div class="jumbotron mt-5">
-  <a *ngIf="!authService.isLoggedIn()" class="btn btn-primary btn-lg" routerLink="/login" role="button">Login</a>
-  <div class="justify-content-between d-flex flex-row align-items-center">
-    <button class="btn btn-primary" (click)="createBoard()">Create</button>
-    <div class="form-check form-switch">
-      <input
-        class="form-check-input"
-        type="checkbox"
-        role="switch"
-        id="flexSwitchCheckDefault"
-        [(ngModel)]="inEditMode"
-      >
-      <label class="form-check-label" for="flexSwitchCheckDefault">Enable Edit Mode to Drag and Resize Components</label>
+<nav>
+
+  <div class="flex board-name">
+    <h2 contenteditable="true" (blur)="updateName()" #name>{{component?.name}}</h2>
+    <i (click)="name.focus()" class="bi bi-pencil-fill"></i>
+  </div>
+
+
+  <div class="flex gap">
+
+    <button class="primary" (click)="createComponent()">
+      <i class="bi bi-plus-square-fill"></i>
+      <span class="m-1">Create</span>
+    </button>
+
+    <div class="form-check form-switch" title="Enable edit mode to drag and resize components">
+      <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault"
+        [(ngModel)]="inEditMode">
+      <label class="form-check-label" for="flexSwitchCheckDefault">Edit</label>
     </div>
 
   </div>
-  <div *ngIf="authService.isLoggedIn()">
-      <app-container-component
-        [id]="'board-' + containers[0].id"
-        [depth]=0
-        [container]="containers[0]"
-        [inEditMode]="inEditMode"
-        (widthChanged)="onWidthChanged($event)"
-        (startDraggingContainer)="startDragging($event)"
-        (stopDraggingContainer)="stopDragging(undefined)"
-      >
-      </app-container-component>
 
+</nav>
 
-  </div>
+<div *ngIf="!!component">
+
+  <app-container-component [id]="'board-' + component.id" [depth]=0 [container]="component" [inEditMode]="inEditMode"
+    (widthChanged)="onWidthChanged($event)" (startDraggingContainer)="startDragging($event)"
+    (stopDraggingContainer)="stopDragging(undefined)">
+  </app-container-component>
+
 </div>
-
-<a routerLink="/user/me">User page</a>

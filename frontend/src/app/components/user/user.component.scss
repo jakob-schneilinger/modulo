@@ -29,7 +29,7 @@
   aspect-ratio: 1;
   cursor: pointer;
 
-  > span {
+  > i {
     margin: auto;
   }
 }
@@ -51,4 +51,10 @@
 
 .passwords > div {
   margin: 1rem 0;
+}
+
+.container {
+  max-width: 540px;
+  padding: 2rem;
+  margin: 0;
 }

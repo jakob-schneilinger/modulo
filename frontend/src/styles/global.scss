@@ -5,6 +5,22 @@ a {
   color: $primary;
 }
 
+html {
+  background-color: white;
+}
+
+body {
+  background-color: $primary;
+}
+
+h1 {
+  font-weight: bold;
+  color: transparent;
+  background-clip: text;
+  background: $gradient;
+  -webkit-background-clip: text;
+}
+
 button {
   padding: 0.25rem;
   border-radius: 4px;
@@ -69,4 +85,14 @@ div.notification {
 
 span.error {
   color: $error;
+}
+
+.flex {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &.between {
+    justify-content: space-between;
+  }
 }
