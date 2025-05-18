@@ -1,9 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import {
-  UntypedFormBuilder,
-  UntypedFormGroup,
-  Validators,
-} from "@angular/forms";
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
 import { map, switchMap } from "rxjs";
 import { User, UserUpdateDto } from "src/app/dtos/user";
@@ -24,12 +20,7 @@ export class UserComponent implements OnInit {
   error = null;
 
   get isChanged() {
-    return (
-      this.displayNameChanged ||
-      this.emailChanged ||
-      this.avatarChanged ||
-      this.passwordChanged
-    );
+    return this.displayNameChanged || this.emailChanged || this.avatarChanged || this.passwordChanged;
   }
 
   get displayNameChanged() {
@@ -72,48 +63,41 @@ export class UserComponent implements OnInit {
     this.selectedAvatar = null;
     this.removeAvatarOnSave = false;
 
-    this.route.params
-      .pipe(map((params) => this.userService.get(params["name"])))
-      .subscribe((user) =>
-        user.subscribe({
-          next: (u) => {
-            this.user = u;
-            this.canManage = this.userService.canManage(u);
-            this.isOwn = this.userService.isCurrentLoggedIn(u);
+    this.route.params.pipe(map((params) => this.userService.get(params["name"]))).subscribe((user) =>
+      user.subscribe({
+        next: (u) => {
+          this.user = u;
+          this.canManage = this.userService.canManage(u);
+          this.isOwn = this.userService.isCurrentLoggedIn(u);
 
-            this.updateForm.controls.displayName.setValue(
-              this.user.displayName
-            );
-            this.updateForm.controls.email.setValue(this.user.email);
+          this.updateForm.controls.displayName.setValue(this.user.displayName);
+          this.updateForm.controls.email.setValue(this.user.email);
 
-            let img: HTMLImageElement = document.querySelector("#avatar");
-            img.src = "";
+          let img: HTMLImageElement = document.querySelector("#avatar");
+          img.src = "";
 
-            this.userService.getAvatarSrc(u).subscribe({
-              next: (baseUri) => {
-                if (baseUri) img.src = baseUri;
-                else {
-                  img.src = generateAvatar(this.user.username);
-                  img.style.imageRendering = "pixelated";
-                }
-              },
-              error: (e) => {
-                this.handleError(e);
-              },
-            });
-          },
-          error: (e) => {
-            this.router.navigate(["/404"], { skipLocationChange: true });
-          },
-        })
-      );
+          this.userService.getAvatarSrc(u).subscribe({
+            next: (baseUri) => {
+              if (baseUri) img.src = baseUri;
+              else {
+                img.src = generateAvatar(this.user.username);
+                img.style.imageRendering = "pixelated";
+              }
+            },
+            error: (e) => {
+              this.handleError(e);
+            },
+          });
+        },
+        error: (e) => {
+          this.router.navigate(["/404"], { skipLocationChange: true });
+        },
+      })
+    );
   }
 
   passwordsValid() {
-    if (
-      this.updateForm.controls.password.value !=
-      this.updateForm.controls.passwordRepeat.value
-    ) {
+    if (this.updateForm.controls.password.value != this.updateForm.controls.passwordRepeat.value) {
       this.updateForm.controls.passwordRepeat.setErrors({ noMatch: true });
       return false;
     }
@@ -136,8 +120,7 @@ export class UserComponent implements OnInit {
 
     const promises = [];
     if (this.removeAvatarOnSave) promises.push(this.removeAvatar());
-    else if (this.avatarChanged)
-      promises.push(this.uploadAvatar(this.selectedAvatar));
+    else if (this.avatarChanged) promises.push(this.uploadAvatar(this.selectedAvatar));
 
     promises.push(
       new Promise<void>((res, rej) => {
@@ -159,8 +142,7 @@ export class UserComponent implements OnInit {
   }
 
   onDelete() {
-    const msg =
-      "This action can't be reversed! Are you sure you want to delete: ";
+    const msg = "This action can't be reversed! Are you sure you want to delete: ";
     if (confirm(msg + this.user.username)) {
       this.userService.delete(this.user).subscribe({
         next: () => {

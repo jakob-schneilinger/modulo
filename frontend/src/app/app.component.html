@@ -1,5 +1,9 @@
-<!-- <app-header></app-header> -->
+<div class="view">
+    <app-header *ngIf="showHeader"></app-header>
 
-<router-outlet></router-outlet>
+    <main [ngClass]="{'header-visible': showHeader}">
+        <router-outlet></router-outlet>
+    </main>
+</div>
 
 <!-- <app-footer></app-footer> -->
