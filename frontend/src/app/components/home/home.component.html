@@ -5,7 +5,6 @@
     <i (click)="name.focus()" class="bi bi-pencil-fill"></i>
   </div>
 
-
   <div class="flex gap">
 
     <div>
@@ -27,8 +26,7 @@
       </div>
     </div>
 
-    <button class="primary"
-            (click)="deleteBoard()">
+    <button type="button" class="primary" (click)="openDeleteModal(this.component)">
       <i class="bi bi-trash-fill"></i>
       <span class="m-1"> Delete Board </span>
     </button>
@@ -43,20 +41,40 @@
 
 </nav>
 
-  <div *ngIf="authService.isLoggedIn()">
-      <app-container-component
-        *ngIf="component"
-        [id]="'board-' + component.id"
-        [depth]=0
-        [container]="component"
-        [inEditMode]="inEditMode"
-        (startDraggingContainer)="startDragging($event)"
-        (stopDraggingContainer)="stopDragging(undefined)"
-      >
-      </app-container-component>
+<div *ngIf="authService.isLoggedIn()">
+    <app-container-component
+      *ngIf="component"
+      [id]="'board-' + component.id"
+      [depth]=0
+      [container]="component"
+      [inEditMode]="inEditMode"
+      (startDraggingContainer)="startDragging($event)"
+      (stopDraggingContainer)="stopDragging(undefined)"
+    >
+    </app-container-component>
 
 
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" #deleteModal>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Delete {{this.forDeletion?.name}}?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete the board "{{this.forDeletion?.name}}"?
+        <br>
+        All components on this board will also be deleted!
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" (click)="finishDeleteModal()" data-bs-dismiss="modal">Delete</button>
+      </div>
+    </div>
   </div>
-
+</div>
 
 

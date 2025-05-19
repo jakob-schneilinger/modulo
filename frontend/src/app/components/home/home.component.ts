@@ -3,10 +3,12 @@ import { ComponentService } from '../../services/component.service';
 import { DragService } from '../../interaction-services/drag.service';
 import {AuthService} from '../../services/auth.service';
 import {ActivatedRoute, Router} from "@angular/router";
-import {Component, OnInit, ViewChild} from "@angular/core";
-import {EventService} from "../../interaction-services/event.service";
+import {Component, OnInit, ViewChild, ElementRef, OnDestroy} from "@angular/core";
+import {EventService} from "../../interaction-services/event.service"
+import { Subscription } from 'rxjs';
 
-
+// for delete modal
+declare var bootstrap: any;
 
 @Component({
   selector: "app-home",
@@ -14,7 +16,7 @@ import {EventService} from "../../interaction-services/event.service";
   styleUrls: ["./home.component.scss"],
   standalone: false,
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
 
   constructor(
     public authService: AuthService,
@@ -26,8 +28,11 @@ export class HomeComponent implements OnInit {
   ) { }
 
   @ViewChild("name") nameElement;
+  @ViewChild("deleteModal") deleteModal: ElementRef;
 
   inEditMode: boolean = false;
+
+  private subscriptions: Subscription[] = [];
 
   // used for component dragging
   dragging = false;
@@ -36,9 +41,7 @@ export class HomeComponent implements OnInit {
 
   // essentially all boards we are going to show, so all the root boards that have no parent
   component: Container = undefined;
-
-
-
+  forDeletion: Comp = undefined;
 
   createBoard() {
     // or child board beneath the lowest child component
@@ -57,7 +60,7 @@ export class HomeComponent implements OnInit {
     }
 
     this.compService.createBoard(newBoard).subscribe({
-      next : created => neighbors.push(created),
+      next : created => neighbors.push({...created, parentId: this.component.id}),
       error : err => console.error(err)
     });
 
@@ -90,7 +93,7 @@ export class HomeComponent implements OnInit {
   }
 
   titleChanged(event: { component: Comp }) {
-
+    console.log("titleChanged123")
     this.compService.updateContainer(event.component as any).subscribe({
       next: () => console.log('Updated successfully'),
       error: err => console.error('Update failed', err)
@@ -184,7 +187,25 @@ export class HomeComponent implements OnInit {
     });
   }
 
+  // Opens delete Modal with specific component
+  openDeleteModal(component: Comp) {
+    console.log("Test1", component)
+    const modal = new bootstrap.Modal(this.deleteModal.nativeElement);
+    this.forDeletion = component;
+    modal.show();
+  }
 
+  // Deletes the component from the delete modal
+  finishDeleteModal() {
+    if(this.forDeletion.id == this.component.id) {
+      this.deleteBoard();
+    } else {
+      this.compService.deleteComponent(this.forDeletion.id).subscribe({
+        next: value => this.component.children = this.recursiveDelete(this.component.children, this.forDeletion.id),
+        error: err => console.error("unable to delete component", this.forDeletion.id, "with error", err)
+      })
+    }
+  }
 
   logOut() {
     this.authService.logoutUser();
@@ -229,36 +250,45 @@ export class HomeComponent implements OnInit {
     });
 
 
+    this.subscriptions.push(
+      this.eventService.widthChanged$.subscribe(({ component }) => {
+        this.onWidthChanged({component})
+      })
+    );
 
-    this.eventService.widthChanged$.subscribe(({ component }) => {
-      this.onWidthChanged({component})
-    });
+    this.subscriptions.push(
+      this.eventService.titleChanged$.subscribe(({ component }) => {
+        this.titleChanged({component})
+      })
+    );
 
-    this.eventService.titleChanged$.subscribe(({ component }) => {
-      this.titleChanged({component})
-    });
+    this.subscriptions.push(
+      this.eventService.textChanged$.subscribe(({ component }) => {
+        // TODO: Handle text change
+        console.log("The text of the following component just changed:")
+        console.log(component)
+      })
+    );
 
-    this.eventService.textChanged$.subscribe(({ component }) => {
-      // TODO: Handle text change
-      console.log("The text of the following component just changed:")
-      console.log(component)
+    this.subscriptions.push(
+      this.eventService.enableEditMode$.subscribe(() => {
+        this.inEditMode = true;
+      })
+    );
 
-    });
+    this.subscriptions.push(
+      this.eventService.deleteComponent$.subscribe({
+        next: value => {
+          console.log("Test3")
+          this.openDeleteModal(value.component);
+        }
+      })
+    );
 
-    this.eventService.enableEditMode$.subscribe(() => {
-      this.inEditMode = true;
-    });
+  }
 
-    this.eventService.deleteComponent$.subscribe({
-      next: value => {
-        this.compService.deleteComponent(value.component.id).subscribe({
-          next: value1 => this.component.children = this.recursiveDelete(this.component.children, value.component.id),
-          error: err => console.error("unable to delete component", value.component.id, "with error", err)
-        })
-
-      }
-    });
-
+  ngOnDestroy() {
+    this.subscriptions.forEach(s => s.unsubscribe());
   }
 
 
