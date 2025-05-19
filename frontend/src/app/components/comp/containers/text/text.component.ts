@@ -12,6 +12,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {Container, Text, Component as Comp} from "../../../../dtos/component";
 import {ResizeService} from "../../../../interaction-services/resize.service";
+import {EventService} from "../../../../interaction-services/event.service";
 
 /**
  * A simple, self‑contained text item that can live inside a Container.
@@ -31,7 +32,8 @@ export class TextComponent implements AfterViewInit{
 
   constructor(
     private elementRef: ElementRef,
-    private resizeService: ResizeService
+    private resizeService: ResizeService,
+    private eventService: EventService
   ) { }
 
   /** The actual text that the board (or another parent) owns */
@@ -42,8 +44,10 @@ export class TextComponent implements AfterViewInit{
   @Input() homeGridElInput:ElementRef;
   @Input() inEditMode:boolean;
 
+  /* TODO: remove if event service is used instead
   @Output() widthChanged = new EventEmitter<{ component: Comp }>();
   @Output() textChange = new EventEmitter<string>();
+   */
   @Output() startDraggingContainer = new EventEmitter<{ component: Comp, event: MouseEvent }>();
   @Output() stopDraggingContainer = new EventEmitter<void>();
 
@@ -69,6 +73,7 @@ export class TextComponent implements AfterViewInit{
       this.text.text = this.buffer.trim();
     }
     this.editing = false;
+    this.eventService.emitTextChanged(this.text);
   }
 
   cancel(): void {
@@ -84,7 +89,7 @@ export class TextComponent implements AfterViewInit{
   @HostListener('document:mousemove', ['$event'])
   onMouseMove(event: MouseEvent) {
     if (!this.inEditMode) return;
-    this.resizeService.resize(event, this.text, this.currentWidth, this.cardEl, this.previewCardEl, this.parentGridElInput, this.homeGridElInput, this.depth, (columns, rows) => {
+    this.resizeService.resize(event, this.text, this.currentWidth, this.cardEl, this.previewCardEl, this.parent, this.parentGridElInput, this.homeGridElInput, this.depth, (columns, rows) => {
       this.updateWidth(columns);
       this.updateHeight(rows);
     });
@@ -93,11 +98,14 @@ export class TextComponent implements AfterViewInit{
   @HostListener('document:mouseup', ['$event'])
   onMouseUp(event: MouseEvent) {
     if (!this.inEditMode) return;
-    this.resizeService.stopResize(event, this.text, this.currentWidth, this.currentHeight, this.previewCardEl,  this.parent, (columns, rows) => {
+    this.resizeService.stopResize(event, this.text, this.currentWidth, this.currentHeight, this.previewCardEl,  this.parent, (columns, rows, changes) => {
       this.updateWidth(columns);
       this.updateHeight(rows);
-      if (columns !== this.text.width || rows !== this.text.height) {
+      if (changes) {
+        /* TODO: remove if event service is used instead
         this.widthChanged.emit({ component: this.text });
+         */
+        this.eventService.emitWidthChanged(this.text);
       }
     });
   }
@@ -125,9 +133,8 @@ export class TextComponent implements AfterViewInit{
     this.stopDraggingContainer.emit();
   }
 
-  capitalizeFirstLetter(word: string) {
-    if (!word) return word;
-    return word[0].toUpperCase() + word.slice(1);
+  enableEditMode() {
+    this.eventService.emitEnableEditMode();
   }
 
   ngAfterViewInit(): void {

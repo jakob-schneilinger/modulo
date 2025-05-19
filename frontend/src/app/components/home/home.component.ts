@@ -1,114 +1,12 @@
-import { Board, Container, Text, Component as Comp } from "../../dtos/component";
-import { ComponentService } from "../../services/component.service";
-import { DragService } from "../../interaction-services/drag.service";
-import { AuthService } from "../../services/auth.service";
-import { ActivatedRoute, Router } from "@angular/router";
-import { Component, OnInit, ViewChild } from "@angular/core";
+import { Board, Container, Text, Component as Comp } from '../../dtos/component';
+import { ComponentService } from '../../services/component.service';
+import { DragService } from '../../interaction-services/drag.service';
+import {AuthService} from '../../services/auth.service';
+import {ActivatedRoute, Router} from "@angular/router";
+import {Component, OnInit, ViewChild} from "@angular/core";
+import {EventService} from "../../interaction-services/event.service";
 
-// Board test data
-/* const text: Text = {
-  title: "Text-Box",
-  column: 1,
-  row: 1,
-  id: 500,
-  name: "My Text",
-  owner_id: 0,
-  type: "text",
-  width: 5,
-  height: 1,
-  text: "Hello World",
-};
 
-const containers: Container = {
-  id: 0,
-  children: [
-    {
-      id: 1,
-      children: [
-        {
-          id: 11,
-          children: [],
-          name: "My first Child",
-          owner_id: 0,
-          type: "board",
-          width: 3,
-          height: 2,
-          column: 1,
-          row: 1,
-        },
-        {
-          id: 12,
-          children: [],
-          name: "My second Child",
-          owner_id: 0,
-          type: "board",
-          width: 3,
-          height: 1,
-          column: 4,
-          row: 1,
-        },
-      ],
-      name: "My first Board",
-      owner_id: 0,
-      type: "board",
-      width: 6,
-      height: 3,
-      column: 1,
-      row: 1,
-    },
-    {
-      id: 2,
-      children: [],
-      name: "My second Board",
-      owner_id: 0,
-      type: "board",
-      width: 2,
-      height: 2,
-      column: 7,
-      row: 1,
-    },
-    {
-      id: 3,
-      children: [],
-      name: "My second Note",
-      owner_id: 0,
-      type: "note",
-      width: 4,
-      height: 1,
-      column: 1,
-      row: 4,
-    },
-    {
-      id: 4,
-      children: [this.text],
-      name: "My first Note",
-      owner_id: 0,
-      type: "note",
-      width: 4,
-      height: 2,
-      column: 5,
-      row: 4,
-    },
-    {
-      id: 5,
-      children: [],
-      name: "My first Task",
-      owner_id: 0,
-      type: "task",
-      width: 2,
-      height: 1,
-      column: 3,
-      row: 5,
-    },
-  ],
-  name: "Home",
-  owner_id: 0,
-  type: "board",
-  width: 0,
-  height: 0,
-  column: 0,
-  row: 0,
-}; */
 
 @Component({
   selector: "app-home",
@@ -117,13 +15,15 @@ const containers: Container = {
   standalone: false,
 })
 export class HomeComponent implements OnInit {
+
   constructor(
     public authService: AuthService,
     public router: Router,
     public route: ActivatedRoute,
     public compService: ComponentService,
-    private dragService: DragService
-  ) {}
+    private dragService: DragService,
+    private eventService: EventService
+  ) { }
 
   @ViewChild("name") nameElement;
 
@@ -134,34 +34,16 @@ export class HomeComponent implements OnInit {
   draggingContainer: Container | null = null;
   previewContainer: Container | null = null;
 
-  // components: Component[] = []; //TODO soll aus service kommen
-  // boards: Board[] = [];         //TODO soll aus service kommen
+  // essentially all boards we are going to show, so all the root boards that have no parent
+  component: Container = undefined;
 
-  component: Comp;
 
-  createComponent() {
-    // TODO: create comp with certain type
-  }
 
-  updateName() {
-    const name = this.nameElement.nativeElement.textContent;
-    const update = { id: this.component.id, name: name };
-    this.compService.updateBoard(update as any).subscribe({
-      next: () => window.dispatchEvent(new CustomEvent("board-name-changed", { detail: { id: update.id, name } })),
-      error: (e) => console.error(e),
-    });
-  }
 
-  /* createBoard() {
-    const children = this.containers.children;
-
-    // Sort by row and column to process top-left to bottom-right
-    children.sort((a, b) => {
-      if (a.row === b.row) return a.column - b.column;
-      return a.row - b.row;
-    });
-
-    const row = this.findFirstFreeRow(2, 2);
+  createBoard() {
+    // or child board beneath the lowest child component
+    const neighbors = this.component.children
+    const row = this.getNextUnusedRow(neighbors)
 
     const newBoard: Board = {
       children: [],
@@ -171,27 +53,80 @@ export class HomeComponent implements OnInit {
       type: "board",
       width: 2,
       row: row,
-    };
+      parentId: this.component.id
+    }
 
-    this.containers.children.push(newBoard);
+    this.compService.createBoard(newBoard).subscribe({
+      next : created => neighbors.push(created),
+      error : err => console.error(err)
+    });
 
-    this.compService.createBoard(newBoard, null);
-  } */
+  }
+
+  updateName(){
+    const name = this.nameElement.nativeElement.textContent;
+    const update = { id: this.component.id, name: name };
+    this.compService.updateBoard(update as any).subscribe({
+      next: () => window.dispatchEvent(new CustomEvent("board-name-changed", { detail: { id: update.id, name } })),
+      error: (e) => console.error(e),
+    });
+
+  }
+  private getNextUnusedRow(neighbors: Comp[]): number{
+    if (neighbors.length === 0){
+      return 1;
+    }
+    const sorted = neighbors.sort((a, b) => b.row - a.row);
+    return sorted[0].row + sorted[0].height
+  }
 
   onWidthChanged(event: { component: Comp }) {
-    const update: Comp = { ...event.component, type: "board" };
-    /*
-    TODO: add when update implemented
 
-    this.compService.updateBoard(update).subscribe({
+    this.compService.updateContainer(event.component as any).subscribe({
       next: () => console.log('Updated successfully'),
       error: err => console.error('Update failed', err)
     });
-     */
+
   }
 
-  /* private findFirstFreeRow(width: number, height: number, column: number = 1): number {
-    const children = this.containers.children;
+  titleChanged(event: { component: Comp }) {
+
+    this.compService.updateContainer(event.component as any).subscribe({
+      next: () => console.log('Updated successfully'),
+      error: err => console.error('Update failed', err)
+    });
+
+  }
+
+  textChanged(event: { component: Comp }) {
+
+    // TODO: call service to update text and subscribe!!!!
+
+  }
+
+  createChild(type: string){
+    // TODO: add other components
+    switch (type){
+      case 'board' :
+        this.createBoard();
+        break;
+      default:
+        console.error("unsupported type of component")
+    }
+  }
+
+  deleteBoard(){
+    this.compService.deleteComponent(this.component.id).subscribe({
+      next: value => {
+        window.dispatchEvent(new CustomEvent("board-delete", { detail: { id: this.component.id, name: this.component.name } }))
+        this.router.navigate(["/"]);
+      }
+    })
+  }
+
+  private findFirstFreeRow(width: number, height: number, column: number = 1): number {
+
+    const children = this.component.children;
 
     let row = 1;
     let found = false;
@@ -202,16 +137,16 @@ export class HomeComponent implements OnInit {
         left: column,
         right: column + width,
         top: row,
-        bottom: row + height,
+        bottom: row + height
       };
 
       // Check for collision with any existing board
-      const collision = children.some((child) => {
+      const collision = children.some(child => {
         const childArea = {
           left: child.column,
           right: child.column + child.width,
           top: child.row,
-          bottom: child.row + child.height,
+          bottom: child.row + child.height
         };
 
         return !(
@@ -230,24 +165,26 @@ export class HomeComponent implements OnInit {
     }
 
     return row;
-  } */
+  }
 
-  startDragging(data: { component: Comp; event: MouseEvent }) {
-    //this.dragService.startDragging(data, this.containers);
+  startDragging(data: { component: Comp, event: MouseEvent }) {
+    this.dragService.startDragging(data, <Container>this.component);
   }
 
   onMouseMove(event: MouseEvent) {
-    /* this.dragService.onMouseMove(event, this.containers, (container, targetContainer) => {
-      // TODO: Update Component
-    }); */
+    this.dragService.onMouseMove(event, <Container>this.component, (container, targetContainer) => {
+
+    });
   }
 
   stopDragging(event: MouseEvent) {
-    /* this.dragService.stopDragging(event, this.containers, (container, targetContainer) => {
-      // TODO: Backend update (uncomment when implemented)
-      // this.compService.updateContainer(container).subscribe();
-    }); */
+    this.dragService.stopDragging(event, <Container>this.component, (container, targetContainer) => {
+      console.log("target", targetContainer)
+      this.compService.updateContainer({...container, parentId: targetContainer.id} as any).subscribe();
+    });
   }
+
+
 
   logOut() {
     this.authService.logoutUser();
@@ -257,9 +194,10 @@ export class HomeComponent implements OnInit {
   deleteUser() {}
 
   ngOnInit() {
-    window.addEventListener("mousemove", this.onMouseMove.bind(this));
-    window.addEventListener("mouseup", this.stopDragging.bind(this));
+    window.addEventListener('mousemove', this.onMouseMove.bind(this));
+    window.addEventListener('mouseup', this.stopDragging.bind(this));
 
+    // for a user fetch his root boards
     this.route.params.subscribe({
       next: (params) => {
         const id = params["id"];
@@ -269,7 +207,16 @@ export class HomeComponent implements OnInit {
         }
 
         this.compService.getComponent(id).subscribe({
-          next: (comp) => (this.component = comp),
+          next: (comp) => {
+            this.component = comp as any
+            this.component.children.forEach(child => {
+              child.parentId = this.component.id
+            })
+            if (this.nameElement.nativeElement) {
+              this.nameElement.nativeElement.innerText = this.component.name
+            }
+            console.log(this.component)
+          },
           error: (e) => {
             if (e.status == 404) {
               this.router.navigate(["/404"], { skipLocationChange: true });
@@ -280,5 +227,51 @@ export class HomeComponent implements OnInit {
         });
       },
     });
+
+
+
+    this.eventService.widthChanged$.subscribe(({ component }) => {
+      this.onWidthChanged({component})
+    });
+
+    this.eventService.titleChanged$.subscribe(({ component }) => {
+      this.titleChanged({component})
+    });
+
+    this.eventService.textChanged$.subscribe(({ component }) => {
+      // TODO: Handle text change
+      console.log("The text of the following component just changed:")
+      console.log(component)
+
+    });
+
+    this.eventService.enableEditMode$.subscribe(() => {
+      this.inEditMode = true;
+    });
+
+    this.eventService.deleteComponent$.subscribe({
+      next: value => {
+        this.compService.deleteComponent(value.component.id).subscribe({
+          next: value1 => this.component.children = this.recursiveDelete(this.component.children, value.component.id),
+          error: err => console.error("unable to delete component", value.component.id, "with error", err)
+        })
+
+      }
+    });
+
   }
+
+
+  private recursiveDelete(children: Comp[], id: number): Comp[]{
+    // map is only to make a copy
+    return children.map(comp => {
+      return {...comp}
+    }).filter(comp => {
+      if ('children' in comp) {
+        comp.children = this.recursiveDelete(comp.children, id);
+      }
+      return comp.id !== id
+    })
+  }
+
 }

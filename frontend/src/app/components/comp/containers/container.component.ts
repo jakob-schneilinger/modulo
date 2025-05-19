@@ -13,6 +13,9 @@ import { ActivatedRoute, Router } from "@angular/router";
 import {NgClass, NgForOf, NgIf, NgStyle} from "@angular/common";
 import {TextComponent} from "./text/text.component";
 import { ResizeService } from '../../../interaction-services/resize.service';
+import {FormsModule} from "@angular/forms";
+import {EventService} from "../../../interaction-services/event.service";
+import {compact} from "lodash";
 
 
 @Component({
@@ -24,7 +27,8 @@ import { ResizeService } from '../../../interaction-services/resize.service';
     NgStyle,
     NgClass,
     NgIf,
-    TextComponent
+    TextComponent,
+    FormsModule
   ],
   standalone: true
 })
@@ -34,7 +38,8 @@ export class ContainerComponent implements AfterViewInit {
     private router: Router,
     private route: ActivatedRoute,
     private elementRef: ElementRef,
-    private resizeService: ResizeService
+    private resizeService: ResizeService,
+    private eventService: EventService
   ) { }
 
   @Input() depth!: number;
@@ -44,7 +49,10 @@ export class ContainerComponent implements AfterViewInit {
   @Input() homeGridElInput!: ElementRef;
   @Input() inEditMode:boolean;
 
+  /* TODO: remove if event service is used instead
   @Output() widthChanged = new EventEmitter<{ component: Comp }>();
+  @Output() titleChanged = new EventEmitter<{ component: Comp }>();
+   */
   @Output() startDraggingContainer = new EventEmitter<{ component: Comp, event: MouseEvent }>();
   @Output() stopDraggingContainer = new EventEmitter<void>();
 
@@ -59,6 +67,9 @@ export class ContainerComponent implements AfterViewInit {
   currentWidth: number = this.container?.width ?? 1;
   currentHeight: number = this.container?.height ?? 1;
 
+  editingTitle = false;
+  titleBuffer = '';
+
 
   @HostListener('mousedown', ['$event'])
   onMouseDown(event: MouseEvent) {
@@ -69,7 +80,7 @@ export class ContainerComponent implements AfterViewInit {
   @HostListener('document:mousemove', ['$event'])
   onMouseMove(event: MouseEvent) {
     if (!this.inEditMode) return;
-    this.resizeService.resize(event, this.container, this.currentWidth, this.cardEl, this.previewCardEl, this.parentGridElInput, this.homeGridElInput, this.depth, (columns, rows) => {
+    this.resizeService.resize(event, this.container, this.currentWidth, this.cardEl, this.previewCardEl, this.parentContainer, this.parentGridElInput, this.homeGridElInput, this.depth, (columns, rows) => {
       this.updateWidth(columns);
       this.updateHeight(rows);
     });
@@ -78,12 +89,12 @@ export class ContainerComponent implements AfterViewInit {
   @HostListener('document:mouseup', ['$event'])
   onMouseUp(event: MouseEvent) {
     if (!this.inEditMode) return;
-    this.resizeService.stopResize(event, this.container, this.currentWidth, this.currentHeight, this.previewCardEl, this.parentContainer, (columns, rows) => {
+    this.resizeService.stopResize(event, this.container, this.currentWidth, this.currentHeight, this.previewCardEl, this.parentContainer, (columns, rows, changes) => {
+      if (changes) {
+        this.eventService.emitWidthChanged(this.container);
+      }
       this.updateWidth(columns);
       this.updateHeight(rows);
-      if (columns !== this.container.width || rows !== this.container.height) {
-        this.widthChanged.emit({ component: this.container });
-      }
     });
   }
 
@@ -138,6 +149,33 @@ export class ContainerComponent implements AfterViewInit {
     }
   }
 
+  startEditTitle(): void {
+    this.titleBuffer = this.container.name;
+    this.editingTitle = true;
+  }
+
+  deleteComponent(){
+    this.eventService.emitDelete(this.container);
+  }
+
+  saveTitle(): void {
+    const trimmedTitle = this.titleBuffer.trim();
+    const changed = this.container.name !== trimmedTitle;
+    this.container.name = trimmedTitle;
+    this.editingTitle = false;
+    if (changed) {
+      this.eventService.emitTitleChanged(this.container);
+    }
+  }
+
+  cancelTitle(): void {
+    this.editingTitle = false;
+  }
+
+  enableEditMode() {
+    this.eventService.emitEnableEditMode();
+  }
+
   capitalizeFirstLetter(word: string) {
     if (!word) return word;
     return word[0].toUpperCase() + word.slice(1);
@@ -149,4 +187,6 @@ export class ContainerComponent implements AfterViewInit {
     this.updateHeight(this.container.height);
     this.updateWidth(this.container.width);
   }
+
+
 }
