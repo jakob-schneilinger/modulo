@@ -59,7 +59,7 @@ export class DragService {
     const relativeX = event.clientX - rect.left;
     const relativeY = event.clientY - rect.top;
 
-    const newColumn = Math.max(1, Math.min(8, Math.round(relativeX / columnWidth)));
+    const newColumn = Math.max(1, Math.min(8, Math.floor(relativeX / columnWidth)));
     const newRow = Math.max(1, Math.min(8, Math.floor(relativeY / rowHeight) + 1));
 
     this.previewContainer.column = newColumn;
