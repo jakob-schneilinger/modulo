@@ -1,8 +1,8 @@
 export interface Component {
   id?: number;
   type: "board" | "task" | "note" | "text" | "image" | "video" | "sketch" | "calender";
-  owner_id?: number;
-  parent_id?: number;
+  ownerId?: number;
+  parentId?: number;
   width: number;
   height: number;
   column: number;
@@ -31,12 +31,6 @@ export interface Note extends Container {
   tags: string[];
 }
 
-export interface BoardCreate {
-  name: string;
-  parentId?: number;
-  width?: number;
-  height?: number;
-}
 
 export interface Text extends Component {
   type: "text";

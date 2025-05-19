@@ -2,47 +2,123 @@
 <div #card class="card p-2" [attr.data-id]="container.id" *ngIf="depth > 0">
   <div *ngIf="container.id !== -1" class="d-flex justify-content-between align-items-start">
     <div class="container-header">
-      <h5 class="mx-1" [ngClass]="{'resizing' : isResizing}"> {{container.name}} </h5>
+      <div class="mx-1 flex-grow-1">
+        <ng-container *ngIf="!editingTitle; else titleEditor">
+          <h5 [ngClass]="{'resizing': isResizing}" (dblclick)="startEditTitle()">
+            {{ container.name }}
+          </h5>
+        </ng-container>
+
+        <ng-template #titleEditor>
+          <textarea
+            class="form-control form-control-sm mb-1"
+            [(ngModel)]="titleBuffer"
+            rows="1"
+            maxlength="255"
+            style="font-size: 1.1rem;"
+          ></textarea>
+          <div class="d-flex gap-1">
+            <button class="btn btn-sm btn-primary" (click)="saveTitle()">Save</button>
+            <button class="btn btn-sm btn-outline-secondary" (click)="cancelTitle()">Cancel</button>
+          </div>
+        </ng-template>
+      </div>
     </div>
-    <div class="three-dots dropdown" (mousedown)="startContainerDrag(container, $event)" (mouseup)="stopContainerDrag()"
-      (click)="$event.stopPropagation()">
-      <i class="bi text-secondary" [ngClass]="{
+
+    <div>
+      <div
+        class="three-dots dropdown"
+        (mousedown)="startContainerDrag(container, $event)"
+        (mouseup)="stopContainerDrag()"
+        (click)="$event.stopPropagation()"
+        [hidden]="editingTitle"
+      >
+        <i class="bi text-secondary"
+           [ngClass]="{
            'bi-arrows-move': inEditMode,
            'bi-three-dots': !inEditMode,
            'grab': inEditMode,
            'point': !inEditMode
-         }" id="dropdownMenuButton-{{container.id}}" data-bs-toggle="dropdown" aria-expanded="false"></i>
-      <ul class="dropdown-menu" [attr.aria-labelledby]="'dropdownMenuButton-' + container.id" [hidden]="inEditMode">
-        <li><a class="dropdown-item" href="#">Edit Title</a></li>
-        <li>
-          <hr class="dropdown-divider">
-        </li>
-        <li><a class="dropdown-item" href="#">Enable Edit Mode</a></li>
-        <li>
-          <hr class="dropdown-divider">
-        </li>
-        <li><a class="dropdown-item" href="#">Delete {{capitalizeFirstLetter(container.type)}}</a></li>
-      </ul>
+         }"
+           id="dropdownMenuButton-{{container.id}}"
+           data-bs-toggle="dropdown"
+           aria-expanded="false"
+        ></i>
+
+        <ul class="dropdown-menu"
+            [attr.aria-labelledby]="'dropdownMenuButton-' + container.id"
+            [hidden]="inEditMode">
+          <li><a class="dropdown-item" (click)="startEditTitle()">Edit Title</a></li>
+          <li>
+            <hr class="dropdown-divider">
+          </li>
+          <li><a class="dropdown-item" (click)="enableEditMode()">Enable Edit Mode</a></li>
+          <li>
+            <hr class="dropdown-divider">
+          </li>
+          <li><a class="dropdown-item" (click)="deleteComponent()">Delete {{capitalizeFirstLetter(container.type)}}</a></li>
+        </ul>
+
+      </div>
     </div>
+
+
+
+
   </div>
 
   <div class="container-grid" [id]="'container-grid-' + container.id" #grid>
-    <app-container-component *ngFor="let child of containerChildren" [id]="'container-' + child.id" [depth]=depth+1
-      [container]="child" [parentContainer]="container" [parentGridElInput]="gridEl" [inEditMode]="inEditMode"
-      (widthChanged)="widthChanged.emit($event)" (startDraggingContainer)="startDraggingContainer.emit($event)"
-      (stopDraggingContainer)="stopDraggingContainer.emit()" class="card-component" [ngStyle]="{
+
+    <!--  TODO: remove if event service is used
+
+      (widthChanged)="widthChanged.emit($event)"
+      (titleChanged)="titleChanged.emit($event)"
+
+  -->
+
+    <app-container-component
+      *ngFor="let child of containerChildren"
+      [id]="'container-' + child.id"
+      [depth]=depth+1
+      [container]="child"
+      [parentContainer]="container"
+      [parentGridElInput]="gridEl"
+      [inEditMode]="inEditMode"
+      (startDraggingContainer)="startDraggingContainer.emit($event)"
+      (stopDraggingContainer)="stopDraggingContainer.emit()"
+      class="card-component"
+      [ngStyle]="{
         'grid-column': child.column + ' / ' + (child.column + child.width),
         'grid-row': child.row + ' / ' + (child.row + child.height),
-      }" [ngClass]="{ 'preview-container': child.id === -1 }">
+      }"
+      [ngClass]="{ 'preview-container': child.id === -1 }"
+    >
     </app-container-component>
 
-    <app-text-component *ngFor="let child of textChildren" [id]="'text-' + child.id" [text]="child" [depth]="depth+1"
-      [parent]="container" [parentGridElInput]="gridEl" [homeGridElInput]="homeGridEl" [inEditMode]="inEditMode"
-      (widthChanged)="widthChanged.emit($event)" (startDraggingContainer)="startDraggingContainer.emit($event)"
-      (stopDraggingContainer)="stopDraggingContainer.emit()" class="card-component" [ngStyle]="{
+    <!--  TODO: remove if event service is used
+
+      (widthChanged)="widthChanged.emit($event)"
+
+  -->
+
+    <app-text-component
+      *ngFor="let child of textChildren"
+      [id]="'text-' + child.id"
+      [text]="child"
+      [depth]="depth+1"
+      [parent]="container"
+      [parentGridElInput]="gridEl"
+      [homeGridElInput]="homeGridEl"
+      [inEditMode]="inEditMode"
+      (startDraggingContainer)="startDraggingContainer.emit($event)"
+      (stopDraggingContainer)="stopDraggingContainer.emit()"
+      class="card-component"
+      [ngStyle]="{
         'grid-column': child.column + ' / ' + (child.column + child.width),
         'grid-row': child.row + ' / ' + (child.row + child.height),
-      }" [ngClass]="{ 'preview-text-container': child.id === -1 }">
+      }"
+      [ngClass]="{ 'preview-text-container': child.id === -1 }"
+    >
     </app-text-component>
 
   </div>
@@ -51,17 +127,33 @@
   </div>
 </div>
 
-<div *ngIf="!(depth > 0)" class="home-container">
-
+<div *ngIf="!(depth > 0)" class="home-container p-3">
   <div class="container-grid" [id]="'container-grid-' + container.id" #homeGrid>
 
-    <app-container-component *ngFor="let child of containerChildren" [id]="'container-' + child.id" [depth]=depth+1
-      [container]="child" [parentContainer]="container" [homeGridElInput]="homeGridEl" [inEditMode]="inEditMode"
-      (widthChanged)="widthChanged.emit($event)" (startDraggingContainer)="startDraggingContainer.emit($event)"
-      (stopDraggingContainer)="stopDraggingContainer.emit()" class="card-component" [ngStyle]="{
+    <!--  TODO: remove if event service is used
+
+      (widthChanged)="widthChanged.emit($event)"
+      (titleChanged)="titleChanged.emit($event)"
+
+  -->
+
+    <app-container-component
+      *ngFor="let child of containerChildren"
+      [id]="'container-' + child.id"
+      [depth]=depth+1
+      [container]="child"
+      [parentContainer]="container!"
+      [homeGridElInput]="homeGridEl"
+      [inEditMode]="inEditMode"
+      (startDraggingContainer)="startDraggingContainer.emit($event)"
+      (stopDraggingContainer)="stopDraggingContainer.emit()"
+      class="card-component"
+      [ngStyle]="{
         'grid-column': child.column + ' / ' + (child.column + child.width),
         'grid-row': child.row + ' / ' + (child.row + child.height),
-      }" [ngClass]="{ 'preview-container': child.id === -1 }">
+      }"
+      [ngClass]="{ 'preview-container': child.id === -1 }"
+    >
     </app-container-component>
 
   </div>

@@ -1,4 +1,4 @@
-/*
+
 package at.ac.tuwien.sepr.groupphase.backend.integrationtest;
 
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.JwtResponseDto;
@@ -6,7 +6,6 @@ import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardCreateD
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardUpdateDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.user.UserCreateDto;
-import at.ac.tuwien.sepr.groupphase.backend.security.JwtTokenizer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -29,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("test") //TODO: hab ich hinzugefügt
+@ActiveProfiles("test")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ComponentEndpointIntegrationTest {
 
@@ -39,8 +38,6 @@ public class ComponentEndpointIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Autowired
-    private JwtTokenizer jwtTokenizer;
 
     private static String userToken;
 
@@ -51,8 +48,6 @@ public class ComponentEndpointIntegrationTest {
 
     // set up a user to be able to interact with components, as we need it for auth and rest methods
     // -> maybe do a config for test or mock some data temporarily
-    // that is so wrong on so many level
-    // god forgive me, for what I have sinned
     @BeforeAll
     void setup()
         throws Exception {
@@ -86,7 +81,7 @@ public class ComponentEndpointIntegrationTest {
     }
 
     static void parentBoard(MockMvc mockMvc, ObjectMapper objectMapper) throws Exception {
-        // having a test database would of course help
+        // having a test datasource would of course help
         BoardCreateDto boardParent = new BoardCreateDto("board test parent", null, 1,1,1,1);
 
         var response = mockMvc.perform(
@@ -340,4 +335,4 @@ public class ComponentEndpointIntegrationTest {
 
 }
 
- */
+

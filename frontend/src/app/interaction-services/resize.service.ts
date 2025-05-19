@@ -7,16 +7,21 @@ import { Container, Component as Comp } from '../dtos/component';
 export class ResizeService {
   private isResizing = false;
   private activeResizerId: string | null = null;
+  private startWidth: number = 1;
+  private startHeight: number = 1;
+
 
   startResize(event: MouseEvent, component: Comp, cardEl: ElementRef, previewCardEl: ElementRef) {
     const target = event.target as HTMLElement;
     if (target.classList.contains('resizer') && target.id === `resizer-${component.id}`) {
       this.isResizing = true;
       this.activeResizerId = target.id;
+      this.startWidth = component.width;
+      this.startHeight = component.height;
     }
   }
 
-  resize(event: MouseEvent, component: Comp, currentWidth: number, cardEl: ElementRef, previewCardEl: ElementRef, parentGridEl: ElementRef | null, homeGridEl: ElementRef | null, depth: number, callback: (columns: number, rows: number) => void) {
+  resize(event: MouseEvent, component: Comp, currentWidth: number, cardEl: ElementRef, previewCardEl: ElementRef, parentContainer: Container, parentGridEl: ElementRef | null, homeGridEl: ElementRef | null, depth: number, callback: (columns: number, rows: number) => void) {
     if (!this.isResizing || this.activeResizerId !== `resizer-${component.id}`) return;
 
     const headerEls = document.querySelectorAll('.container-header h5');
@@ -45,13 +50,19 @@ export class ResizeService {
       preview.style.zIndex = '10';
       preview.style.pointerEvents = 'none';
 
+      const testComponent = { ...component, width: columns, height: rows };
+      const hasCollision = this.hasCollisions(parentContainer, testComponent);
+      preview.style.backgroundColor = hasCollision ? 'rgba(255, 0, 0, 0.15)' : 'rgba(0, 123, 255, 0.15)';
+      preview.style.border = hasCollision ? '2px dashed rgba(255, 0, 0, 0.5)' : '2px dashed rgba(0, 123, 255, 0.5)';
+
+
       callback(columns, rows);
     } else {
       callback(currentWidth, rows);
     }
   }
 
-  stopResize(event: MouseEvent, component: Comp, currentWidth:number, currentHeight:number, previewCardEl: ElementRef, parentContainer: Container, callback: (columns: number, rows: number) => void) {
+  stopResize(event: MouseEvent, component: Comp, currentWidth: number, currentHeight: number, previewCardEl: ElementRef, parentContainer: Container, callback: (columns: number, rows: number, changes: boolean) => void) {
     if (!this.isResizing || this.activeResizerId !== `resizer-${component.id}`) return;
 
     this.isResizing = false;
@@ -65,36 +76,36 @@ export class ResizeService {
     preview.style.display = 'none';
 
     if (currentWidth !== component.width || currentHeight !== component.height) {
+
+      const testComponent = { ...component, width: currentWidth, height: currentHeight };
+
+      if (this.hasCollisions(parentContainer, testComponent)) {
+        callback(this.startWidth, this.startHeight, false);
+        return;
+      }
+
       component.width = currentWidth;
       component.height = currentHeight;
-      this.handleCollisions(parentContainer);
+      callback(currentWidth, currentHeight, true);
     }
 
-    callback(currentWidth, currentHeight);
+    callback(currentWidth, currentHeight, false);
   }
 
-  // TODO: update in backend if collision appear
-  handleCollisions(parentContainer: Container) {
-    const children = parentContainer.children;
-
-    children.sort((a, b) => {
-      if (a.row === b.row) return a.column - b.column;
-      return a.row - b.row;
-    });
+  hasCollisions(parentContainer: Container, component: Comp): boolean {
+    const children: Comp[] = parentContainer.children;
 
     for (let i = 0; i < children.length; i++) {
-      const current = children[i];
-
-      for (let j = i + 1; j < children.length; j++) {
-        const compare = children[j];
-
-        if (this.isOverlapping(current, compare)) {
-          compare.row = current.row + current.height;
-          this.handleCollisions(parentContainer);
-          return;
+      if (this.isOverlapping(children[i], component) && component.id !== children[i].id) {
+        console.log("isOverlapping")
+        if (children[i].id === -1) {
+          return undefined;
         }
+        return true;
       }
     }
+
+    return false;
   }
 
   private isOverlapping(a: Comp, b: Comp): boolean {
@@ -110,12 +121,13 @@ export class ResizeService {
 
     /*
     TODO: remove if done with debugging
+
     console.log("Left: " +aLeft+ " / " +bLeft);
     console.log("Right: " +aRight+ " / " +bRight);
     console.log("Top: " +aTop+ " / " +bTop);
     console.log("Bottom: " +aBottom+ " / " +bBottom);
-
      */
+
 
     return !(aRight <= bLeft || aLeft >= bRight || aBottom <= bTop || aTop >= bBottom);
   }

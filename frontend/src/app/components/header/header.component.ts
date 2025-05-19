@@ -4,7 +4,7 @@ import { ComponentService } from "src/app/services/component.service";
 import { UserService } from "src/app/services/user.service";
 import { Router } from "@angular/router";
 
-import { Board, BoardCreate, Component as Comp } from "../../dtos/component";
+import { Board, Component as Comp } from "../../dtos/component";
 
 @Component({
   selector: "app-header",
@@ -31,7 +31,7 @@ export class HeaderComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.compService.getRoots().subscribe({
+    this.compService.getRootBoards().subscribe({
       next: (v) => (this.roots = v),
       error: (e) => console.log(e),
     });
@@ -40,6 +40,13 @@ export class HeaderComponent implements OnInit {
       const { id, name } = (event as any).detail;
       this.roots.find((i) => i.id == id).name = name;
     });
+
+    window.addEventListener("board-delete", (event) => {
+      const { id, name } = (event as any).detail;
+      const i = this.roots.findIndex((i) => i.id == id);
+      if (i >= 0) this.roots.splice(i, 1)
+    });
+
   }
 
   logout() {
@@ -48,9 +55,9 @@ export class HeaderComponent implements OnInit {
   }
 
   createBoard() {
-    const item: BoardCreate = { name: "Unnamed" };
-    this.compService.createBoard(item as any).subscribe({
-      next: (board) => this.roots.push(board), //
+    const item: Board = { name: "Unnamed" } as any;
+    this.compService.createBoard(item).subscribe({
+      next: (board) => this.roots.push(board),
       error: (e) => console.error(e),
     });
   }

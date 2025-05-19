@@ -65,9 +65,26 @@ export class DragService {
     this.previewContainer.column = newColumn;
     this.previewContainer.row = newRow;
 
-    console.log(containerId)
+    this.previewContainer.parentId = targetContainer.id;
 
-    this.previewContainer.parent_id = targetContainer.id;
+    const testComponent = {
+      ...this.draggingContainer,
+      column: this.previewContainer.column,
+      row: this.previewContainer.row
+    };
+
+    let hasCollision = this.resizeService.hasCollisions(targetContainer, testComponent);
+
+    if (hasCollision == undefined) {
+      hasCollision = false;
+    }
+
+    const previewEl = document.querySelector(`.card[data-id='-1']`) as HTMLElement | null;
+    if (previewEl) {
+      previewEl.style.backgroundColor = hasCollision ? 'rgba(255, 0, 0, 0.15)' : 'rgba(0, 123, 255, 0.15)';
+      previewEl.style.border = hasCollision ? '2px dashed rgba(255, 0, 0, 0.5)' : '2px dashed rgba(0, 123, 255, 0.5)';
+    }
+
     this.removePreviewFromAll(rootContainer);
     this.insertPreview(this.previewContainer, rootContainer);
 
@@ -76,25 +93,22 @@ export class DragService {
 
   stopDragging(event: MouseEvent, rootContainer: Container, callback: (component: Comp, targetContainer: Container) => void) {
     if (this.draggingContainer && this.previewContainer && this.sourceParent) {
-      const targetContainer = this.findContainerById(this.previewContainer.parent_id!, rootContainer) || rootContainer;
+      const targetContainer = this.findContainerById(this.previewContainer.parentId!, rootContainer) || rootContainer;
 
       // Remove preview
       this.removePreviewFromAll(rootContainer);
 
-      // Remove from source parent
-      this.removeComponentFromAll(this.draggingContainer.id, rootContainer);
+      const testComponent = { ...this.draggingContainer, column: this.previewContainer.column, row: this.previewContainer.row };
 
-      // Update dragged container's position
-      this.draggingContainer.column = this.previewContainer.column;
-      this.draggingContainer.row = this.previewContainer.row;
-
-      // Add to target container
-      targetContainer.children.push(this.draggingContainer);
-
-      // Handle collisions in target container
-      this.resizeService.handleCollisions(targetContainer);
-
-      callback(this.draggingContainer, targetContainer);
+      if (this.resizeService.hasCollisions(targetContainer, testComponent)) {
+        callback(this.draggingContainer, this.sourceParent);
+      } else {
+        this.removeComponentFromAll(this.draggingContainer.id, rootContainer);
+        this.draggingContainer.column = this.previewContainer.column;
+        this.draggingContainer.row = this.previewContainer.row;
+        targetContainer.children.push(this.draggingContainer);
+        callback(this.draggingContainer, targetContainer);
+      }
     }
 
     this.draggingContainer = null;
@@ -103,20 +117,8 @@ export class DragService {
     this.dragging = false;
   }
 
-  /*
-  insertPreview(preview: Container, parentContainer: Container) {
-    const children = parentContainer.children;
-    const index = children.findIndex(c => c.id === -1);
-    if (index !== -1) {
-      children.splice(index, 1);
-    }
-    children.push(preview);
-  }
-
-   */
-
   insertPreview(preview: Container, rootContainer: Container) {
-    const target = this.findContainerById(preview.parent_id!, rootContainer);
+    const target = this.findContainerById(preview.parentId!, rootContainer);
     if (!target || !Array.isArray(target.children)) return;
 
     // Add preview
@@ -135,7 +137,6 @@ export class DragService {
   }
 
   private removePreviewFromAll(container: Container) {
-    console.log("Test Preview")
     container.children = container.children.filter(c => c.id !== -1);
     for (const child of container.children) {
       if (this.isContainer(child)) {
@@ -145,7 +146,6 @@ export class DragService {
   }
 
   private removeComponentFromAll(id: number, container: Container): void {
-    console.log("Test Component")
     container.children = container.children.filter(c => c.id !== id);
     for (const child of container.children) {
       if (this.isContainer(child)) {
