@@ -156,6 +156,26 @@
     >
     </app-container-component>
 
+    <app-text-component
+      *ngFor="let child of textChildren"
+      [id]="'text-' + child.id"
+      [text]="child"
+      [depth]="depth+1"
+      [parent]="container"
+      [parentGridElInput]="gridEl"
+      [homeGridElInput]="homeGridEl"
+      [inEditMode]="inEditMode"
+      (startDraggingContainer)="startDraggingContainer.emit($event)"
+      (stopDraggingContainer)="stopDraggingContainer.emit()"
+      class="card-component"
+      [ngStyle]="{
+        'grid-column': child.column + ' / ' + (child.column + child.width),
+        'grid-row': child.row + ' / ' + (child.row + child.height),
+      }"
+      [ngClass]="{ 'preview-text-container': child.id === -1 }"
+    >
+    </app-text-component>
+
   </div>
 
 </div>

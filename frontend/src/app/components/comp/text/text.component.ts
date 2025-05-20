@@ -10,9 +10,10 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import {Container, Text, Component as Comp} from "../../../../dtos/component";
-import {ResizeService} from "../../../../interaction-services/resize.service";
-import {EventService} from "../../../../interaction-services/event.service";
+import {Container, Text, Component as Comp} from "../../../dtos/component";
+import {ResizeService} from "../../../interaction-services/resize.service";
+import {EventService} from "../../../interaction-services/event.service";
+import {ComponentService} from "../../../services/component.service";
 
 /**
  * A simple, self‑contained text item that can live inside a Container.
@@ -33,7 +34,8 @@ export class TextComponent implements AfterViewInit{
   constructor(
     private elementRef: ElementRef,
     private resizeService: ResizeService,
-    private eventService: EventService
+    private eventService: EventService,
+    private service: ComponentService
   ) { }
 
   /** The actual text that the board (or another parent) owns */
@@ -59,6 +61,9 @@ export class TextComponent implements AfterViewInit{
 
   fontSize = 16;
 
+  editingTitle = false;
+  titleBuffer = '';
+
   /** local UI state */
   editing = false;
   buffer  = '';
@@ -78,6 +83,29 @@ export class TextComponent implements AfterViewInit{
 
   cancel(): void {
     this.editing = false;
+  }
+
+  deleteComponent(){
+    this.eventService.emitDelete(this.text);
+  }
+
+  startEditTitle(): void {
+    this.titleBuffer = this.text.name;
+    this.editingTitle = true;
+  }
+
+  saveTitle(): void {
+    const trimmedTitle = this.titleBuffer.trim();
+    const changed = this.text.name !== trimmedTitle;
+    this.text.name = trimmedTitle;
+    this.editingTitle = false;
+    if (changed) {
+      this.eventService.emitTitleChanged(this.text);
+    }
+  }
+
+  cancelTitle(): void {
+    this.editingTitle = false;
   }
 
   @HostListener('mousedown', ['$event'])
@@ -138,6 +166,7 @@ export class TextComponent implements AfterViewInit{
   }
 
   ngAfterViewInit(): void {
+    this.text.name = "My Text"
     this.updateHeight(this.text.height);
     this.updateWidth(this.text.width);
   }

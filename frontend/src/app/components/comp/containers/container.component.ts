@@ -11,7 +11,7 @@ import {
 import {Board, Task, Note, Container, Component as Comp, isText, Text as myText} from "../../../dtos/component";
 import { ActivatedRoute, Router } from "@angular/router";
 import {NgClass, NgForOf, NgIf, NgStyle} from "@angular/common";
-import {TextComponent} from "./text/text.component";
+import {TextComponent} from "../text/text.component";
 import { ResizeService } from '../../../interaction-services/resize.service';
 import {FormsModule} from "@angular/forms";
 import {EventService} from "../../../interaction-services/event.service";
@@ -154,10 +154,6 @@ export class ContainerComponent implements AfterViewInit {
     this.editingTitle = true;
   }
 
-  deleteComponent(){
-    this.eventService.emitDelete(this.container);
-  }
-
   saveTitle(): void {
     const trimmedTitle = this.titleBuffer.trim();
     const changed = this.container.name !== trimmedTitle;
@@ -170,6 +166,10 @@ export class ContainerComponent implements AfterViewInit {
 
   cancelTitle(): void {
     this.editingTitle = false;
+  }
+
+  deleteComponent(){
+    this.eventService.emitDelete(this.container);
   }
 
   enableEditMode() {

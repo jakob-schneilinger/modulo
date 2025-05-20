@@ -12,9 +12,25 @@ import jakarta.persistence.Table;
 @Table(name = "text_content")
 @DiscriminatorValue("text")
 @PrimaryKeyJoinColumn(name = "id")
+
 public class Text extends Component {
 
     private String text;
+
+    private int fontSize;
+
+    @Override
+    public Long getId() {
+        return super.getId();
+    }
+
+    public int getFontSize() {
+        return fontSize;
+    }
+
+    public void setFontSize(int fontSize) {
+        this.fontSize = fontSize;
+    }
 
     public String getText() {
         return text;

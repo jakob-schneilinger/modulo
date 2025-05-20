@@ -3,10 +3,22 @@ package at.ac.tuwien.sepr.groupphase.backend.service;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardCreateDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardUpdateDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDetailDto;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.TextCreateDto;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.TextUpdateDto;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardUpdateDto;
 
 import java.util.List;
 
 public interface ComponentService {
+
+    /**
+     * Creates a TextComponent in database.
+     *
+     * @param textCreateDto board to be created
+     * @return Component detail of the TextComponent created
+     */
+
+    ComponentDetailDto createTextComponent(TextCreateDto textCreateDto);
 
     /**
      * Creates a Board in database.
@@ -45,4 +57,13 @@ public interface ComponentService {
      * @param id of component to delete
      */
     void deleteComponent(Long id);
+
+    /**
+     * Updates a Text component in database.
+     *
+     * @param textComponent to be updated
+     * @return Component detail of the text component updated
+     */
+    ComponentDetailDto updateTextComponent(TextUpdateDto textComponent);
+
 }
