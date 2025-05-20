@@ -35,7 +35,9 @@ export interface Note extends Container {
 export interface Text extends Component {
   type: "text";
   text: string;
-  title: "Text-Box";
+  name: string;
+  fontSize: number;
+  parentId: number;
 }
 
 export function isText(component: Component): component is Text {

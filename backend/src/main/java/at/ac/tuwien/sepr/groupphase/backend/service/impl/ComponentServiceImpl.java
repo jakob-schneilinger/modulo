@@ -1,13 +1,19 @@
 package at.ac.tuwien.sepr.groupphase.backend.service.impl;
 
+
+
+
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardCreateDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardUpdateDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDto;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.TextCreateDto;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.TextUpdateDto;
 import at.ac.tuwien.sepr.groupphase.backend.entity.ApplicationUser;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Board;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Component;
+import at.ac.tuwien.sepr.groupphase.backend.entity.components.Text;
 import at.ac.tuwien.sepr.groupphase.backend.exception.ConflictException;
 import at.ac.tuwien.sepr.groupphase.backend.exception.NotFoundException;
 import at.ac.tuwien.sepr.groupphase.backend.exception.UserNotAuthorizedException;
@@ -19,6 +25,7 @@ import at.ac.tuwien.sepr.groupphase.backend.service.ComponentService;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +43,7 @@ public class ComponentServiceImpl implements ComponentService {
     private final ComponentValidator componentValidator;
     private final UserRepository userRepository;
 
+    @Autowired
     public ComponentServiceImpl(ComponentRepository componentRepository, ComponentValidator componentValidator, JwtUtils jwtUtils, UserRepository userRepository) {
         this.componentRepository = componentRepository;
         this.componentValidator = componentValidator;
@@ -49,6 +57,45 @@ public class ComponentServiceImpl implements ComponentService {
         componentValidator.validateBoardForCreation(boardDto, userId);
 
         return setBoardComponent(boardDto, new Board(), userId);
+    }
+
+    @Override
+    public ComponentDetailDto createTextComponent(TextCreateDto dto) {
+        LOG.trace("createText({})", dto);
+
+        Text text = new Text();
+        text.setWidth(dto.width());
+        text.setText(dto.text());
+        text.setFontSize(dto.fontSize());
+        text.setOwnerId(getUserId());
+
+        return setComponent(dto, text, getUserId());
+
+    }
+
+    @Override
+    public ComponentDetailDto updateTextComponent(TextUpdateDto dto) {
+        LOG.trace("updateText({})", dto);
+        LOG.warn("{} the id of the text", dto.id());
+
+        Text text = componentRepository.findById(dto.id())
+            .filter(c -> c instanceof Text)
+            .map(c -> (Text) c)
+            .orElseThrow(() -> new NotFoundException("Text not found: " + dto.id()));
+
+        if (!text.getOwnerId().equals(getUserId())) {
+            throw new RuntimeException("User is not owner of this component");
+        }
+
+        text.setText(dto.text());
+        text.setFontSize(dto.fontSize());
+
+        if (dto.parentId() != null) {
+            componentRepository.unlink(dto.id());
+            componentRepository.link(dto.parentId(), dto.id());
+        }
+
+        return setComponent(dto, text, getUserId());
     }
 
     @Override
@@ -139,7 +186,7 @@ public class ComponentServiceImpl implements ComponentService {
     private long getUserId() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         ApplicationUser user = userRepository.findByUsername(username)
-            .orElseThrow(() -> new NotFoundException("User not found"));
+            .orElseThrow(() -> new NotFoundException("User not found" + username));
         return user.getId();
     }
 }

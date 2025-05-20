@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS components (
 
 CREATE TABLE IF NOT EXISTS text_content (
 	id INT NOT NULL UNIQUE,
+    font_size INT DEFAULT 12,
 	text VARCHAR(255) NOT NULL
 );
 

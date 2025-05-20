@@ -46,7 +46,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   createBoard() {
     // or child board beneath the lowest child component
     const neighbors = this.component.children
-    const row = this.getNextUnusedRow(neighbors)
+    const row = this.findFirstFreeRow(2,2)
 
     const newBoard: Board = {
       children: [],
@@ -61,6 +61,37 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     this.compService.createBoard(newBoard).subscribe({
       next : created => neighbors.push({...created, parentId: this.component.id}),
+      error : err => console.error(err)
+    });
+
+  }
+
+  createText() {
+    const neighbors = this.component.children
+    const row = this.findFirstFreeRow(2,1)
+
+    const newText: Text = {
+      column: 1,
+      height: 1,
+      text: "Add Text here:",
+      width: 2,
+      type: "text",
+      row: row,
+      fontSize: 12,
+      name: "Text-Box",
+      parentId: this.component.id
+    }
+
+
+    console.log("TEST2!")
+
+    // TODO: look if changes are needed
+    this.compService.createText(newText).subscribe({
+      next : created => {
+
+        console.log("TEST3!")
+        neighbors.push({...created, parentId: this.component.id})
+      },
       error : err => console.error(err)
     });
 
@@ -109,9 +140,14 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   createChild(type: string){
     // TODO: add other components
+    console.log("TEST123!")
     switch (type){
       case 'board' :
         this.createBoard();
+        break;
+      case 'text' :
+        console.log("TEST!")
+        this.createText();
         break;
       default:
         console.error("unsupported type of component")
@@ -136,6 +172,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     while (!found) {
       // Define the new board's area
+      console.log("Tow", row)
       const newArea = {
         left: column,
         right: column + width,
@@ -236,7 +273,7 @@ export class HomeComponent implements OnInit, OnDestroy {
             if (this.nameElement.nativeElement) {
               this.nameElement.nativeElement.innerText = this.component.name
             }
-            console.log(this.component)
+            console.log("All Components", this.component)
           },
           error: (e) => {
             if (e.status == 404) {

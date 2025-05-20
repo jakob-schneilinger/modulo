@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import {Board, Component, Container} from "../dtos/component";
+import { Board, Component, Container, Text } from "../dtos/component";
 import { Observable } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import { Globals } from "../global/globals";
@@ -19,6 +19,16 @@ export class ComponentService {
 
     console.log(board)
     return this.httpClient.post<Board>(this.componentBaseUri + "/board", board);
+  }
+
+  createText(component: Text): Observable<Text> {
+    console.log("Create Text Component: " + component);
+    return this.httpClient.post<Text>(this.componentBaseUri + "/text", component);
+  }
+
+  updateText(component: Text): Observable<Text> {
+    console.log("Updated Text Component: " + component);
+    return this.httpClient.put<Text>(this.componentBaseUri + "/text", component);
   }
 
   updateContainer(container: Container): Observable<Container> {

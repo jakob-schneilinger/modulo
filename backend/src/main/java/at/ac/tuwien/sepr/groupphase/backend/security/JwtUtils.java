@@ -49,23 +49,6 @@ public class JwtUtils {
         }
     }
 
-    public String getUsernameFromJwtToken(String token) {
-        try {
-            byte[] signingKey = securityProperties.getJwtSecret().getBytes();
-
-            Claims claims = Jwts.parser()
-                    .verifyWith(Keys.hmacShaKeyFor(signingKey))
-                    .build()
-                    .parseSignedClaims(token.replace(securityProperties.getAuthTokenPrefix(), ""))
-                    .getPayload();
-
-            return claims.getSubject();
-        } catch (Exception e) {
-            logger.error("Error extracting username from token: {}", e.getMessage());
-            return null;
-        }
-    }
-
     public boolean validateJwtToken(String authToken) {
         try {
             byte[] signingKey = securityProperties.getJwtSecret().getBytes();
@@ -86,5 +69,22 @@ public class JwtUtils {
             logger.error("JWT claims string is empty: {}", e.getMessage());
         }
         return false;
+    }
+
+    public String getUsernameFromJwtToken(String token) {
+        try {
+            byte[] signingKey = securityProperties.getJwtSecret().getBytes();
+
+            Claims claims = Jwts.parser()
+                .verifyWith(Keys.hmacShaKeyFor(signingKey))
+                .build()
+                .parseSignedClaims(token.replace(securityProperties.getAuthTokenPrefix(), ""))
+                .getPayload();
+
+            return claims.getSubject();
+        } catch (Exception e) {
+            logger.error("Error extracting username from token: {}", e.getMessage());
+            return null;
+        }
     }
 }

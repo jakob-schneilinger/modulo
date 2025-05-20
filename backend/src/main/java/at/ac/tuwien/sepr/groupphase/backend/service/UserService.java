@@ -16,7 +16,7 @@ public interface UserService {
     /**
      * Gets an user.
      *
-     * @param username the specified user 
+     * @param username the specified user
      */
     UserDto get(String username);
 
