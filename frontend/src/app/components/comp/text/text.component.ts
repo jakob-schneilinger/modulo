@@ -76,6 +76,7 @@ export class TextComponent implements AfterViewInit{
   save(): void {
     if(this.text) {
       this.text.text = this.buffer.trim();
+      this.text.fontSize = this.fontSize;
     }
     this.editing = false;
     this.eventService.emitTextChanged(this.text);
@@ -97,10 +98,11 @@ export class TextComponent implements AfterViewInit{
   saveTitle(): void {
     const trimmedTitle = this.titleBuffer.trim();
     const changed = this.text.name !== trimmedTitle;
+    console.log(this.text)
     this.text.name = trimmedTitle;
     this.editingTitle = false;
     if (changed) {
-      this.eventService.emitTitleChanged(this.text);
+      this.eventService.emitTextChanged(this.text);
     }
   }
 
@@ -166,7 +168,7 @@ export class TextComponent implements AfterViewInit{
   }
 
   ngAfterViewInit(): void {
-    this.text.name = "My Text"
+    this.fontSize = this.text.fontSize
     this.updateHeight(this.text.height);
     this.updateWidth(this.text.width);
   }

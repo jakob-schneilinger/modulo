@@ -43,10 +43,13 @@ public class TextComponentTest {
     private TextCreateDto createDto(){
         return new TextCreateDto(
             "Hello World",
+            "textbox",
             null,
-            100,
             12,
-            1, 1, 1
+            1,
+            1,
+            1,
+            1
         );
     }
 
@@ -76,10 +79,10 @@ public class TextComponentTest {
     void createTextComponent_persistsEntity() {
         TextCreateDto dto = new TextCreateDto(
             "Hello World",
+            "textbox",
             null,
-            100,
             12,
-            1, 1, 1
+            1, 1, 1, 1
         );
 
         TextDetailDto created = (TextDetailDto) componentService.createTextComponent(dto);
@@ -97,7 +100,7 @@ public class TextComponentTest {
 
         TextDetailDto created = (TextDetailDto) componentService.createTextComponent(dto);
 
-        TextUpdateDto updateDto = new TextUpdateDto(created.id(), null, 100, "Updated", null,12,1L,1L,1L);
+        TextUpdateDto updateDto = new TextUpdateDto(created.id(), "textbox", 100, "Updated", null,12,1L,1L,1L);
         TextDetailDto update = (TextDetailDto) componentService.updateTextComponent(updateDto);
         assertThat(update.text()).isEqualTo("Updated");
     }
@@ -113,9 +116,10 @@ public class TextComponentTest {
         other.setDisplayName("other User");
         other = userRepository.save(other);
 
-        Text text = new Text(); text.setWidth(50L); text.setText("Some text"); text.setFontSize(12); text.setOwnerId(user.getId()); text.setHeight(1L); text.setWidth(1L);
+        Text text = new Text(); text.setName("text"); text.setWidth(50L); text.setText("Some text"); text.setFontSize(12); text.setOwnerId(user.getId()); text.setHeight(1L); text.setWidth(1L);
         text.setColumn(1L);
         text.setRow(1L);
+
         text = componentRepository.save(text);
 
         var auth = new UsernamePasswordAuthenticationToken(
@@ -124,7 +128,7 @@ public class TextComponentTest {
 
         TextUpdateDto dto = new TextUpdateDto(
             text.getId(),
-            null,
+            "textbox",
             50L,
             "New text",
             null,
