@@ -26,6 +26,6 @@ public class ComponentEntityToDtoMapper {
     }
 
     public static TextDetailDto visit(Text text) {
-        return new TextDetailDto(text.getText(), text.getId(), text.getWidth(), text.getHeight(), text.getColumn(), text.getRow(), text.getFontSize());
+        return new TextDetailDto(text.getText(), text.getName(), text.getId(), text.getWidth(), text.getHeight(), text.getColumn(), text.getRow(), text.getFontSize());
     }
 }

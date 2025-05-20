@@ -77,7 +77,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       width: 2,
       type: "text",
       row: row,
-      fontSize: 12,
+      fontSize: 16,
       name: "Text-Box",
       parentId: this.component.id
     }
@@ -134,8 +134,10 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   textChanged(event: { component: Comp }) {
 
-    // TODO: call service to update text and subscribe!!!!
-
+    this.compService.updateText(event.component as Text).subscribe({
+      next: () => console.log('Updated successfully'),
+      error: err => console.error('Update failed', err)
+    })
   }
 
   createChild(type: string){
@@ -293,6 +295,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       })
     );
 
+
     this.subscriptions.push(
       this.eventService.titleChanged$.subscribe(({ component }) => {
         this.titleChanged({component})
@@ -302,6 +305,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.eventService.textChanged$.subscribe(({ component }) => {
         // TODO: Handle text change
+        this.textChanged({component})
         console.log("The text of the following component just changed:")
         console.log(component)
       })

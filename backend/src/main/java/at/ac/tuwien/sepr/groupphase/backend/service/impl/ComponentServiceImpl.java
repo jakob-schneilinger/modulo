@@ -64,6 +64,7 @@ public class ComponentServiceImpl implements ComponentService {
         LOG.trace("createText({})", dto);
 
         Text text = new Text();
+        text.setName(dto.name());
         text.setWidth(dto.width());
         text.setText(dto.text());
         text.setFontSize(dto.fontSize());
@@ -87,6 +88,7 @@ public class ComponentServiceImpl implements ComponentService {
             throw new RuntimeException("User is not owner of this component");
         }
 
+        text.setName(dto.name());
         text.setText(dto.text());
         text.setFontSize(dto.fontSize());
 
