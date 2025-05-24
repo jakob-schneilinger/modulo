@@ -1,10 +1,7 @@
 import { BrowserModule } from "@angular/platform-browser";
 import { NgModule } from "@angular/core";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
-import {
-  provideHttpClient,
-  withInterceptorsFromDi,
-} from "@angular/common/http";
+import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 
 import { LoginComponent as UserLoginComponent } from "./components/user/login/login.component";
 import { CreateComponent as UserCreateComponent } from "./components/user/create/create.component";
@@ -23,6 +20,7 @@ import { ContainerComponent } from "./components/comp/containers/container.compo
 import { ResizeService } from "./interaction-services/resize.service";
 import { DragService } from "./interaction-services/drag.service";
 import { CommonModule } from "@angular/common";
+import { ImageComponent } from "./components/comp/image/image.component";
 
 @NgModule({
   declarations: [
@@ -45,12 +43,8 @@ import { CommonModule } from "@angular/common";
     RouterLink,
     ContainerComponent,
     TextComponent,
+    ImageComponent,
   ],
-  providers: [
-    httpInterceptorProviders,
-    provideHttpClient(withInterceptorsFromDi()),
-    ResizeService,
-    DragService,
-  ],
+  providers: [httpInterceptorProviders, provideHttpClient(withInterceptorsFromDi()), ResizeService, DragService],
 })
 export class AppModule {}

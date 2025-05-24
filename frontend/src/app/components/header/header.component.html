@@ -40,7 +40,7 @@
   </div>
 
   <ul id="nav-components" *ngIf="!!roots">
-    <li *ngFor="let item of roots" [routerLink]="'component/'+item.id">
+    <li *ngFor="let item of roots" [routerLink]="'component/'+item.id" [ngClass]="{'in-view': isCurrentlyViewed(item)}">
       <a>{{item.name}}</a>
     </li>
   </ul>

@@ -1,11 +1,12 @@
-import { Board, Container, Text, Component as Comp } from '../../dtos/component';
-import { ComponentService } from '../../services/component.service';
-import { DragService } from '../../interaction-services/drag.service';
-import {AuthService} from '../../services/auth.service';
-import {ActivatedRoute, Router} from "@angular/router";
-import {Component, OnInit, ViewChild, ElementRef, OnDestroy} from "@angular/core";
-import {EventService} from "../../interaction-services/event.service"
-import { Subscription } from 'rxjs';
+import { Board, Container, Text, Component as Comp } from "../../dtos/component";
+import { ComponentService } from "../../services/component.service";
+import { DragService } from "../../interaction-services/drag.service";
+import { AuthService } from "../../services/auth.service";
+import { ActivatedRoute, Router } from "@angular/router";
+import { Component, OnInit, ViewChild, ElementRef, OnDestroy } from "@angular/core";
+import { EventService } from "../../interaction-services/event.service";
+import { Subscription } from "rxjs";
+import {gridVar} from "../../dtos/grid";
 
 // for delete modal
 declare var bootstrap: any;
@@ -17,7 +18,6 @@ declare var bootstrap: any;
   standalone: false,
 })
 export class HomeComponent implements OnInit, OnDestroy {
-
   constructor(
     public authService: AuthService,
     public router: Router,
@@ -25,19 +25,17 @@ export class HomeComponent implements OnInit, OnDestroy {
     public compService: ComponentService,
     private dragService: DragService,
     private eventService: EventService
-  ) { }
+  ) {}
 
   @ViewChild("name") nameElement;
   @ViewChild("deleteModal") deleteModal: ElementRef;
 
-  inEditMode: boolean = false;
+  inEditMode: boolean = true;
 
   private subscriptions: Subscription[] = [];
 
   // used for component dragging
   dragging = false;
-  draggingContainer: Container | null = null;
-  previewContainer: Container | null = null;
 
   // essentially all boards we are going to show, so all the root boards that have no parent
   component: Container = undefined;
@@ -45,128 +43,141 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   createBoard() {
     // or child board beneath the lowest child component
-    const neighbors = this.component.children
-    const row = this.findFirstFreeRow(2,2)
+    const neighbors = this.component.children;
+
+    const width = Math.floor(gridVar.columns/4);
+    const height = Math.floor(gridVar.columns/4);
+    const row = this.findFirstFreeRow(width, height);
 
     const newBoard: Board = {
       children: [],
       column: 1,
-      height: 2,
+      height: height,
       name: "My New Board",
       type: "board",
-      width: 2,
+      width: width,
       row: row,
-      parentId: this.component.id
-    }
+      parentId: this.component.id,
+    };
 
     this.compService.createBoard(newBoard).subscribe({
-      next : created => neighbors.push({...created, parentId: this.component.id}),
-      error : err => console.error(err)
+      next: (created) => neighbors.push({ ...created, parentId: this.component.id }),
+      error: (err) => console.error(err),
     });
-
   }
 
   createText() {
-    const neighbors = this.component.children
-    const row = this.findFirstFreeRow(2,1)
+    const neighbors = this.component.children;
+
+    const width = Math.floor(gridVar.columns/4);
+    const height = Math.floor(gridVar.columns/8);
+    const row = this.findFirstFreeRow(width, height);
 
     const newText: Text = {
       column: 1,
-      height: 1,
+      height: Math.floor(gridVar.columns/8),
       text: "Add Text here:",
-      width: 2,
+      width: Math.floor(gridVar.columns/4),
       type: "text",
       row: row,
       fontSize: 16,
       name: "Text-Box",
-      parentId: this.component.id
-    }
-
-
-    console.log("TEST2!")
+      parentId: this.component.id,
+    };
 
     // TODO: look if changes are needed
     this.compService.createText(newText).subscribe({
-      next : created => {
-
-        console.log("TEST3!")
-        neighbors.push({...created, parentId: this.component.id})
+      next: (created) => {
+        neighbors.push({ ...created, parentId: this.component.id });
       },
-      error : err => console.error(err)
+      error: (err) => console.error(err),
     });
-
   }
 
-  updateName(){
-    const name = this.nameElement.nativeElement.textContent;
-    const update = { id: this.component.id, name: name };
+  updateName() {
+    const update = { id: this.component.id, name: this.component.name };
     this.compService.updateBoard(update as any).subscribe({
-      next: () => window.dispatchEvent(new CustomEvent("board-name-changed", { detail: { id: update.id, name } })),
+      next: () => console.log("Board renamed!"),
       error: (e) => console.error(e),
     });
-
   }
-  private getNextUnusedRow(neighbors: Comp[]): number{
-    if (neighbors.length === 0){
+
+  previewName() {
+    window.dispatchEvent(new CustomEvent("board-name-changed", { detail: this.component }));
+  }
+
+  private getNextUnusedRow(neighbors: Comp[]): number {
+    if (neighbors.length === 0) {
       return 1;
     }
     const sorted = neighbors.sort((a, b) => b.row - a.row);
-    return sorted[0].row + sorted[0].height
+    return sorted[0].row + sorted[0].height;
   }
 
   onWidthChanged(event: { component: Comp }) {
-
-    this.compService.updateContainer(event.component as any).subscribe({
-      next: () => console.log('Updated successfully'),
-      error: err => console.error('Update failed', err)
+    this.compService.updatePosAndSize(event.component as any).subscribe({
+      next: () => console.log("Updated successfully"),
+      error: (err) => console.error("Update failed", err),
     });
-
   }
 
   titleChanged(event: { component: Comp }) {
-    console.log("titleChanged123")
-    this.compService.updateContainer(event.component as any).subscribe({
-      next: () => console.log('Updated successfully'),
-      error: err => console.error('Update failed', err)
+    this.compService.updatePosAndSize(event.component as any).subscribe({
+      next: () => console.log("Updated successfully"),
+      error: (err) => console.error("Update failed", err),
     });
-
   }
 
   textChanged(event: { component: Comp }) {
-
     this.compService.updateText(event.component as Text).subscribe({
-      next: () => console.log('Updated successfully'),
-      error: err => console.error('Update failed', err)
-    })
+      next: () => console.log("Updated successfully"),
+      error: (err) => console.error("Update failed", err),
+    });
   }
 
-  createChild(type: string){
+  createChild(type: string) {
     // TODO: add other components
-    console.log("TEST123!")
-    switch (type){
-      case 'board' :
+    switch (type) {
+      case "board":
         this.createBoard();
         break;
-      case 'text' :
-        console.log("TEST!")
+      case "text":
         this.createText();
         break;
+      case "image":
+        this.createImage();
+        break;
       default:
-        console.error("unsupported type of component")
+        alert("not implemented yet!");
+        console.error("unsupported type of component");
     }
   }
 
-  deleteBoard(){
+  createImage() {
+    const neighbors = this.component.children;
+
+    const width = Math.floor(gridVar.columns/4);
+    const height = Math.floor(gridVar.columns/4);
+    const row = this.findFirstFreeRow(width, height);
+    const column = 1;
+    this.compService.createImage({ parentId: this.component.id, column, row, width: width, height: height }, null).subscribe({
+      next: (comp) => this.component.children.push(comp),
+      error: (e) => console.log(e),
+    });
+  }
+
+  deleteBoard() {
     this.compService.deleteComponent(this.component.id).subscribe({
-      next: value => {
-        window.dispatchEvent(new CustomEvent("board-delete", { detail: { id: this.component.id, name: this.component.name } }))
+      next: (value) => {
+        window.dispatchEvent(
+          new CustomEvent("board-delete", { detail: { id: this.component.id, name: this.component.name } })
+        );
         this.router.navigate(["/"]);
-      }
-    })
+      },
+    });
   }
 
   private findFirstFreeRow(width: number, height: number, column: number = 1): number {
-
     const children = this.component.children;
 
     let row = 1;
@@ -174,21 +185,20 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     while (!found) {
       // Define the new board's area
-      console.log("Tow", row)
       const newArea = {
         left: column,
         right: column + width,
         top: row,
-        bottom: row + height
+        bottom: row + height,
       };
 
       // Check for collision with any existing board
-      const collision = children.some(child => {
+      const collision = children.some((child) => {
         const childArea = {
           left: child.column,
           right: child.column + child.width,
           top: child.row,
-          bottom: child.row + child.height
+          bottom: child.row + child.height,
         };
 
         return !(
@@ -205,30 +215,30 @@ export class HomeComponent implements OnInit, OnDestroy {
         row++; // move down and try again
       }
     }
-
     return row;
   }
 
-  startDragging(data: { component: Comp, event: MouseEvent }) {
+  startDragging(data: { component: Comp; event: MouseEvent }) {
+    this.dragging = true;
     this.dragService.startDragging(data, <Container>this.component);
   }
 
   onMouseMove(event: MouseEvent) {
-    this.dragService.onMouseMove(event, <Container>this.component, (container, targetContainer) => {
-
-    });
+    this.dragService.onMouseMove(event, <Container>this.component, (container, targetContainer) => {});
   }
 
   stopDragging(event: MouseEvent) {
+    if (!this.dragging) return;
+    this.dragging = false;
     this.dragService.stopDragging(event, <Container>this.component, (container, targetContainer) => {
-      console.log("target", targetContainer)
-      this.compService.updateContainer({...container, parentId: targetContainer.id} as any).subscribe();
+      container.parentId = targetContainer.id;
+      this.compService.updatePosAndSize({...container, parentId: targetContainer.id} as any).subscribe();
     });
   }
 
+
   // Opens delete Modal with specific component
   openDeleteModal(component: Comp) {
-    console.log("Test1", component)
     const modal = new bootstrap.Modal(this.deleteModal.nativeElement);
     this.forDeletion = component;
     modal.show();
@@ -236,13 +246,13 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   // Deletes the component from the delete modal
   finishDeleteModal() {
-    if(this.forDeletion.id == this.component.id) {
+    if (this.forDeletion.id == this.component.id) {
       this.deleteBoard();
     } else {
       this.compService.deleteComponent(this.forDeletion.id).subscribe({
-        next: value => this.component.children = this.recursiveDelete(this.component.children, this.forDeletion.id),
-        error: err => console.error("unable to delete component", this.forDeletion.id, "with error", err)
-      })
+        next: (value) => (this.component.children = this.recursiveDelete(this.component.children, this.forDeletion.id)),
+        error: (err) => console.error("unable to delete component", this.forDeletion.id, "with error", err),
+      });
     }
   }
 
@@ -254,10 +264,11 @@ export class HomeComponent implements OnInit, OnDestroy {
   deleteUser() {}
 
   ngOnInit() {
-    window.addEventListener('mousemove', this.onMouseMove.bind(this));
-    window.addEventListener('mouseup', this.stopDragging.bind(this));
+    window.addEventListener("mousemove", this.onMouseMove.bind(this));
+    window.addEventListener("mouseup", this.stopDragging.bind(this));
 
     // for a user fetch his root boards
+
     this.route.params.subscribe({
       next: (params) => {
         const id = params["id"];
@@ -269,10 +280,8 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.compService.getComponent(id).subscribe({
           next: (comp) => {
             this.component = comp as any
-            this.component.children.forEach(child => {
-              child.parentId = this.component.id
-            })
-            if (this.nameElement.nativeElement) {
+            this.setRecursiveParentId(this.component)
+            if (this.nameElement?.nativeElement) {
               this.nameElement.nativeElement.innerText = this.component.name
             }
             console.log("All Components", this.component)
@@ -288,26 +297,21 @@ export class HomeComponent implements OnInit, OnDestroy {
       },
     });
 
-
     this.subscriptions.push(
       this.eventService.widthChanged$.subscribe(({ component }) => {
-        this.onWidthChanged({component})
+        this.onWidthChanged({ component });
       })
     );
 
-
     this.subscriptions.push(
       this.eventService.titleChanged$.subscribe(({ component }) => {
-        this.titleChanged({component})
+        this.titleChanged({ component });
       })
     );
 
     this.subscriptions.push(
       this.eventService.textChanged$.subscribe(({ component }) => {
-        // TODO: Handle text change
-        this.textChanged({component})
-        console.log("The text of the following component just changed:")
-        console.log(component)
+        this.textChanged({ component });
       })
     );
 
@@ -319,30 +323,35 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     this.subscriptions.push(
       this.eventService.deleteComponent$.subscribe({
-        next: value => {
-          console.log("Test3")
+        next: (value) => {
           this.openDeleteModal(value.component);
-        }
+        },
       })
     );
-
   }
 
   ngOnDestroy() {
-    this.subscriptions.forEach(s => s.unsubscribe());
+    this.subscriptions.forEach((s) => s.unsubscribe());
   }
 
-
-  private recursiveDelete(children: Comp[], id: number): Comp[]{
+  private recursiveDelete(children: Comp[], id: number): Comp[] {
     // map is only to make a copy
-    return children.map(comp => {
-      return {...comp}
-    }).filter(comp => {
-      if ('children' in comp) {
-        comp.children = this.recursiveDelete(comp.children, id);
-      }
-      return comp.id !== id
+    return children
+      .map((comp) => {
+        return { ...comp };
+      })
+      .filter((comp) => {
+        if ("children" in comp) {
+          comp.children = this.recursiveDelete(comp.children, id);
+        }
+        return comp.id !== id;
+      });
+  }
+
+  private setRecursiveParentId(parent: Comp) {
+    parent?.children?.forEach((child) => {
+      child.parentId = parent.id;
+      this.setRecursiveParentId(child);
     })
   }
-
 }

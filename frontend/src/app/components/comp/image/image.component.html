@@ -1,0 +1,43 @@
+<div #previewCard class="preview-card" [attr.data-preview-id]="self.id"></div>
+<div #card [attr.data-id]="self.id" class="card">
+
+    <div class="d-flex justify-content-end p-1">
+        <div class="three-dots dropdown" (mousedown)="startContainerDrag(self, $event)" (mouseup)="stopContainerDrag()"
+            (click)="$event.stopPropagation()">
+            <i class="bi text-secondary" [ngClass]="{
+             'bi-arrows-move': inEditMode,
+             'bi-three-dots': !inEditMode,
+             'grab': inEditMode,
+             'point': !inEditMode
+           }" id="dropdownMenuButton-{{self.id}}" data-bs-toggle="dropdown" aria-expanded="false"></i>
+
+            <ul class="dropdown-menu" [attr.aria-labelledby]="'dropdownMenuButton-' + self.id" [hidden]="inEditMode">
+                <li><a class="dropdown-item" (click)="focusFileInput()">Change Image</a></li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li><a class="dropdown-item" (click)="enableEditMode()">Enable Edit Mode</a></li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li><a class="dropdown-item" (click)="deleteComponent()">Delete {{capitalizeFirstLetter(self.type)}}</a>
+                </li>
+            </ul>
+
+        </div>
+    </div>
+
+    <div class="content">
+        <img #content (dblclick)="focusFileInput()">
+        <div class="no-img-msg" *ngIf="!content.src">
+            No image selected yet!
+            <button (click)="focusFileInput()">Set image</button>
+        </div>
+        <input #input class="hidden" type="file" (change)="setImage($event.target.files[0])"
+            accept="gif,.jpg,.jepg,.png">
+    </div>
+
+    <div *ngIf="self.id !== -1 && inEditMode" class="resizer" [id]="'resizer-' + self.id">
+        <i class="bi bi-arrows-angle-expand"></i>
+    </div>
+</div>

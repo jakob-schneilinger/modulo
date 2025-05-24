@@ -1,15 +1,13 @@
-package at.ac.tuwien.sepr.groupphase.backend.service.impl;
+package at.ac.tuwien.sepr.groupphase.backend.service.componentservice.impl;
 
-import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardCreateDto;
-import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardUpdateDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ContainerDto;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Component;
 import at.ac.tuwien.sepr.groupphase.backend.exception.ConflictException;
 import at.ac.tuwien.sepr.groupphase.backend.exception.NotFoundException;
 import at.ac.tuwien.sepr.groupphase.backend.exception.UserNotAuthorizedException;
-import at.ac.tuwien.sepr.groupphase.backend.exception.ValidationException;
 import at.ac.tuwien.sepr.groupphase.backend.repository.ComponentRepository;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Component
 public class ComponentValidator {
@@ -34,55 +31,20 @@ public class ComponentValidator {
     }
 
     /**
-     * Validates a board that should be created.
+     * Helper method for standard component validation.
+     *      Checks for:
+     *      - no overlapping
+     *      - user is authorized
+     *      - parentId does exist and does not equal self id
+     *      - column and row are not below 1
      *
-     * @param board to be created
-     * @param userId of the user that wants to create the board
+     * @param component to be validated
+     * @param userId of the user
+     * @param selfId od the component (can be -1L for creation)
+     * @return List of errors found
      */
-    public void validateBoardForCreation(BoardCreateDto board, long userId) {
-        LOG.trace("validateBoardForCreation({})", board);
-
-        List<String> errors = new ArrayList<>();
-        errors.addAll(validateContainerForCreation(board));
-        errors.addAll(validateComponent(board, userId, null));
-
-        if (board.name() == null || board.name().isEmpty()) {
-            errors.add("Board name is null or empty");
-        }
-
-        if (!errors.isEmpty()) {
-            throw new ValidationException("Validation for updating board failed", errors);
-        }
-    }
-
-    /**
-     * Validates a board that should be updated.
-     *
-     * @param boardDto dto for board that should be created
-     * @param board current board entity in database
-     * @param userId of the user that wants to create the board
-     */
-    public void validateBoardForUpdate(BoardUpdateDto boardDto, Component board, long userId) {
-        LOG.trace("validateBoardForUpdate({}, {})", boardDto, board);
-
-        List<String> errors = new ArrayList<>();
-        if (!board.getOwnerId().equals(userId)) {
-            throw new UserNotAuthorizedException("User is not owner of this component");
-        }
-
-        errors.addAll(validateContainerForUpdate(boardDto, board));
-        errors.addAll(validateComponent(boardDto, userId, board.getId()));
-
-        if (boardDto.name() == null || boardDto.name().isEmpty()) {
-            errors.add("Board name is null or empty");
-        }
-
-        if (!errors.isEmpty()) {
-            throw new ValidationException("Validation for updating board failed", errors);
-        }
-    }
-
-    private List<String> validateComponent(ComponentDto component, long userId, Long selfId) {
+    @Transactional
+    public List<String> validateComponent(ComponentDto component, long userId, Long selfId) {
         LOG.trace("validateComponent({}, {})", component, selfId);
         List<String> errors = new ArrayList<>();
         if (component.parentId() != null) {
@@ -92,13 +54,26 @@ public class ComponentValidator {
                 throw new NotFoundException("Parent with given ID does not exist");
             }
 
+            if (Objects.equals(component.parentId(), selfId)) {
+                throw new ConflictException("The component cannot be its own parent", new ArrayList<>());
+            }
+
             Component parentComponent = parentComponentOpt.get();
 
             if (!parentComponent.getOwnerId().equals(userId)) {
                 throw new UserNotAuthorizedException("User is not authorized for given parent");
             }
 
-            List<Component> siblings = parentComponent.getChildren().stream().filter(child -> !Objects.equals(child.getId(), selfId)).toList();
+            if (component.row() < 1) {
+                errors.add("Row should be greater than zero");
+            }
+
+            if (component.column() < 1) {
+                errors.add("Column should be greater than zero");
+            }
+
+            List<Component> siblings = parentComponent.getChildren().stream()
+                    .filter(child -> !Objects.equals(child.getId(), selfId)).toList();
 
             long x1 = component.column();
             long y1 = component.row();
@@ -114,14 +89,22 @@ public class ComponentValidator {
                 boolean overlaps = !(x1 + w1 <= x2 || x1 >= x2 + w2 || y1 + h1 <= y2 || y1 >= y2 + h2);
 
                 if (overlaps) {
-                    errors.add("Component overlaps with existing component (ID: " + sibling.getId() + ")");
+                    throw new ConflictException("Conflict while trying to update a component", List.of("Component overlaps with existing component"));
                 }
             }
         }
         return errors;
     }
 
-    private List<String> validateContainerForCreation(ContainerDto component) {
+    /**
+     * Helper method for standard Container validation for creation.
+     *      Checks for:
+     *      - maximal depth
+     *
+     * @param component to be validated
+     * @return List of errors found
+     */
+    public List<String> validateContainerForCreation(ContainerDto component) {
         LOG.trace("validateContainerForCreation({})", component);
         List<String> errors = new ArrayList<>();
         if (componentRepository.getParentDepth(component.parentId()) + 1 > MAX_DEPTH) {
@@ -130,13 +113,21 @@ public class ComponentValidator {
         return errors;
     }
 
-    private List<String> validateContainerForUpdate(ContainerDto component, Component self) {
+    /**
+     * Helper method for standard Container validation for update.
+     *      Checks for:
+     *      - maximal depth
+     *      - no circular structures
+     *
+     * @param component to be validated
+     * @param self entity of the component
+     * @return List of errors found
+     */
+    @Transactional
+    public List<String> validateContainerForUpdate(ComponentDto component, Component self) {
         LOG.trace("validateContainerForUpdate({}, {})", component, self);
 
         List<String> errors = new ArrayList<>();
-        if (Objects.equals(component.parentId(), self.getId())) {
-            throw new ConflictException("Circular structure found", new ArrayList<>());
-        }
 
         int upwardDepth = componentRepository.getParentDepth(component.parentId()) + 1;
         int downwardDepth = getMaxChildDepth(self, 0, component.parentId());

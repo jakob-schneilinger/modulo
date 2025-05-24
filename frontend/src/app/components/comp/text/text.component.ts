@@ -1,19 +1,8 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  EventEmitter,
-  HostListener,
-  Input,
-  Output,
-  ViewChild
-} from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import {Container, Text, Component as Comp} from "../../../dtos/component";
-import {ResizeService} from "../../../interaction-services/resize.service";
-import {EventService} from "../../../interaction-services/event.service";
-import {ComponentService} from "../../../services/component.service";
+import { Component } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { FormsModule } from "@angular/forms";
+import { Container, Text, Component as Comp } from "../../../dtos/component";
+import { BaseComponent } from "../base/base.component";
 
 /**
  * A simple, self‑contained text item that can live inside a Container.
@@ -23,86 +12,55 @@ import {ComponentService} from "../../../services/component.service";
  *   passes in via the `content` input.
  */
 @Component({
-  selector: 'app-text-component',
+  selector: "app-text-component",
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './text.component.html',
-  styleUrls: ['./text.component.scss'],
+  templateUrl: "./text.component.html",
+  styleUrls: ["./text.component.scss", "../base/base.component.scss"],
 })
-export class TextComponent implements AfterViewInit{
-
-  constructor(
-    private elementRef: ElementRef,
-    private resizeService: ResizeService,
-    private eventService: EventService,
-    private service: ComponentService
-  ) { }
-
-  /** The actual text that the board (or another parent) owns */
-  @Input() text!:Text;
-  @Input() depth:number;
-  @Input() parent:Container;
-  @Input() parentGridElInput:ElementRef;
-  @Input() homeGridElInput:ElementRef;
-  @Input() inEditMode:boolean;
-
-  /* TODO: remove if event service is used instead
-  @Output() widthChanged = new EventEmitter<{ component: Comp }>();
-  @Output() textChange = new EventEmitter<string>();
-   */
-  @Output() startDraggingContainer = new EventEmitter<{ component: Comp, event: MouseEvent }>();
-  @Output() stopDraggingContainer = new EventEmitter<void>();
-
-  @ViewChild('card', { static: false }) cardEl!: ElementRef;
-  @ViewChild('previewCard', { static: false }) previewCardEl!: ElementRef;
-
-  currentWidth: number = this.text?.width ?? 1;
-  currentHeight: number = this.text?.height ?? 1;
-
+export class TextComponent extends BaseComponent<Text> {
   fontSize = 16;
 
   editingTitle = false;
-  titleBuffer = '';
+  titleBuffer = "";
 
   /** local UI state */
   editing = false;
-  buffer  = '';
+  buffer = "";
 
   startEdit(): void {
-    this.buffer  = this.text?.text;
+    this.buffer = this.self?.text;
     this.editing = true;
   }
 
   save(): void {
-    if(this.text) {
-      this.text.text = this.buffer.trim();
-      this.text.fontSize = this.fontSize;
+    if (this.self) {
+      this.self.text = this.buffer.trim();
     }
     this.editing = false;
-    this.eventService.emitTextChanged(this.text);
+    this.eventService.emitTextChanged(this.self);
   }
 
   cancel(): void {
     this.editing = false;
   }
 
-  deleteComponent(){
-    this.eventService.emitDelete(this.text);
+  deleteComponent() {
+    this.eventService.emitDelete(this.self);
   }
 
   startEditTitle(): void {
-    this.titleBuffer = this.text.name;
+    this.titleBuffer = this.self.name;
     this.editingTitle = true;
   }
 
   saveTitle(): void {
     const trimmedTitle = this.titleBuffer.trim();
-    const changed = this.text.name !== trimmedTitle;
-    console.log(this.text)
-    this.text.name = trimmedTitle;
+    const changed = this.self.name !== trimmedTitle;
+    this.self.name = trimmedTitle;
     this.editingTitle = false;
     if (changed) {
-      this.eventService.emitTextChanged(this.text);
+      this.eventService.emitTextChanged(this.self);
     }
   }
 
@@ -110,66 +68,7 @@ export class TextComponent implements AfterViewInit{
     this.editingTitle = false;
   }
 
-  @HostListener('mousedown', ['$event'])
-  onMouseDown(event: MouseEvent) {
-    if (!this.inEditMode) return;
-    this.resizeService.startResize(event, this.text, this.cardEl, this.previewCardEl);
-  }
-
-  @HostListener('document:mousemove', ['$event'])
-  onMouseMove(event: MouseEvent) {
-    if (!this.inEditMode) return;
-    this.resizeService.resize(event, this.text, this.currentWidth, this.cardEl, this.previewCardEl, this.parent, this.parentGridElInput, this.homeGridElInput, this.depth, (columns, rows) => {
-      this.updateWidth(columns);
-      this.updateHeight(rows);
-    });
-  }
-
-  @HostListener('document:mouseup', ['$event'])
-  onMouseUp(event: MouseEvent) {
-    if (!this.inEditMode) return;
-    this.resizeService.stopResize(event, this.text, this.currentWidth, this.currentHeight, this.previewCardEl,  this.parent, (columns, rows, changes) => {
-      this.updateWidth(columns);
-      this.updateHeight(rows);
-      if (changes) {
-        /* TODO: remove if event service is used instead
-        this.widthChanged.emit({ component: this.text });
-         */
-        this.eventService.emitWidthChanged(this.text);
-      }
-    });
-  }
-
-  updateWidth(columns: number) {
-    this.currentWidth = columns;
-    const hostEl = this.elementRef.nativeElement as HTMLElement;
-    hostEl.style.gridColumn = `${this.text.column} / ${this.text.column + columns}`;
-  }
-
-  updateHeight(rows: number) {
-    this.currentHeight = rows;
-    const hostEl = this.elementRef.nativeElement as HTMLElement;
-    hostEl.style.gridRow = `${this.text.row} / ${this.text.row + rows}`;
-  }
-
-  // TODO: implement like in container
-  startContainerDrag(component: Comp, event: MouseEvent) {
-    if (!this.inEditMode) return;
-    event.preventDefault();
-    this.startDraggingContainer.emit({ component, event });
-  }
-
-  stopContainerDrag() {
-    this.stopDraggingContainer.emit();
-  }
-
-  enableEditMode() {
-    this.eventService.emitEnableEditMode();
-  }
-
   ngAfterViewInit(): void {
-    this.fontSize = this.text.fontSize
-    this.updateHeight(this.text.height);
-    this.updateWidth(this.text.width);
+    this.fontSize = this.self.fontSize;
   }
 }

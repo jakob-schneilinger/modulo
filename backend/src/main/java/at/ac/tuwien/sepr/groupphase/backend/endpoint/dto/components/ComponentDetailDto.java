@@ -11,7 +11,17 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonSubTypes({
     @JsonSubTypes.Type(value = BoardDetailDto.class, name = "board"),
     @JsonSubTypes.Type(value = TextDetailDto.class, name = "text"),
+    @JsonSubTypes.Type(value = ImageDetailDto.class, name = "image")
 })
 public interface ComponentDetailDto {
 
+    long id();
+
+    long height();
+
+    long width();
+
+    long row();
+
+    long column();
 }

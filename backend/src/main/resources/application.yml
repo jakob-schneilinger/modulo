@@ -1,6 +1,7 @@
 global:
   location:
     avatars: res/avatars/
+    image: res/images/
 
 logging:
   file.name: ./log/backend.log

@@ -36,4 +36,3 @@ public class Board extends Component {
         return true;
     }
 }
-

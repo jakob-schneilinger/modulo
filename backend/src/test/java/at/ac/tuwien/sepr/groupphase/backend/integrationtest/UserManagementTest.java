@@ -1,6 +1,5 @@
 package at.ac.tuwien.sepr.groupphase.backend.integrationtest;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -13,7 +12,9 @@ import java.util.Base64;
 import java.util.Base64.Decoder;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -40,10 +41,13 @@ import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.user.UserUpdateDto;
 import at.ac.tuwien.sepr.groupphase.backend.security.JwtTokenizer;
 import at.ac.tuwien.sepr.groupphase.backend.security.JwtUtils;
 
+import at.ac.tuwien.sepr.groupphase.backend.repository.UserRepository;
+
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class UserManagementTest {
 
     @Autowired
@@ -58,7 +62,16 @@ public class UserManagementTest {
     private Decoder decoder = Base64.getUrlDecoder();
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private AuthenticationManager authenticationManager;
+
+    //TODO: Hotfix
+    @BeforeAll
+    void setup() {
+        userRepository.deleteAll();
+    }
 
     // ##########  User Create Tests  ##########
 

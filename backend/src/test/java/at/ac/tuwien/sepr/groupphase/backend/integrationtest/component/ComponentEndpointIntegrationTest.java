@@ -1,11 +1,13 @@
 
-package at.ac.tuwien.sepr.groupphase.backend.integrationtest;
+package at.ac.tuwien.sepr.groupphase.backend.integrationtest.component;
 
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.JwtResponseDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardCreateDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardUpdateDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.user.UserCreateDto;
+import at.ac.tuwien.sepr.groupphase.backend.repository.ComponentRepository;
+import at.ac.tuwien.sepr.groupphase.backend.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -18,6 +20,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -43,7 +48,10 @@ public class ComponentEndpointIntegrationTest {
 
     private static Long parentId;
     private static String otherUserToken;
-
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private ComponentRepository componentRepository;
 
 
     // set up a user to be able to interact with components, as we need it for auth and rest methods
@@ -51,6 +59,11 @@ public class ComponentEndpointIntegrationTest {
     @BeforeAll
     void setup()
         throws Exception {
+
+        //TODO: Hotfix
+        userRepository.deleteAll();
+        componentRepository.deleteAll();
+
         var dto = createUserDto("seb_01", "Sebi", "sebi@ibes.oarg", "1234567890");
 
         var mvcResponse = mockMvc.perform(post("/api/v1/user/register")
@@ -101,15 +114,8 @@ public class ComponentEndpointIntegrationTest {
     }
 
     @AfterAll
-    void cleanup() throws Exception {
-        mockMvc.perform(delete("/api/v1/user/seb_01")
-                .header("Authorization", userToken));
-        mockMvc.perform(delete("/api/v1/user/othername")
-            .header("Authorization", otherUserToken));
-        mockMvc.perform(
-            delete("/api/v1/component/" + parentId)
-                .header("Authorization", userToken));
-
+    static void cleanup() throws Exception {
+        Files.deleteIfExists(Path.of("database/testdb.mv.db"));
     }
 
     public static UserCreateDto createUserDto(String username, String displayName, String email, String password) {
@@ -152,7 +158,7 @@ public class ComponentEndpointIntegrationTest {
 
     @Test
     void createWithNonexistentParentReturns404() throws Exception {
-        BoardCreateDto boardCreateDto = new BoardCreateDto("board test", -99L, 1,1,1,1);
+        BoardCreateDto boardCreateDto = new BoardCreateDto("board test", -99L, 1,1,3,3);
 
         var response = mockMvc.perform(
             post("/api/v1/component/board")
@@ -168,7 +174,7 @@ public class ComponentEndpointIntegrationTest {
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     void createWithParentCorrectly() throws Exception {
 
-        BoardCreateDto boardChild = new BoardCreateDto("board test child", parentId, 1,1,1,1);
+        BoardCreateDto boardChild = new BoardCreateDto("board test child", parentId, 1,1,4,4);
         var response = mockMvc.perform(
             post("/api/v1/component/board")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -191,7 +197,7 @@ public class ComponentEndpointIntegrationTest {
 
     @Test
     void createBoardWithParentOfOtherUserReturns403() throws Exception {
-        BoardCreateDto boardChild = new BoardCreateDto("board test child", parentId, 1,1,1,1);
+        BoardCreateDto boardChild = new BoardCreateDto("board test child", parentId, 1,1,5,5);
         var response = mockMvc.perform(
             post("/api/v1/component/board")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -199,6 +205,27 @@ public class ComponentEndpointIntegrationTest {
                 .header("Authorization", otherUserToken)
         );
         response.andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    void createOnPositionOfExistingBoardReturns409() throws Exception {
+        BoardCreateDto boardCreateDto = new BoardCreateDto("new board", parentId, 1,1,6,6);
+
+        mockMvc.perform(
+            post("/api/v1/component/board")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsBytes(boardCreateDto))
+                .header("Authorization", userToken)
+        );
+
+        var response = mockMvc.perform(
+            post("/api/v1/component/board")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsBytes(boardCreateDto))
+                .header("Authorization", userToken)
+        );
+        response.andExpect(status().isConflict());
     }
 
 
@@ -243,7 +270,7 @@ public class ComponentEndpointIntegrationTest {
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     void updateExistingBoardAndReturn200() throws Exception {
-        BoardUpdateDto boardChild = new BoardUpdateDto(parentId, "new name",null, 1,1,1,1);
+        BoardUpdateDto boardChild = new BoardUpdateDto(parentId, "new name",null, 1,1,7,7);
         var response = mockMvc.perform(
             put("/api/v1/component/board")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -267,7 +294,7 @@ public class ComponentEndpointIntegrationTest {
 
     @Test
     void updateNonexistentBoardReturns404() throws Exception {
-        BoardUpdateDto boardChild = new BoardUpdateDto(-100, "new name",null, 1,1,1,1);
+        BoardUpdateDto boardChild = new BoardUpdateDto(-100, "new name",null, 1,1,8,8);
         var response = mockMvc.perform(
             put("/api/v1/component/board")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -279,7 +306,7 @@ public class ComponentEndpointIntegrationTest {
 
     @Test
     void updateBoardOfOtherUserReturns403() throws Exception {
-        BoardUpdateDto boardChild = new BoardUpdateDto(parentId, "new name",null, 1,1,1,1);
+        BoardUpdateDto boardChild = new BoardUpdateDto(parentId, "new name",null, 1,1,9,9);
         var response = mockMvc.perform(
             put("/api/v1/component/board")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -291,7 +318,7 @@ public class ComponentEndpointIntegrationTest {
 
     @Test
     void updateWithSelfAsParentReturns409() throws Exception {
-        BoardUpdateDto boardChild = new BoardUpdateDto(parentId, "new name", parentId, 1,1,1,1);
+        BoardUpdateDto boardChild = new BoardUpdateDto(parentId, "new name", parentId, 1,1,10,10);
         var response = mockMvc.perform(
             put("/api/v1/component/board")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -305,7 +332,7 @@ public class ComponentEndpointIntegrationTest {
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     void updateBoardAssignParentBoardAndReturn200() throws Exception {
 
-        BoardCreateDto boardChild = new BoardCreateDto( "new board",null, 1,1,3,3);
+        BoardCreateDto boardChild = new BoardCreateDto( "new board",null, 1,1,11,11);
         var response = mockMvc.perform(
             post("/api/v1/component/board")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -321,7 +348,7 @@ public class ComponentEndpointIntegrationTest {
                 .getResponse()
                 .getContentAsByteArray()).id();
 
-        BoardUpdateDto updateChild = new BoardUpdateDto(childId, "new board", parentId, 1, 1, 3, 3);
+        BoardUpdateDto updateChild = new BoardUpdateDto(childId, "new board", parentId, 1, 1, 11, 11);
         mockMvc.perform(
             put("/api/v1/component/board")
                 .contentType(MediaType.APPLICATION_JSON)
