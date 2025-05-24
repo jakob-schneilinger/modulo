@@ -44,7 +44,6 @@ export class CreateComponent implements OnInit {
   }
 
   onSubmit() {
-    console.log("OK!");
 
     this.submitted = true;
     if (!this.createForm.valid) {

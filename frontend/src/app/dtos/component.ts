@@ -21,6 +21,10 @@ export interface Board extends Container {
   type: "board";
 }
 
+export interface Image extends Container {
+  type: "image";
+}
+
 export interface Task extends Container {
   type: "task";
   // TODO: implement something with time/deadlines
@@ -31,6 +35,45 @@ export interface Note extends Container {
   tags: string[];
 }
 
+export interface ImageCreate {
+  parentId: number;
+  width: number;
+  height: number;
+  column: number;
+  row: number;
+}
+
+export interface ImageCreate {
+  parentId: number;
+  width: number;
+  height: number;
+  column: number;
+  row: number;
+}
+
+export interface ImageCreate {
+  parentId: number;
+  width: number;
+  height: number;
+  column: number;
+  row: number;
+}
+
+export interface ImageCreate {
+  parentId: number;
+  width: number;
+  height: number;
+  column: number;
+  row: number;
+}
+
+export interface ImageCreate {
+  parentId: number;
+  width: number;
+  height: number;
+  column: number;
+  row: number;
+}
 
 export interface Text extends Component {
   type: "text";
@@ -42,4 +85,8 @@ export interface Text extends Component {
 
 export function isText(component: Component): component is Text {
   return component.type === "text";
+}
+
+export function isImage(component: Component): component is Image {
+  return component.type === "image";
 }

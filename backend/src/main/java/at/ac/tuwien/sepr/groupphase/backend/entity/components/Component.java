@@ -126,4 +126,3 @@ public abstract class Component {
         return Objects.hash(id);
     }
 }
-

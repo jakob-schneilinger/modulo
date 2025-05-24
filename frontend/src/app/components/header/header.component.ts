@@ -2,7 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { AuthService } from "../../services/auth.service";
 import { ComponentService } from "src/app/services/component.service";
 import { UserService } from "src/app/services/user.service";
-import { Router } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 
 import { Board, Component as Comp } from "../../dtos/component";
 
@@ -30,9 +30,13 @@ export class HeaderComponent implements OnInit {
     });
   }
 
+  public isCurrentlyViewed(item: Comp) {
+    return this.router.url.toString().includes(item.id.toString());
+  }
+
   ngOnInit() {
-    this.compService.getRootBoards().subscribe({
-      next: (v) => (this.roots = v),
+    this.compService.getRoots().subscribe({
+      next: (v) => (this.roots = v.filter((c) => c.type == "board")),
       error: (e) => console.log(e),
     });
 
@@ -44,9 +48,8 @@ export class HeaderComponent implements OnInit {
     window.addEventListener("board-delete", (event) => {
       const { id, name } = (event as any).detail;
       const i = this.roots.findIndex((i) => i.id == id);
-      if (i >= 0) this.roots.splice(i, 1)
+      if (i >= 0) this.roots.splice(i, 1);
     });
-
   }
 
   logout() {

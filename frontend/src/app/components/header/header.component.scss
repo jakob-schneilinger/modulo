@@ -26,6 +26,13 @@ li {
   padding: 0.5rem;
   font-size: 1rem;
 
+  &.in-view {
+    a {
+      /* color: $primary; */
+    }
+    background-color: $nav-bg-light;
+  }
+
   cursor: pointer;
 
   img.profile[src=""] {

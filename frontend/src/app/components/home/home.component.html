@@ -1,19 +1,18 @@
-<nav>
+<nav *ngIf="!!component">
 
-  <div class="flex board-name">
-    <h2 contenteditable="true" (blur)="updateName()" #name>{{component?.name}}</h2>
+  <div class="flex board-title">
+    <input (blur)="updateName()" (input)="previewName()" [(ngModel)]="component.name" name="title" #name>
     <i (click)="name.focus()" class="bi bi-pencil-fill"></i>
   </div>
 
   <div class="flex gap">
 
     <div>
-      <button class="primary"
-              data-bs-toggle="dropdown" aria-expanded="false">
+      <button class="primary" data-bs-toggle="dropdown" aria-expanded="false">
         <i class="bi bi-plus-square-fill"></i>
         <span class="m-1"> Create </span>
       </button>
-      <div class="dropdown-menu add-child-menu" >
+      <div class="dropdown-menu add-child-menu">
         <div class="h6 add-child-header">Add to {{this.component?.name}}</div>
         <hr class="m-0 p-0">
         <div class="add-child-items m-0 p-0">
@@ -30,10 +29,9 @@
       <i class="bi bi-trash-fill"></i>
       <span class="m-1"> Delete Board </span>
     </button>
-
     <div class="form-check form-switch" title="Enable edit mode to drag and resize components">
       <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault"
-             [(ngModel)]="inEditMode">
+        [(ngModel)]="inEditMode">
       <label class="form-check-label" for="flexSwitchCheckDefault">Edit</label>
     </div>
 
@@ -41,23 +39,18 @@
 
 </nav>
 
-<div *ngIf="authService.isLoggedIn()">
-    <app-container-component
-      *ngIf="component"
-      [id]="'board-' + component.id"
-      [depth]=0
-      [container]="component"
-      [inEditMode]="inEditMode"
-      (startDraggingContainer)="startDragging($event)"
-      (stopDraggingContainer)="stopDragging(undefined)"
-    >
-    </app-container-component>
+<div *ngIf="!!component">
+  <app-container-component *ngIf="component" [id]="'board-' + component.id" [depth]=0 [self]="component"
+    [inEditMode]="inEditMode" (startDraggingContainer)="startDragging($event)"
+    (stopDraggingContainer)="stopDragging(undefined)">
+  </app-container-component>
 
 
 </div>
 
 <!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" #deleteModal>
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true"
+  #deleteModal>
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -71,10 +64,9 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" (click)="finishDeleteModal()" data-bs-dismiss="modal">Delete</button>
+        <button type="button" class="btn btn-primary" (click)="finishDeleteModal()"
+          data-bs-dismiss="modal">Delete</button>
       </div>
     </div>
   </div>
 </div>
-
-

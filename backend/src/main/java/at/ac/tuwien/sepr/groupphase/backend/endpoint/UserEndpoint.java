@@ -121,6 +121,5 @@ public class UserEndpoint {
     public ResponseEntity<Void> removeAvatar(@PathVariable(name = "username") String username) {
         userService.removeAvatar(username);
         return ResponseEntity.ok().build();
-
     }
 }

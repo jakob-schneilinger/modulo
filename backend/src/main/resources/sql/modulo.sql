@@ -19,9 +19,7 @@ CREATE TABLE IF NOT EXISTS text_content (
 
 
 CREATE TABLE IF NOT EXISTS image_content (
-	id INT NOT NULL UNIQUE,
-	image_type ENUM('png', 'gif', 'jpg') NOT NULL,
-	image VARCHAR(255) NOT NULL
+	id INT NOT NULL UNIQUE
 );
 
 

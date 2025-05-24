@@ -1,5 +1,6 @@
 import { Injectable, ElementRef } from '@angular/core';
 import { Container, Component as Comp } from '../dtos/component';
+import { gridVar } from '../dtos/grid';
 
 @Injectable({
   providedIn: 'root'
@@ -24,8 +25,8 @@ export class ResizeService {
   resize(event: MouseEvent, component: Comp, currentWidth: number, cardEl: ElementRef, previewCardEl: ElementRef, parentContainer: Container, parentGridEl: ElementRef | null, homeGridEl: ElementRef | null, depth: number, callback: (columns: number, rows: number) => void) {
     if (!this.isResizing || this.activeResizerId !== `resizer-${component.id}`) return;
 
-    const headerEls = document.querySelectorAll('.container-header h5');
-    headerEls.forEach(el => (el as HTMLElement).style.userSelect = 'none');
+    const body = document.querySelectorAll('body');
+    body.forEach(b => b.style.userSelect = 'none')
 
     const card = cardEl.nativeElement as HTMLElement;
     const preview = previewCardEl.nativeElement as HTMLElement;
@@ -34,12 +35,13 @@ export class ResizeService {
     const deltaY = event.clientY - rect.top;
 
     const grid = depth > 1 ? (parentGridEl?.nativeElement ?? card) : (homeGridEl?.nativeElement ?? card);
-    const columnWidth = grid.offsetWidth / 8;
+    const columnWidth = grid.offsetWidth / gridVar.columns;
+    const rowHeight = gridVar.rowHeight; //grid.offsetHeight / 8;
 
-    const rows = Math.min(8, Math.max(1, Math.round(deltaY / 150))); // TODO: change if Css changes
+    const rows = Math.min(gridVar.columns, Math.max(1, Math.round(deltaY / rowHeight))); // TODO: change if Css changes
 
     if(columnWidth != 0) {
-      const columns = Math.min(8, Math.max(1, Math.round(deltaX / columnWidth)));
+      const columns = Math.min(gridVar.columns, Math.max(1, Math.round(deltaX / columnWidth)));
 
       preview.style.position = 'absolute';
       preview.style.top = `${card.offsetTop}px`;
@@ -55,7 +57,6 @@ export class ResizeService {
       preview.style.backgroundColor = hasCollision ? 'rgba(255, 0, 0, 0.15)' : 'rgba(0, 123, 255, 0.15)';
       preview.style.border = hasCollision ? '2px dashed rgba(255, 0, 0, 0.5)' : '2px dashed rgba(0, 123, 255, 0.5)';
 
-
       callback(columns, rows);
     } else {
       callback(currentWidth, rows);
@@ -68,8 +69,8 @@ export class ResizeService {
     this.isResizing = false;
     this.activeResizerId = null;
 
-    const headerEls = document.querySelectorAll('.container-header h5');
-    headerEls.forEach(el => (el as HTMLElement).style.userSelect = '');
+    const body = document.querySelectorAll('body');
+    body.forEach(b => b.style.userSelect = '')
 
     const preview = previewCardEl.nativeElement as HTMLElement;
 
@@ -97,14 +98,12 @@ export class ResizeService {
 
     for (let i = 0; i < children.length; i++) {
       if (this.isOverlapping(children[i], component) && component.id !== children[i].id) {
-        console.log("isOverlapping")
         if (children[i].id === -1) {
           return undefined;
         }
         return true;
       }
     }
-
     return false;
   }
 
@@ -118,16 +117,6 @@ export class ResizeService {
     const bRight = b.column + b.width;
     const bTop = b.row;
     const bBottom = b.row + b.height;
-
-    /*
-    TODO: remove if done with debugging
-
-    console.log("Left: " +aLeft+ " / " +bLeft);
-    console.log("Right: " +aRight+ " / " +bRight);
-    console.log("Top: " +aTop+ " / " +bTop);
-    console.log("Bottom: " +aBottom+ " / " +bBottom);
-     */
-
 
     return !(aRight <= bLeft || aLeft >= bRight || aBottom <= bTop || aTop >= bBottom);
   }

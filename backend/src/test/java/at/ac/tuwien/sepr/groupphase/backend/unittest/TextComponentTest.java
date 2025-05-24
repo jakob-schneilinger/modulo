@@ -8,7 +8,8 @@ import at.ac.tuwien.sepr.groupphase.backend.entity.components.Text;
 import at.ac.tuwien.sepr.groupphase.backend.exception.NotFoundException;
 import at.ac.tuwien.sepr.groupphase.backend.repository.ComponentRepository;
 import at.ac.tuwien.sepr.groupphase.backend.repository.UserRepository;
-import at.ac.tuwien.sepr.groupphase.backend.service.impl.ComponentServiceImpl;
+import at.ac.tuwien.sepr.groupphase.backend.service.componentservice.TextService;
+import at.ac.tuwien.sepr.groupphase.backend.service.componentservice.impl.ComponentServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,13 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -33,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @SpringBootTest
 public class TextComponentTest {
 
-    @Autowired ComponentServiceImpl componentService;
+    @Autowired TextService textService;
     @Autowired UserRepository userRepository;
     @Autowired ComponentRepository componentRepository;
 
@@ -85,7 +84,7 @@ public class TextComponentTest {
             1, 1, 1, 1
         );
 
-        TextDetailDto created = (TextDetailDto) componentService.createTextComponent(dto);
+        TextDetailDto created = (TextDetailDto) textService.createTextComponent(dto);
         assertThat(created.text()).isEqualTo("Hello World");
         assertThat(componentRepository.findById(created.id())).isPresent();
     }
@@ -98,10 +97,10 @@ public class TextComponentTest {
 
         TextCreateDto dto = createDto();
 
-        TextDetailDto created = (TextDetailDto) componentService.createTextComponent(dto);
+        TextDetailDto created = (TextDetailDto) textService.createTextComponent(dto);
 
         TextUpdateDto updateDto = new TextUpdateDto(created.id(), "textbox", 100, "Updated", null,12,1L,1L,1L);
-        TextDetailDto update = (TextDetailDto) componentService.updateTextComponent(updateDto);
+        TextDetailDto update = (TextDetailDto) textService.updateTextComponent(updateDto);
         assertThat(update.text()).isEqualTo("Updated");
     }
 
@@ -139,7 +138,7 @@ public class TextComponentTest {
         );
 
         // when / then
-        assertThatThrownBy(() -> componentService.updateTextComponent(dto))
+        assertThatThrownBy(() -> textService.updateTextComponent(dto))
             .isInstanceOf(RuntimeException.class)
             .hasMessageContaining("User is not owner");
     }
@@ -159,7 +158,7 @@ public class TextComponentTest {
             1L,
             1L
         );
-        assertThatThrownBy(() -> componentService.updateTextComponent(dto))
+        assertThatThrownBy(() -> textService.updateTextComponent(dto))
             .isInstanceOf(NotFoundException.class);
     }
 
