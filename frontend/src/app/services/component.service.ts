@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { Board, Component, Container, Image, ImageCreate, Text } from "../dtos/component";
+import { Board, Component, Container, Image, ImageCreate, Text, Task } from "../dtos/component";
 import { Observable } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import { Globals } from "../global/globals";
@@ -26,6 +26,10 @@ export class ComponentService {
   updateText(component: Text): Observable<Text> {
     console.log("Updated Text Component: ", component);
     return this.httpClient.put<Text>(this.componentBaseUri + "/text", component);
+  }
+
+  createTask(task: Task): Observable<Task>{
+    return this.httpClient.post<Task>(this.componentBaseUri + "/task", task)
   }
 
   createImage(image: ImageCreate, data?: Blob) {
@@ -71,6 +75,11 @@ export class ComponentService {
   updateComponent(component: Component): Observable<Component> {
     // used to update with/height/row/col
     return this.httpClient.put<Component>(this.componentBaseUri + "/" + component.type, component);
+  }
+
+  repeatTask(task: Container): Observable<Task> {
+    console.log("Repeat Task: " + task.id)
+    return this.httpClient.put<Task>(this.componentBaseUri + "/task/repeat", task)
   }
 
   updateBoard(board: Board): Observable<Board> {

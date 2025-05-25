@@ -1,16 +1,26 @@
 import { AfterViewInit, Component, ElementRef, ViewChild } from "@angular/core";
-import { Container, Component as Comp, isText, Text as myText, Image, isImage } from "../../../dtos/component";
+import {
+  Container,
+  Component as Comp,
+  isText,
+  Text as myText,
+  Image,
+  isImage,
+  Task,
+  isTask
+} from "../../../dtos/component";
 import { NgClass, NgForOf, NgIf, NgStyle } from "@angular/common";
 import { TextComponent } from "../text/text.component";
 import { FormsModule } from "@angular/forms";
 import { BaseComponent } from "../base/base.component";
 import { ImageComponent } from "../image/image.component";
+import {TaskComponent} from "./task/task.component";
 
 @Component({
   selector: "app-container-component",
   templateUrl: "./container.component.html",
   styleUrls: ["./container.component.scss", "../base/base.component.scss"],
-  imports: [NgForOf, NgStyle, NgClass, NgIf, TextComponent, ImageComponent, FormsModule],
+  imports: [NgForOf, NgStyle, NgClass, NgIf, TextComponent, ImageComponent, FormsModule, TaskComponent],
   standalone: true,
 })
 export class ContainerComponent extends BaseComponent<Container> {
@@ -27,9 +37,15 @@ export class ContainerComponent extends BaseComponent<Container> {
   // TODO: find a better way to seperate Containers and other Components
   private isContainer(component: Comp): component is Container {
     return (
-      (component.type === "board" || component.type === "task" || component.type === "note") &&
+      (component.type === "board" || component.type === "note") &&
       Array.isArray(component.children)
     );
+  }
+
+  asTask(comp: Comp): Task {
+    if(isTask(comp)) {
+      return comp as Task;
+    }
   }
 
   get containerChildren(): Container[] {
@@ -42,6 +58,10 @@ export class ContainerComponent extends BaseComponent<Container> {
 
   get imageChildren(): Image[] {
     return this.self.children.filter(isImage);
+  }
+
+  get taskChildren(): Task[] {
+    return this.self.children.filter(isTask);
   }
 
   startEditTitle(): void {

@@ -3,9 +3,12 @@ package at.ac.tuwien.sepr.groupphase.backend.mapper;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ImageDetailDto;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.TaskDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.TextDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Board;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Image;
+import at.ac.tuwien.sepr.groupphase.backend.entity.components.Component;
+import at.ac.tuwien.sepr.groupphase.backend.entity.components.Task;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Text;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +28,16 @@ public class ComponentEntityToDtoMapper {
         };
         return new BoardDetailDto(board.getId(), board.getBoardName(), board.getWidth(), board.getHeight(),
                 board.getColumn(), board.getRow(), children);
+    }
+
+    public static TaskDetailDto visit(Task task, MappingDepth depth) {
+        List<ComponentDetailDto> children = switch (depth) {
+            case DEEP -> task.getChildren().stream()
+                .map(child -> child.accept(depth))
+                .toList();
+            case SHALLOW -> List.of();
+        };
+        return new TaskDetailDto(task.getId(), task.getTaskName(), task.getWidth(), task.getHeight(), task.getColumn(), task.getRow(), children, task.getStartDate(), task.getEndDate(), task.isCompleted(), task.isRepeatable());
     }
 
     public static TextDetailDto visit(Text text) {
