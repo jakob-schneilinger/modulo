@@ -29,11 +29,11 @@ public class BoardComponentEndpoint {
      * Creates a board in the database.
      *
      * @param board information to add
-     * @return Component detail of created board
+     * @return component detail of created board
      */
     @PermitAll // TODO: fix this
     @PostMapping("")
-    public ResponseEntity<ComponentDetailDto> createBoard(
+    public ResponseEntity<ComponentDetailDto> createBoardComponent(
             @RequestBody BoardCreateDto board) {
 
         return new ResponseEntity<>(service.createBoard(board), HttpStatus.CREATED);
@@ -43,11 +43,11 @@ public class BoardComponentEndpoint {
      * Updates a board in the database.
      *
      * @param board information to update
-     * @return Component detail of updated board
+     * @return component detail of updated board
      */
     @PermitAll // TODO: fix this
     @PutMapping("")
-    public ResponseEntity<ComponentDetailDto> updateBoard(
+    public ResponseEntity<ComponentDetailDto> updateBoardComponent(
             @RequestBody BoardUpdateDto board) {
 
         return new ResponseEntity<>(service.updateBoard(board), HttpStatus.OK);

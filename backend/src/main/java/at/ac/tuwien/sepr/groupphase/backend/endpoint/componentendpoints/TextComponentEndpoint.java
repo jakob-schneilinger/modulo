@@ -27,10 +27,10 @@ public class TextComponentEndpoint {
     }
 
     /**
-     * Creates a TextComponent in the database.
+     * Creates a text component in the database.
      *
      * @param textComponent information to add
-     * @return Component detail of created TextComponent
+     * @return component detail of created text component
      */
     @PermitAll
     @PostMapping("")
@@ -40,10 +40,10 @@ public class TextComponentEndpoint {
     }
 
     /**
-     * Updates a TextComponent in the database.
+     * Updates a text component in the database.
      *
      * @param textComponent information to add
-     * @return Component detail of updated TextComponent
+     * @return component detail of updated text component
      */
     @PermitAll
     @PutMapping("")

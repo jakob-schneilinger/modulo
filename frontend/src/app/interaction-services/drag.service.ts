@@ -7,7 +7,6 @@ import {gridVar} from "../dtos/grid";
   providedIn: "root",
 })
 export class DragService {
-  private dragging = false;
   private draggingContainer: Comp | null = null;
   private previewContainer: Container | null = null;
   private sourceParent: Container | null = null;
@@ -19,7 +18,6 @@ export class DragService {
     data.event.preventDefault();
     this.draggingContainer = data.component;
     this.sourceParent = sourceParent;
-    this.dragging = true;
     this.componentDepth = this.getComponentDepth(this.draggingContainer);
 
     this.previewContainer = {
@@ -66,7 +64,7 @@ export class DragService {
 
     const rect = grid.getBoundingClientRect();
     const columnWidth = rect.width / gridVar.columns;
-    const rowHeight = gridVar.rowHeight; // TODO: Change if Css changes
+    const rowHeight = gridVar.rowHeight;
 
     const relativeX = event.clientX - rect.left;
     const relativeY = event.clientY - rect.top;
@@ -97,7 +95,7 @@ export class DragService {
     } else if (totalDepth == -1) {
       this.previewContainer.name = "Component depth to deep!"
     } else if (hasCollision) {
-      this.previewContainer.name = "No Collissions allowed!"
+      this.previewContainer.name = "No Collisions allowed!"
     } else {
       this.previewContainer.name = ""
     }
@@ -158,7 +156,6 @@ export class DragService {
     this.draggingContainer = null;
     this.previewContainer = null;
     this.sourceParent = null;
-    this.dragging = false;
   }
 
   insertPreview(preview: Container, rootContainer: Container) {

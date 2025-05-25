@@ -36,7 +36,8 @@ public class ComponentEndpoint {
     /**
      * Gets the details of the component with given id including all children.
      *
-     * @return Component detail of component with all subcomponents
+     * @param id of the component to get
+     * @return component detail of component with all subcomponents
      */
     @PermitAll // TODO: fix this
     @GetMapping("{id}")
@@ -47,7 +48,7 @@ public class ComponentEndpoint {
     /**
      * Gets a list of all root components (components without a parent) NOT including children.
      *
-     * @return List of the details of the root components
+     * @return list of the details of the root components
      */
     @PermitAll // TODO: fix this
     @GetMapping()

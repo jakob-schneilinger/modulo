@@ -11,26 +11,10 @@ public interface ImageService {
     * Creates an image in the database.
     *
     * @param imageDto component dto for the image
-    * @return Component detail of the image created
-    */
-    ComponentDetailDto createImage(ImageCreateDto imageDto);
-
-    /**
-    * Creates an image in the database.
-    *
-    * @param imageDto component dto for the image
     * @param imageData raw data for the image
     * @return Component detail of the image created
     */
     ComponentDetailDto createImage(ImageCreateDto imageDto, byte[] imageData);
-
-    /**
-    * Updates an image in the database.
-    *
-    * @param imageDto component dto for the image
-    * @return Component detail of the image created
-    */
-    ComponentDetailDto updateImage(ImageUpdateDto imageDto);
 
     /**
     * Updates an image in the database.
