@@ -9,6 +9,7 @@ import at.ac.tuwien.sepr.groupphase.backend.exception.ValidationException;
 import at.ac.tuwien.sepr.groupphase.backend.repository.ComponentRepository;
 import at.ac.tuwien.sepr.groupphase.backend.service.componentservice.ComponentService;
 import at.ac.tuwien.sepr.groupphase.backend.service.componentservice.TextService;
+import at.ac.tuwien.sepr.groupphase.backend.validation.ComponentValidator;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

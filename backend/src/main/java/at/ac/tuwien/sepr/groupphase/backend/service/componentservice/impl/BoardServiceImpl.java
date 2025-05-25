@@ -11,6 +11,7 @@ import at.ac.tuwien.sepr.groupphase.backend.exception.NotFoundException;
 import at.ac.tuwien.sepr.groupphase.backend.repository.ComponentRepository;
 import at.ac.tuwien.sepr.groupphase.backend.service.componentservice.BoardService;
 import at.ac.tuwien.sepr.groupphase.backend.service.componentservice.ComponentService;
+import at.ac.tuwien.sepr.groupphase.backend.validation.BoardComponentValidator;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

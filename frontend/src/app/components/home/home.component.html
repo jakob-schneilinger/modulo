@@ -54,13 +54,13 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Delete {{this.forDeletion?.name}}?</h5>
+        <h5 class="modal-title" id="exampleModalLabel">Delete {{this.forDeletion?.name ?? 'Component'}}?</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        Are you sure you want to delete the board "{{this.forDeletion?.name}}"?
+        Are you sure you want to delete the component {{this.forDeletion?.name ? '\"' + this.forDeletion?.name + '\"' : 'of type \"' + this.forDeletion?.type + '\"'}}"?
         <br>
-        All components on this board will also be deleted!
+        All existing sub-components in this component will also be deleted!
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

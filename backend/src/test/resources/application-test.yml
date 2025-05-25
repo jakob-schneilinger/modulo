@@ -1,3 +1,7 @@
+global:
+  location:
+    image: res/test_images/
+
 logging:
   file.name: ./log/backend-test.log
 

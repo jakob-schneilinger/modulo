@@ -1,4 +1,4 @@
-package at.ac.tuwien.sepr.groupphase.backend.service.componentservice.impl;
+package at.ac.tuwien.sepr.groupphase.backend.validation;
 
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardCreateDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardUpdateDto;

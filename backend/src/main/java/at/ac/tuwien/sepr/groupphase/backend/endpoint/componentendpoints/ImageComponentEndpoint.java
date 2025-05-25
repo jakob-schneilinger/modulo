@@ -37,6 +37,12 @@ public class ImageComponentEndpoint {
         this.service = imageService;
     }
 
+    /**
+     * Gets the image file of the image component with given id.
+     *
+     * @param id of the component to get
+     * @return image file of component
+     */
     @PermitAll // TODO: fix this
     @GetMapping("{id}")
     public ResponseEntity<FileSystemResource> getImage(
@@ -46,6 +52,13 @@ public class ImageComponentEndpoint {
         return ResponseEntity.ok().headers(headers).body(service.getImage(id));
     }
 
+    /**
+     * Creates an image component.
+     *
+     * @param image component data
+     * @param file image file data
+     * @return component detail of created image
+     */
     @PermitAll // TODO: fix this
     @PostMapping("")
     public ResponseEntity<ComponentDetailDto> createImageComponent(
@@ -55,7 +68,7 @@ public class ImageComponentEndpoint {
         ComponentDetailDto result;
         try {
             if (file == null || file.isEmpty()) {
-                result = service.createImage(image);
+                result = service.createImage(image, null);
             } else {
                 result = service.createImage(image, file.getBytes());
             }
@@ -65,15 +78,22 @@ public class ImageComponentEndpoint {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
+    /**
+     * Updates an image component.
+     *
+     * @param image component data
+     * @param file image file data
+     * @return component detail of updated image
+     */
     @PermitAll // TODO: fix this
     @PutMapping("")
-    public ResponseEntity<ComponentDetailDto> setImage(
+    public ResponseEntity<ComponentDetailDto> updateImageComponent(
             @RequestPart(name = "component", required = true) ImageUpdateDto image,
             @RequestPart(name = "image", required = false) MultipartFile file) {
         ComponentDetailDto result;
         try {
             if (file == null || file.isEmpty()) {
-                result = service.updateImage(image);
+                result = service.updateImage(image, null);
             } else {
                 result = service.updateImage(image, file.getBytes());
             }
