@@ -16,6 +16,7 @@ import { HomeComponent } from "./components/home/home.component";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import { httpInterceptorProviders } from "./interceptors";
 import { TextComponent } from "./components/comp/text/text.component";
+import { TaskComponent } from "./components/comp/containers/task/task.component";
 import { ContainerComponent } from "./components/comp/containers/container.component";
 import { ResizeService } from "./interaction-services/resize.service";
 import { DragService } from "./interaction-services/drag.service";
@@ -44,6 +45,7 @@ import { ImageComponent } from "./components/comp/image/image.component";
     ContainerComponent,
     TextComponent,
     ImageComponent,
+    TaskComponent
   ],
   providers: [httpInterceptorProviders, provideHttpClient(withInterceptorsFromDi()), ResizeService, DragService],
 })

@@ -1,5 +1,8 @@
 package at.ac.tuwien.sepr.groupphase.backend.validation;
 
+
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardUpdateDto;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ContainerDto;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Component;
@@ -10,6 +13,8 @@ import at.ac.tuwien.sepr.groupphase.backend.repository.ComponentRepository;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
@@ -18,6 +23,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @org.springframework.stereotype.Component
+@Primary
 public class ComponentValidator {
 
     //Maximal depth for rekursive containers (not including root board)

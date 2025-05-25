@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS components (
 	id INT NOT NULL AUTO_INCREMENT UNIQUE,
-	type ENUM('text', 'image', 'board') NOT NULL,
+	type ENUM('text', 'image', 'board', 'task') NOT NULL,
 	owner_id INT NOT NULL,
 	width INT NOT NULL,
     height INT NOT NULL,
@@ -9,6 +9,14 @@ CREATE TABLE IF NOT EXISTS components (
 	PRIMARY KEY(id)
 );
 
+CREATE TABLE IF NOT EXISTS task_content (
+    id INT NOT NULL UNIQUE,
+    task_name VARCHAR(255) NOT NULL,
+    start_date DATE,
+    end_date DATE,
+    completed BOOLEAN,
+    repeatable BOOLEAN
+);
 
 CREATE TABLE IF NOT EXISTS text_content (
 	id INT NOT NULL UNIQUE,
@@ -81,7 +89,9 @@ CREATE TABLE IF NOT EXISTS salts (
 	salt VARCHAR(255) NOT NULL
 );
 
-
+ALTER TABLE task_content
+ADD FOREIGN KEY(id) REFERENCES components(id)
+ON UPDATE NO ACTION ON DELETE CASCADE;
 ALTER TABLE text_content
 ADD FOREIGN KEY(id) REFERENCES components(id)
 ON UPDATE NO ACTION ON DELETE CASCADE;

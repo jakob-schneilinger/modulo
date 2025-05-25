@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonSubTypes({
     @JsonSubTypes.Type(value = BoardDetailDto.class, name = "board"),
     @JsonSubTypes.Type(value = TextDetailDto.class, name = "text"),
+    @JsonSubTypes.Type(value = TaskDetailDto.class, name = "task"),
     @JsonSubTypes.Type(value = ImageDetailDto.class, name = "image")
 })
 public interface ComponentDetailDto {

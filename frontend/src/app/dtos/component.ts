@@ -25,9 +25,13 @@ export interface Image extends Container {
   type: "image";
 }
 
-export interface Task extends Container {
-  type: "task";
-  // TODO: implement something with time/deadlines
+export interface Task extends Container{
+  type: 'task';
+  repeating: boolean;
+  deadLineInDays?: number;
+  startDate: Date;
+  endDate?: Date;
+  completed: boolean;
 }
 
 export interface Note extends Container {
@@ -85,6 +89,9 @@ export interface Text extends Component {
 
 export function isText(component: Component): component is Text {
   return component.type === "text";
+}
+export function isTask(container: Component): container is Task {
+  return container.type === "task";
 }
 
 export function isImage(component: Component): component is Image {

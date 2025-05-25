@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ComponentRepository extends JpaRepository<Component, Long> {
@@ -43,4 +44,6 @@ public interface ComponentRepository extends JpaRepository<Component, Long> {
         SELECT COALESCE(MAX(depth), 0) FROM parent_tree
         """, nativeQuery = true)
     Integer getParentDepth(@Param("childId") Long childId);
+
+    Optional<Component> findByChildren_Id(Long childId);
 }

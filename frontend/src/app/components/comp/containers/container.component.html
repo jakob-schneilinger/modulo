@@ -77,6 +77,19 @@
     }" [ngClass]="{ 'preview-container': child.id === -1 }">
     </app-image-component>
 
+    <app-task-component
+      *ngFor="let child of taskChildren"
+      [isNotChildOfTask]= true
+      [id]="'container-' + child.id" [depth]=depth+1
+      [self]="child" [parentContainer]="self" [parentGridElInput]="gridEl"
+      [homeGridElInput]="depth > 0 ? homeGridEl : gridEl" [inEditMode]="inEditMode"
+      (startDraggingContainer)="startDraggingContainer.emit($event)"
+      (stopDraggingContainer)="stopDraggingContainer.emit()" class="card-component" [ngStyle]="{
+        'grid-column': child.column + ' / ' + (child.column + child.width),
+        'grid-row': child.row + ' / ' + (child.row + child.height),
+      }" [ngClass]="{ 'preview-container': child.id === -1 }"
+    ></app-task-component>
+
   </div>
   <div *ngIf="!!parentContainer && inEditMode && self.id !== -1" class="resizer" [id]="'resizer-' + self.id">
     <i class="bi bi-arrows-angle-expand"></i>

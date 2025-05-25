@@ -1,4 +1,4 @@
-import { Board, Container, Text, Component as Comp } from "../../dtos/component";
+import { Board, Container, Text, Component as Comp, Task } from "../../dtos/component";
 import { ComponentService } from "../../services/component.service";
 import { DragService } from "../../interaction-services/drag.service";
 import { AuthService } from "../../services/auth.service";
@@ -40,6 +40,30 @@ export class HomeComponent implements OnInit, OnDestroy {
   // essentially all boards we are going to show, so all the root boards that have no parent
   component: Container = undefined;
   forDeletion: Comp = undefined;
+
+  createTask() {
+    const neighbors = this.component.children
+    const row = this.findFirstFreeRow(2, 2)
+
+    const newTask: Task = {
+      children: [],
+      column: 1,
+      completed: false,
+      height: 3,
+      name: "New Task",
+      row: row,
+      repeating: false,
+      startDate: undefined,
+      type: "task",
+      width: 4,
+      parentId: this.component.id
+    }
+
+    this.compService.createTask(newTask).subscribe({
+      next: created => neighbors.push({...created, parentId: this.component.id}),
+      error: err => console.error(err)
+    });
+  }
 
   createBoard() {
     // or child board beneath the lowest child component
@@ -126,6 +150,40 @@ export class HomeComponent implements OnInit, OnDestroy {
       next: () => console.log("Updated successfully"),
       error: (err) => console.error("Update failed", err),
     });
+
+  }
+
+  findAndPatch(nodes: Comp[], updated: Comp): boolean {
+    for (const node of nodes) {
+      if (node.id === updated.id) {
+        Object.assign(node, updated);
+        return true;
+      }
+      if (node.children && this.findAndPatch(node.children, updated)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  taskChanged(event: { component: Comp }) {
+    this.setRecursiveParentId(this.component)
+    this.compService.updateComponent(event.component as any).subscribe({
+      next: data => {
+        this.findAndPatch(this.component.children, data);
+      },
+      error: err => console.error('Update failed', err)
+    })
+  }
+
+  taskRepeat(event: { component: Comp }) {
+    this.setRecursiveParentId(this.component)
+    this.compService.repeatTask(event.component as any).subscribe({
+      next: data => {
+        this.findAndPatch(this.component.children, data);
+      },
+      error: err => console.error('Update failed', err)
+    })
   }
 
   textChanged(event: { component: Comp }) {
@@ -147,6 +205,9 @@ export class HomeComponent implements OnInit, OnDestroy {
       case "image":
         this.createImage();
         break;
+      case 'task' :
+        this.createTask();
+        break;
       default:
         alert("not implemented yet!");
         console.error("unsupported type of component");
@@ -166,7 +227,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
   }
 
-  deleteBoard() {
+  deleteBoard(){
     this.compService.deleteComponent(this.component.id).subscribe({
       next: (value) => {
         window.dispatchEvent(
@@ -312,6 +373,20 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.eventService.textChanged$.subscribe(({ component }) => {
         this.textChanged({ component });
+      })
+    );
+
+    this.subscriptions.push(
+      this.eventService.taskChanged$.subscribe(({component}) => {
+        this.taskChanged({component})
+        console.log("The Task status of the following component just changed:")
+        console.log(component)
+      })
+    );
+
+    this.subscriptions.push(
+      this.eventService.taskRepeated$.subscribe(({component}) => {
+        this.taskRepeat({component})
       })
     );
 

@@ -1,11 +1,22 @@
 package at.ac.tuwien.sepr.groupphase.backend.service.componentservice.impl;
 
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardCreateDto;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardUpdateDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDetailDto;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.TaskCreateDto;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentUpdateDto;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.TaskDto;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.TaskUpdateDto;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.TextCreateDto;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.TextUpdateDto;
 import at.ac.tuwien.sepr.groupphase.backend.entity.ApplicationUser;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Component;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Image;
+import at.ac.tuwien.sepr.groupphase.backend.entity.components.Text;
+import at.ac.tuwien.sepr.groupphase.backend.entity.components.Task;
+import at.ac.tuwien.sepr.groupphase.backend.exception.ConflictException;
 import at.ac.tuwien.sepr.groupphase.backend.exception.NotFoundException;
 import at.ac.tuwien.sepr.groupphase.backend.exception.UserNotAuthorizedException;
 import at.ac.tuwien.sepr.groupphase.backend.exception.ValidationException;
