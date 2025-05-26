@@ -3,7 +3,7 @@
 
     <div class="d-flex justify-content-end p-1">
         <div class="three-dots dropdown" (mousedown)="startContainerDrag(self, $event)" (mouseup)="stopContainerDrag()"
-            (click)="$event.stopPropagation()">
+            (click)="$event.stopPropagation()" [attr.data-cy]="'image-manage-dropdown'">
             <i class="bi text-secondary" [ngClass]="{
              'bi-arrows-move': inEditMode,
              'bi-three-dots': !inEditMode,
@@ -20,7 +20,7 @@
                 <li>
                     <hr class="dropdown-divider">
                 </li>
-                <li><a class="dropdown-item" (click)="deleteComponent()">Delete {{capitalizeFirstLetter(self.type)}}</a>
+                <li><a class="dropdown-item" (click)="deleteComponent()" [attr.data-cy]="'image-delete'">Delete {{capitalizeFirstLetter(self.type)}}</a>
                 </li>
             </ul>
 
@@ -28,13 +28,13 @@
     </div>
 
     <div class="content">
-        <img #content (dblclick)="focusFileInput()">
+        <img #content (dblclick)="focusFileInput()" [attr.data-cy]="'image-content'">
         <div class="no-img-msg" *ngIf="!content.src">
             No image selected yet!
-            <button (click)="focusFileInput()">Set image</button>
+            <button (click)="focusFileInput()" [attr.data-cy]="'image-select-button'">Set image</button>
         </div>
         <input #input class="hidden" type="file" (change)="setImage($event.target.files[0])"
-            accept="gif,.jpg,.jepg,.png">
+            accept=".gif,.jpg,.jpeg,.png" [attr.data-cy]="'image-select-input'">
     </div>
 
     <div *ngIf="self.id !== -1 && inEditMode" class="resizer" [id]="'resizer-' + self.id">

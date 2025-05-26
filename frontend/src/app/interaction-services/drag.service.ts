@@ -66,11 +66,11 @@ export class DragService {
     const columnWidth = rect.width / gridVar.columns;
     const rowHeight = gridVar.rowHeight;
 
-    const relativeX = event.clientX - rect.left;
+    const relativeX = event.clientX - rect.left - (this.draggingContainer.width * columnWidth);
     const relativeY = event.clientY - rect.top;
 
-    const newColumn = Math.max(1, Math.min(gridVar.columns, Math.floor(relativeX / columnWidth)));
-    const newRow = Math.max(1, Math.min(gridVar.columns, Math.floor(relativeY / rowHeight) + 1));
+    const newColumn = Math.max(1, Math.min(gridVar.columns - this.draggingContainer.width + 1, Math.round(relativeX / columnWidth) + 1));
+    const newRow = Math.max(1, Math.floor(relativeY / rowHeight) + 1);
 
     this.previewContainer.column = newColumn;
     this.previewContainer.row = newRow;

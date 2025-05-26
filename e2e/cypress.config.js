@@ -6,6 +6,7 @@ module.exports = defineConfig({
     configFile: 'cypress/reporter-config.json',
   },
   watchForFileChanges: false,
+  includeShadowDom: true,
   viewportWidth: 1920,
   viewportHeight: 1080,
   e2e: {

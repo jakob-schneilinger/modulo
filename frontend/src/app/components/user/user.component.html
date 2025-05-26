@@ -9,43 +9,43 @@
 
         <!-- big round avatar -->
         <div class="avatar">
-            <img id="avatar">
+            <img id="avatar" [attr.data-cy]="'user-image'">
             <div *ngIf="canManage" class="avatar-ctrl remove" (click)="onRemoveAvatar()">
                 <i class="bi bi-x-circle-fill"></i>
             </div>
-            <div *ngIf="canManage" class="avatar-ctrl edit" (click)="changeAvatar()">
+            <div *ngIf="canManage" class="avatar-ctrl edit" (click)="changeAvatar()" [attr.data-cy]="'user-select-avatar'">
                 <i class="bi bi-pencil-fill"></i>
             </div>
         </div>
 
         <!-- username -->
         <span>{{user?.username}}</span>
-        <h3>{{user?.displayName}}</h3>
+        <h3 [attr.data-cy]="'user-displayname'">{{user?.displayName}}</h3>
 
         <div *ngIf="canManage">
             <!-- Change data -->
             <div class="form-group">
                 <label for="tbxDisplayName">Display name</label>
-                <input type="text" id="tbxDisplayName" class="form-control" formControlName="displayName">
+                <input type="text" id="tbxDisplayName" class="form-control" formControlName="displayName" data-cy="user-displayname-input">
             </div>
 
 
             <div class="form-group">
                 <label for="tbxEmail">Email</label>
-                <input type="email" id="tbxEmail" class="form-control" formControlName="email">
+                <input type="email" id="tbxEmail" class="form-control" formControlName="email" data-cy="user-email-input">
                 <span *ngIf="updateForm.controls.password?.errors?.email" class="error">
                     Invalid email format
                 </span>
             </div>
 
             <button *ngIf="!passwordChangeRequested" type="button" class="form-group"
-                (click)="passwordChangeRequested = true">Change Password</button>
+                (click)="passwordChangeRequested = true" [attr.data-cy]="'user-request-password-change'">Change Password</button>
 
             <div *ngIf="passwordChangeRequested" class="form-group passwords">
                 <div>
                     <label for="tbxPassword">New password</label>
                     <input type="password" id="tbxPassword" class="form-control" formControlName="password"
-                        minlength="8">
+                        minlength="8" data-cy="user-password-input-1">
                     <span *ngIf="updateForm.controls.password?.errors?.minlength" class="error">
                         Your password must be at least 8 characters long!
                     </span>
@@ -54,7 +54,7 @@
                 <div>
                     <label for="tbxPasswordRepeat">Repeat password</label>
                     <input type="password" id="tbxPasswordRepeat" class="form-control" formControlName="passwordRepeat"
-                        (input)="passwordsValid()">
+                        (input)="passwordsValid()" [attr.data-cy]="'user-password-input-2'">
                     <span *ngIf="updateForm.controls.passwordRepeat?.errors?.noMatch" class="error">
                         Passwords don't match
                     </span>
@@ -62,7 +62,7 @@
             </div>
 
             <div class="form-group" style="display: flex; gap: .5rem;">
-                <button *ngIf="isChanged" type="submit" class="primary">Save</button>
+                <button *ngIf="isChanged" type="submit" class="primary" [attr.data-cy]="'user-save'">Save</button>
                 <button type="button" (click)="onDelete()" class="error">Delete</button>
             </div>
         </div>

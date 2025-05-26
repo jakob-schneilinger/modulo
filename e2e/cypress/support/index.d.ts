@@ -1,9 +1,10 @@
 declare namespace Cypress{
     interface Chainable {
         /**
-         * Navigate to main page and login as admin
+         * create a session and login
          */
-        loginAdmin();
-
+        createSession(username: string, pass: string);
+        login(username: string, pass: string);
+        isFixtureImage(fixtureImage: string)
     }
 }

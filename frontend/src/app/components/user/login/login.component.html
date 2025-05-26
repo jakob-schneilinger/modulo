@@ -1,4 +1,4 @@
-<div *ngIf="error" class="notification alert alert-warning alert-dismissible fade show" role="alert">
+<div *ngIf="error" class="notification alert alert-warning alert-dismissible fade show" role="alert" data-cy="auth-error">
   <strong>Authentication problems!</strong> {{ errorMessage }}
   <button type="button" (click)="vanishError()" class="close" data-dismiss="alert" aria-label="Close">
     <span aria-hidden="true">&times;</span>
@@ -19,7 +19,7 @@
         <div class="form-group">
           <label for="inputUsername">Username</label>
           <input type="text" name="username" formControlName="username" class="form-control" id="inputUsername"
-            aria-describedby="usernameHelp" placeholder="Enter username">
+            aria-describedby="usernameHelp" placeholder="Enter username" data-cy="login-input-username">
           <div *ngIf="submitted && loginForm.controls.username.errors" class="error">
             <small class="form-text text-warning" *ngIf="loginForm.controls.username.errors.required">
               Your username is required!
@@ -31,7 +31,7 @@
         <div class="form-group">
           <label for="password">Password</label>
           <input type="password" name="password" formControlName="password" class="form-control" id="password"
-            placeholder="Password">
+            placeholder="Password" data-cy="login-input-password">
           <div *ngIf="submitted && loginForm.controls.password.errors" class="error">
             <small class="form-text text-warning" *ngIf="loginForm.controls.password.errors.required">
               Your password is required!
@@ -39,11 +39,11 @@
           </div>
         </div>
 
-        <button type="submit" (click)="loginUser()" class="primary">Login</button>
+        <button type="submit" (click)="loginUser()" class="primary" data-cy="login-button">Login</button>
 
       </form>
 
-      <span>New here? <a routerLink="/signup">Create an account</a></span>
+      <span>New here? <a routerLink="/signup" data-cy="register-link">Create an account</a></span>
     </div>
   </div>
 </div>
