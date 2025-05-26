@@ -24,7 +24,7 @@
 
   <ul>
     <li routerLink="/user/me" class="flex between" (mouseenter)="hoverProfile=true" (mouseleave)="hoverProfile=false">
-      <span class="flex"><img [src]="profileImgSrc" class="profile"><a>Profile</a></span>
+      <span class="flex"><img [src]="profileImgSrc" class="profile"><a data-cy="header-profile">Profile</a></span>
       <span><i *ngIf="hoverProfile" (click)="logout()" class="bi bi-box-arrow-right profile"></i></span>
     </li>
     <li class="flex">
@@ -36,11 +36,11 @@
   <hr>
 
   <div class="control">
-    <button class="primary" (click)="createBoard()"><i class="bi bi-plus-square-fill"></i>Create board</button>
+    <button class="primary" (click)="createBoard()" data-cy="header-create-board"><i class="bi bi-plus-square-fill"></i>Create board</button>
   </div>
 
   <ul id="nav-components" *ngIf="!!roots">
-    <li *ngFor="let item of roots" [routerLink]="'component/'+item.id" [ngClass]="{'in-view': isCurrentlyViewed(item)}">
+    <li *ngFor="let item of roots" [routerLink]="'component/'+item.id" [ngClass]="{'in-view': isCurrentlyViewed(item)}" [attr.data-cy]="'root-board-link'">
       <a>{{item.name}}</a>
     </li>
   </ul>

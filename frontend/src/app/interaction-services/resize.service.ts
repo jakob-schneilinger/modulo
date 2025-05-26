@@ -38,7 +38,7 @@ export class ResizeService {
     const columnWidth = grid.offsetWidth / gridVar.columns;
     const rowHeight = gridVar.rowHeight; //grid.offsetHeight / 8;
 
-    const rows = Math.min(gridVar.columns, Math.max(1, Math.round(deltaY / rowHeight))); // TODO: change if Css changes
+    const rows = Math.max(1, Math.round(deltaY / rowHeight)); // TODO: change if Css changes
 
     if(columnWidth != 0) {
       const columns = Math.min(gridVar.columns, Math.max(1, Math.round(deltaX / columnWidth)));

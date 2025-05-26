@@ -24,13 +24,13 @@
 
     <div *ngIf="self.id !== -1">
       <div class="three-dots dropdown" (mousedown)="startContainerDrag(self, $event)" (mouseup)="stopContainerDrag()"
-        (click)="$event.stopPropagation()" [hidden]="editingTitle">
+        (click)="$event.stopPropagation()" [hidden]="editingTitle" [attr.data-cy]="'container-manage-dropdown'">
         <i class="bi text-secondary" [ngClass]="{
            'bi-arrows-move': inEditMode,
            'bi-three-dots': !inEditMode,
            'grab': inEditMode,
            'point': !inEditMode
-         }" id="dropdownMenuButton-{{self.id}}" data-bs-toggle="dropdown" aria-expanded="false"></i>
+         }" id="dropdownMenuButton-{{self.id}}" data-bs-toggle="dropdown" aria-expanded="false" [attr.data-cy]="'container-manage-icon'"></i>
 
         <ul class="dropdown-menu" [attr.aria-labelledby]="'dropdownMenuButton-' + self.id" [hidden]="inEditMode">
           <li><a class="dropdown-item" (click)="startEditTitle()">Edit Title</a></li>
@@ -41,7 +41,7 @@
           <li>
             <hr class="dropdown-divider">
           </li>
-          <li><a class="dropdown-item" (click)="deleteComponent()">Delete {{capitalizeFirstLetter(self.type)}}</a></li>
+          <li><a class="dropdown-item" (click)="deleteComponent()" [attr.data-cy]="'container-delete'">Delete {{capitalizeFirstLetter(self.type)}}</a></li>
         </ul>
 
       </div>
@@ -49,14 +49,17 @@
   </div>
 
   <!-- Create children -->
-  <div class="container-grid" [id]="'container-grid-' + self.id" #grid>
+  <div class="container-grid" [id]="'container-grid-' + self.id" #grid [attr.data-cy]="'grid'">
     <app-container-component *ngFor="let child of containerChildren" [id]="'container-' + child.id" [depth]=depth+1
       [self]="child" [parentContainer]="self" [parentGridElInput]="gridEl" [homeGridElInput]="depth > 0 ? homeGridEl : gridEl" [inEditMode]="inEditMode"
       (startDraggingContainer)="startDraggingContainer.emit($event)"
       (stopDraggingContainer)="stopDraggingContainer.emit()" class="card-component" [ngStyle]="{
         'grid-column': child.column + ' / ' + (child.column + child.width),
         'grid-row': child.row + ' / ' + (child.row + child.height),
-      }" [ngClass]="{ 'preview-container': child.id === -1 }">
+      }" [ngClass]="{ 'preview-container': child.id === -1 }"
+      [attr.data-cy]="'child-container'"
+      [attr.data-cy-position]="child.row + ' ' + child.column"
+      [attr.data-cy-size]="child.width + ' ' + child.height">
     </app-container-component>
 
     <app-text-component *ngFor="let child of textChildren" [id]="'text-' + child.id" [self]="child" [depth]="depth+1"
@@ -65,7 +68,7 @@
       (stopDraggingContainer)="stopDraggingContainer.emit()" class="card-component" [ngStyle]="{
         'grid-column': child.column + ' / ' + (child.column + child.width),
         'grid-row': child.row + ' / ' + (child.row + child.height),
-      }" [ngClass]="{ 'preview-text-container': child.id === -1 }">
+      }" [ngClass]="{ 'preview-text-container': child.id === -1 }" [attr.data-cy]="'child-text'">
     </app-text-component>
 
     <app-image-component *ngFor="let child of imageChildren" [id]="'image-' + child.id" [self]="child" [depth]="depth+1"
@@ -74,7 +77,7 @@
       (stopDraggingContainer)="stopDraggingContainer.emit()" class="card-component" [ngStyle]="{
       'grid-column': child.column + ' / ' + (child.column + child.width),
       'grid-row': child.row + ' / ' + (child.row + child.height),
-    }" [ngClass]="{ 'preview-container': child.id === -1 }">
+    }" [ngClass]="{ 'preview-container': child.id === -1 }" [attr.data-cy]="'child-image'">
     </app-image-component>
 
     <app-task-component
@@ -91,7 +94,7 @@
     ></app-task-component>
 
   </div>
-  <div *ngIf="!!parentContainer && inEditMode && self.id !== -1" class="resizer" [id]="'resizer-' + self.id">
-    <i class="bi bi-arrows-angle-expand"></i>
+  <div *ngIf="!!parentContainer && inEditMode && self.id !== -1" class="resizer" [id]="'resizer-' + self.id" data-cy="container-resizer">
+    <i class="bi bi-arrows-angle-expand" ></i>
   </div>
 </div>

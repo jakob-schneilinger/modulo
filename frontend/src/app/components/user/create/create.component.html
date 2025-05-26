@@ -20,13 +20,13 @@
                     <label for="inputUsername">Username*</label>
                     <input type="text" name="username" formControlName="username" class="form-control"
                         id="inputUsername" aria-describedby="usernameHelp" placeholder="Enter username"
-                        pattern="[a-z0-9._-]+" required (input)="onUsernameInput($event)">
+                        pattern="[a-z0-9._-]+" required (input)="onUsernameInput($event)" data-cy="register-username">
                     <div *ngIf="(submitted || createForm.controls.username.touched) && createForm.controls.username.errors"
                         class="error">
-                        <small class="form-text text-warning" *ngIf="createForm.controls.username.errors.required">
+                        <small class="form-text text-warning" *ngIf="createForm.controls.username.errors.required" data-cy="register-no-username">
                             Your username is required!
                         </small>
-                        <small class="form-text text-warning" *ngIf="createForm.controls.username.errors.pattern">
+                        <small class="form-text text-warning" *ngIf="createForm.controls.username.errors.pattern" data-cy="register-bad-username">
                             Your username must only contain characters a-z or 0-9!
                         </small>
                     </div>
@@ -39,17 +39,17 @@
                         id="inputDisplayName" aria-describedby="displayNameHelp" placeholder="Enter display name">
                 </div>
 
-                <!-- Username input -->
+                <!-- Email input -->
                 <div class="form-group">
                     <label for="inputEmail">Email*</label>
                     <input type="text" name="email" formControlName="email" class="form-control" id="inputEmail"
-                        aria-describedby="emailHelp" placeholder="Enter email" required type="email">
+                        aria-describedby="emailHelp" placeholder="Enter email" required type="email" data-cy="register-email">
                     <div *ngIf="(submitted || createForm.controls.email.touched) && createForm.controls.email.errors"
                         class="error">
-                        <small class="form-text text-warning" *ngIf="createForm.controls.email.errors.required">
+                        <small class="form-text text-warning" *ngIf="createForm.controls.email.errors.required" data-cy="register-no-email">
                             Your email is required!
                         </small>
-                        <small class="form-text text-warning" *ngIf="createForm.controls.email.errors.email">
+                        <small class="form-text text-warning" *ngIf="createForm.controls.email.errors.email" data-cy="register-bad-email">
                             Wrong email format!
                         </small>
                     </div>
@@ -59,19 +59,19 @@
                 <div class="form-group">
                     <label for="password">Password*</label>
                     <input type="password" name="password" formControlName="password" class="form-control" id="password"
-                        placeholder="Password">
+                        placeholder="Password" data-cy="register-password">
                     <div *ngIf="(submitted || createForm.controls.password.touched) && createForm.controls.password.errors"
                         class="error">
-                        <small class="form-text text-warning" *ngIf="createForm.controls.password.errors.required">
+                        <small class="form-text text-warning" *ngIf="createForm.controls.password.errors.required" data-cy="register-no-password">
                             Your password is required!
                         </small>
-                        <small class="form-text text-warning" *ngIf="createForm.controls.password.errors.minlength">
+                        <small class="form-text text-warning" *ngIf="createForm.controls.password.errors.minlength" data-cy="register-bad-password">
                             Your password must be at least 8 characters long!
                         </small>
                     </div>
                 </div>
 
-                <button type="submit" class="primary">Create</button>
+                <button type="submit" class="primary" data-cy="register-create">Create</button>
 
             </form>
             <span>Already have an account? <a routerLink="/login">Login here</a></span>
