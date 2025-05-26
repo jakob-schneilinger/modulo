@@ -90,35 +90,34 @@ describe("tests dragging and resizing a component", ()=>{
     })
 
     it('should not move a component by dragging in navbar', ()=>{
-        cy.get("[data-cy-position='1 1']").should('exist')
 
-        cy.get('[data-cy=container-manage-icon]')
-            .trigger('mousedown', { which: 1 })
-            .trigger('mousemove', { clientX: 0, clientY: -200 })
-            .trigger('mouseup', { force: true })
-        // did not move
-        cy.get("[data-cy-position='1 1']")
-            .should('exist')
-            .should('have.attr', 'data-cy', 'child-container')
+        cy.get("[data-cy-position='1 1']").then(()=>{
+            cy.get('[data-cy=container-manage-icon]')
+                .trigger('mousedown', { which: 1 })
+                .trigger('mousemove', { clientX: 0, clientY: -200 })
+                .trigger('mouseup', { force: true })
+            // did not move
+            cy.get("[data-cy-position='1 1']")
+                .should('exist')
+                .should('have.attr', 'data-cy', 'child-container')
+        })
 
     })
 
     it('should not move a component by dragging in sidebar', ()=>{
-        cy.get("[data-cy-position='1 1']").should('exist')
-
-        cy.get('[data-cy=container-manage-icon]')
-            .trigger('mousedown', { which: 1 })
-            .trigger('mousemove', { clientX: -300, clientY: 0 })
-            .trigger('mouseup', { force: true })
-        // did not move
-        cy.get("[data-cy-position='1 1']")
-            .should('exist')
-            .should('have.attr', 'data-cy', 'child-container')
-
+        cy.get("[data-cy-position='1 1']").then(()=>{
+            cy.get('[data-cy=container-manage-icon]')
+                .trigger('mousedown', { which: 1 })
+                .trigger('mousemove', { clientX: -300, clientY: 0 })
+                .trigger('mouseup', { force: true })
+            // did not move
+            cy.get("[data-cy-position='1 1']")
+                .should('exist')
+                .should('have.attr', 'data-cy', 'child-container')
+        })
     })
 
     it('should resize a component', ()=>{
-        cy.get("[data-cy-position='1 1']").should('exist')
 
         cy.get("[data-cy=grid]").then(([grid]) => {
             const columnWidth = Math.round(grid.clientWidth / columnNumber)
