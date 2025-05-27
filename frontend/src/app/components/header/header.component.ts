@@ -50,6 +50,11 @@ export class HeaderComponent implements OnInit {
       const i = this.roots.findIndex((i) => i.id == id);
       if (i >= 0) this.roots.splice(i, 1);
     });
+
+    window.addEventListener("board-created-homepage", (event) => {
+      const createdRoot = (event as any).detail
+      this.roots.push(createdRoot)
+    })
   }
 
   logout() {
@@ -60,7 +65,10 @@ export class HeaderComponent implements OnInit {
   createBoard() {
     const item: Board = { name: "Unnamed" } as any;
     this.compService.createBoard(item).subscribe({
-      next: (board) => this.roots.push(board),
+      next: (board) => {
+        this.roots.push(board)
+        window.dispatchEvent(new CustomEvent("board-created-header", {detail: board}))
+      },
       error: (e) => console.error(e),
     });
   }
