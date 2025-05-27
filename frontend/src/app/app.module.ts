@@ -12,6 +12,7 @@ import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
 import { HeaderComponent } from "./components/header/header.component";
 import { FooterComponent } from "./components/footer/footer.component";
+import { HomepageComponent } from "./components/homepage/homepage.component";
 import { HomeComponent } from "./components/home/home.component";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import { httpInterceptorProviders } from "./interceptors";

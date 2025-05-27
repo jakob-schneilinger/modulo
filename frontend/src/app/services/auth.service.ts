@@ -64,7 +64,7 @@ export class AuthService {
     let token = jwtDecode(this.getToken());
     return {
       username: token.sub,
-      displayName: token["displayName"],
+      displayName: token["display_name"],
       email: token["email"],
     };
   }

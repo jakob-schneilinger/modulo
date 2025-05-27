@@ -90,8 +90,8 @@ describe("tests dragging and resizing a component", ()=>{
     })
 
     it('should not move a component by dragging in navbar', ()=>{
-
-        cy.get("[data-cy-position='1 1']").then(()=>{
+        cy.wait(2000)
+        cy.get("[data-cy-position='1 1']").should('exist').then(()=>{
             cy.get('[data-cy=container-manage-icon]')
                 .trigger('mousedown', { which: 1 })
                 .trigger('mousemove', { clientX: 0, clientY: -200 })
@@ -105,7 +105,8 @@ describe("tests dragging and resizing a component", ()=>{
     })
 
     it('should not move a component by dragging in sidebar', ()=>{
-        cy.get("[data-cy-position='1 1']").then(()=>{
+        cy.wait(2000)
+        cy.get("[data-cy-position='1 1']").should('exist').then(()=>{
             cy.get('[data-cy=container-manage-icon]')
                 .trigger('mousedown', { which: 1 })
                 .trigger('mousemove', { clientX: -300, clientY: 0 })
@@ -118,8 +119,8 @@ describe("tests dragging and resizing a component", ()=>{
     })
 
     it('should resize a component', ()=>{
-
-        cy.get("[data-cy=grid]").then(([grid]) => {
+        cy.wait(2000)
+        cy.get("[data-cy=grid]").should('exist').then(([grid]) => {
             const columnWidth = Math.round(grid.clientWidth / columnNumber)
             const xOffset = 5
             const yOffset = 4
@@ -129,6 +130,7 @@ describe("tests dragging and resizing a component", ()=>{
                 .trigger('mousemove', columnWidth*xOffset, rowHeight*yOffset, {force: true})
                 .trigger('mouseup', { force: true })
             // did not move and resized
+            cy.wait(1000)
             cy.get("[data-cy-position='1 1']")
                 .should('exist').should('have.attr', 'data-cy-size', `${createBoard.width + xOffset} ${createBoard.height + yOffset-1}`)
 
