@@ -10,16 +10,16 @@
   position: relative;
   grid-auto-flow: row dense;
   overflow: visible;
+  height: 100vh;
 }
 
-.container-header {
-  min-width: 0;
-  overflow: hidden;
-}
-
-.container-header h5 {
+h5 {
   font-size: 1.1rem;
   white-space: normal;
   word-break: break-word;
   margin-bottom: 0.1rem;
+}
+
+input.title {
+  width: calc(100% - 1rem);
 }

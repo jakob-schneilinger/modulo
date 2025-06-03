@@ -5,13 +5,12 @@ import java.time.LocalDate;
 public record TaskCreateDto(
         String name,
         Long parentId,
-        long width,
-        long height,
-        long column,
-        long row,
+        Long width,
+        Long height,
+        Long column,
+        Long row,
         LocalDate startDate,
         LocalDate endDate,
         boolean completed,
-        boolean repeating
-) implements TaskDto {
+        boolean repeating) implements TaskDto {
 }

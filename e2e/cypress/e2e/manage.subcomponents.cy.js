@@ -52,13 +52,13 @@ describe("managing", ()=>{
         // create
         cy.get("[data-cy=create-sub-component]").click()
         cy.get("[data-cy=create-sub-board]").click()
-        cy.get("[data-cy=child-container]").should("exist")
+        cy.get("[data-cy=child-board]").should("exist")
         // delete
-        cy.get("[data-cy=home-edit-mode]").click()
-        cy.get("[data-cy=container-manage-dropdown]").click()
-        cy.get("[data-cy=container-delete]").click()
+        cy.get("[data-cy=manage-dropdown]").click()
+        cy.get("[data-cy='context-Delete Board']").click()
         cy.get('[data-cy=home-board-delete-modal-confirm]').click()
-        cy.get("[data-cy=child-container]").should("not.exist")
+        cy.wait(100)
+        cy.get("[data-cy=child-board]").should("not.exist")
     })
 
     it("can create and delete a child text", ()=>{
@@ -67,10 +67,10 @@ describe("managing", ()=>{
         cy.get("[data-cy=create-sub-text]").click()
         cy.get("[data-cy=child-text]").should("exist")
         // delete
-        cy.get("[data-cy=home-edit-mode]").click()
-        cy.get("[data-cy=text-manage-dropdown]").click()
-        cy.get("[data-cy=text-delete]").click()
+        cy.get("[data-cy=manage-dropdown]").click()
+        cy.get("[data-cy='context-Delete Text']").click()
         cy.get('[data-cy=home-board-delete-modal-confirm]').click()
+        cy.wait(100)
         cy.get("[data-cy=child-text]").should("not.exist")
     })
 
@@ -88,10 +88,10 @@ describe("managing", ()=>{
 
 
         // delete
-        cy.get("[data-cy=home-edit-mode]").click()
-        cy.get("[data-cy=image-manage-dropdown]").click()
-        cy.get("[data-cy=image-delete]").click()
+        cy.get("[data-cy=manage-dropdown]").click()
+        cy.get("[data-cy='context-Delete Image']").click()
         cy.get('[data-cy=home-board-delete-modal-confirm]').click()
+        cy.wait(100)
         cy.get("[data-cy=child-image]").should("not.exist")
     })
 

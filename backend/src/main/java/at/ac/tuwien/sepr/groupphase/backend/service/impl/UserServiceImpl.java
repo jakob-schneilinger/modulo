@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,6 +40,7 @@ public class UserServiceImpl implements UserService {
 
     private final PasswordEncoder passwordEncoder;
 
+    @Autowired
     public UserServiceImpl(UserRepository userRepository, JwtUtils utils, UserValidator validator,
             PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
@@ -141,5 +143,13 @@ public class UserServiceImpl implements UserService {
 
         File file = new File(avatarPath, username);
         file.delete();
+    }
+
+    public long getUserId() {
+        LOGGER.trace("getUserId");
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        ApplicationUser user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new NotFoundException("User not found: " + username));
+        return user.getId();
     }
 }

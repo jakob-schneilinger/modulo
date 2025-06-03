@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS components (
 	id INT NOT NULL AUTO_INCREMENT UNIQUE,
-	type ENUM('text', 'image', 'board', 'task') NOT NULL,
+	type ENUM('text', 'image', 'board', 'note', 'task') NOT NULL,
 	owner_id INT NOT NULL,
 	width INT NOT NULL,
     height INT NOT NULL,
@@ -19,20 +19,37 @@ CREATE TABLE IF NOT EXISTS task_content (
 );
 
 CREATE TABLE IF NOT EXISTS text_content (
-	id INT NOT NULL UNIQUE,
-    font_size INT DEFAULT 12,
-	text VARCHAR(255) NOT NULL,
-    name VARCHAR(255) NOT NULL
+	id INT NOT NULL PRIMARY KEY,
+    content TEXT
 );
 
 
 CREATE TABLE IF NOT EXISTS image_content (
-	id INT NOT NULL UNIQUE
+	id INT NOT NULL PRIMARY KEY
+);
+
+
+CREATE TABLE IF NOT EXISTS note_content (
+    id INT NOT NULL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL
+);
+
+
+CREATE TABLE IF NOT EXISTS labels (
+    label_name VARCHAR(255) NOT NULL PRIMARY KEY,
+    color VARCHAR(7)
+);
+
+
+CREATE TABLE IF NOT EXISTS label_component (
+    label_name VARCHAR(255) NOT NULL,
+    component_id INT NOT NULL,
+    PRIMARY KEY (label_name, component_id)
 );
 
 
 CREATE TABLE IF NOT EXISTS board_content (
-	id INT NOT NULL UNIQUE,
+	id INT NOT NULL PRIMARY KEY,
 	board_name VARCHAR(255) NOT NULL
 );
 
@@ -101,11 +118,20 @@ ON UPDATE NO ACTION ON DELETE CASCADE;
 ALTER TABLE board_content
 ADD FOREIGN KEY(id) REFERENCES components(id)
 ON UPDATE NO ACTION ON DELETE CASCADE;
+ALTER TABLE note_content
+ADD FOREIGN KEY(id) REFERENCES components(id)
+ON UPDATE NO ACTION ON DELETE CASCADE;
 ALTER TABLE container_children
 ADD FOREIGN KEY(id_child) REFERENCES components(id)
 ON UPDATE NO ACTION ON DELETE CASCADE;
 ALTER TABLE container_children
 ADD FOREIGN KEY(id_container) REFERENCES components(id)
+ON UPDATE NO ACTION ON DELETE CASCADE;
+ALTER TABLE label_component
+ADD FOREIGN KEY(label_name) REFERENCES labels(label_name)
+ON UPDATE NO ACTION ON DELETE CASCADE;
+ALTER TABLE label_component
+ADD FOREIGN KEY(component_id) REFERENCES components(id)
 ON UPDATE NO ACTION ON DELETE CASCADE;
 ALTER TABLE components
 ADD FOREIGN KEY(owner_id) REFERENCES users(id)

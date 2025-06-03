@@ -26,7 +26,7 @@ export class ResizeService {
     if (!this.isResizing || this.activeResizerId !== `resizer-${component.id}`) return;
 
     const body = document.querySelectorAll('body');
-    body.forEach(b => b.style.userSelect = 'none')
+    body.forEach(b => (b.style.userSelect = 'none', b.style.webkitUserSelect = 'none'))
 
     const card = cardEl.nativeElement as HTMLElement;
     const preview = previewCardEl.nativeElement as HTMLElement;
@@ -38,7 +38,7 @@ export class ResizeService {
     const columnWidth = grid.offsetWidth / gridVar.columns;
     const rowHeight = gridVar.rowHeight; //grid.offsetHeight / 8;
 
-    const rows = Math.max(1, Math.round(deltaY / rowHeight)); // TODO: change if Css changes
+    const rows = Math.max(1, Math.round(deltaY / rowHeight));
 
     if(columnWidth != 0) {
       const columns = Math.min(gridVar.columns, Math.max(1, Math.round(deltaX / columnWidth)));
@@ -70,7 +70,7 @@ export class ResizeService {
     this.activeResizerId = null;
 
     const body = document.querySelectorAll('body');
-    body.forEach(b => b.style.userSelect = '')
+    body.forEach(b => (b.style.userSelect = '', b.style.webkitUserSelect = ''))
 
     const preview = previewCardEl.nativeElement as HTMLElement;
 

@@ -1,13 +1,8 @@
 package at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components;
 
-public record TextCreateDto(
-    String text,
-    String name,
-    Long parentId,
-    long width,
-    int fontSize,
-    long height,
-    long row,
-    long column
-) implements TextDto {
+/**
+ * Dto for creating a text component.
+ */
+public record TextCreateDto(String content, Long parentId, Long width, Long height, Long row, Long column)
+                implements TextDto {
 }

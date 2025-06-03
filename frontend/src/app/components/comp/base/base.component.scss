@@ -1,7 +1,17 @@
 @use "src/styles/global.scss" as *;
 @use "src/styles/variables.scss" as *;
 
+:host {
+  position: relative;
+}
+
 // ------ CARD ------ //
+
+.borders {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
 
 .card-component {
   padding: 4px;
@@ -68,9 +78,6 @@ a {
 // ------ DROPDOWN & RESIZE/DRAGGING ------ //
 
 .resizer {
-  position: sticky;
-  top: 100%;
-  left: 100%;
   width: 16px;
   height: 16px;
   cursor: nwse-resize;
@@ -80,22 +87,6 @@ a {
   justify-content: center;
   border-radius: 4px;
 }
-/* old resizer
-  .resizer {
-    position: absolute;
-    right: 2px;
-    bottom: 2px;
-    width: 20px;
-    height: 20px;
-    cursor: nwse-resize;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 4px;
-    background-color: white;
-  }
-   */
 
 .resizer i {
   font-size: 10px;
@@ -113,22 +104,14 @@ a {
   cursor: grab;
 }
 
-.point {
-  cursor: pointer;
+.top-right {
+  position: absolute;
+  top: 4px;
+  right: 4px;
 }
 
-.dropdown-menu {
-  z-index: 100;
-  padding: 0.1rem 0;
-}
-
-.dropdown-menu .dropdown-item {
-  padding-top: 0.25rem;
-  padding-bottom: 0.25rem;
-  margin: 0.1rem 0;
-  font-size: 0.875rem;
-}
-
-.dropdown-menu .dropdown-divider {
-  margin: 0rem 0;
+.bottom-right {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
 }

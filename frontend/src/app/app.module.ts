@@ -16,13 +16,10 @@ import { HomepageComponent } from "./components/homepage/homepage.component";
 import { HomeComponent } from "./components/home/home.component";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import { httpInterceptorProviders } from "./interceptors";
-import { TextComponent } from "./components/comp/text/text.component";
-import { TaskComponent } from "./components/comp/containers/task/task.component";
-import { ContainerComponent } from "./components/comp/containers/container.component";
 import { ResizeService } from "./interaction-services/resize.service";
 import { DragService } from "./interaction-services/drag.service";
 import { CommonModule } from "@angular/common";
-import { ImageComponent } from "./components/comp/image/image.component";
+import { ComponentsModule } from "./components/comp/components.module";
 
 @NgModule({
   declarations: [
@@ -36,6 +33,7 @@ import { ImageComponent } from "./components/comp/image/image.component";
   ],
   bootstrap: [AppComponent],
   imports: [
+    ComponentsModule,
     CommonModule,
     BrowserModule,
     AppRoutingModule,
@@ -43,10 +41,6 @@ import { ImageComponent } from "./components/comp/image/image.component";
     NgbModule,
     FormsModule,
     RouterLink,
-    ContainerComponent,
-    TextComponent,
-    ImageComponent,
-    TaskComponent
   ],
   providers: [httpInterceptorProviders, provideHttpClient(withInterceptorsFromDi()), ResizeService, DragService],
 })

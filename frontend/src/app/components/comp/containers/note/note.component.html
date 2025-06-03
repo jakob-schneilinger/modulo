@@ -1,0 +1,47 @@
+<div #previewCard class="preview-card" [attr.data-preview-id]="self.id"></div>
+<div #card [attr.data-id]="self.id" class="card p-2">
+
+    <!-- Title -->
+    @if (editingTitle) {
+    <input class="title  form-control form-control-sm mb-1" [(ngModel)]="titleBuffer" maxlength="255">
+    <div class="d-flex gap-1">
+        <button class="btn btn-sm btn-primary" (click)="saveTitle()">Save</button>
+        <button class="btn btn-sm btn-outline-secondary" (click)="cancelTitle()">Cancel</button>
+    </div>
+    } @else {
+    <h5 [ngClass]="{'resizing': isResizing}" (dblclick)="startEditTitle()">
+        {{ self.title }}
+    </h5>
+    }
+
+    <!-- Controls -->
+    @if (inEditMode) {
+    <!-- Drag & Resize -->
+    <div class="top-right" (mousedown)="startContainerDrag(self, $event)" (mouseup)="stopContainerDrag()">
+        <i class="bi bi-arrows-move grab"></i>
+    </div>
+    <div class="resizer bottom-right" [id]="'resizer-' + self.id">
+        <i class="bi bi-arrows-angle-expand"></i>
+    </div>
+    } @else {
+    <app-context-menu class="top-right" [actions]="actions"></app-context-menu>
+    }
+
+
+    <!-- Labels -->
+    <div class="flex gap-1">
+        @for (label of self.labels; track label) {
+        <span class="label flex gap-1" [style]="'background-color:'+lblBGColor(label)+';color:'+lblColor(label)">
+            {{label.name}}
+            <i class="bi bi-x" (click)="removeLbl(label)"></i>
+        </span>
+        }
+        <button class="compact" (click)="addLbl()"><i class="bi bi-plus"></i>add</button>
+    </div>
+
+
+    <!-- Children -->
+    <div class="container-grid" [id]="'container-grid-' + self.id" #grid>
+        <ng-container #children></ng-container>
+    </div>
+</div>

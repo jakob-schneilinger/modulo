@@ -17,18 +17,25 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Entity
+@Getter
+@Setter
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING)
 @Table(name = "components")
 public abstract class Component {
 
     public abstract ComponentDetailDto accept(MappingDepth depth);
+
+    public boolean isContainer() {
+        return false;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,6 +48,7 @@ public abstract class Component {
     private Long row;
 
     private Long width;
+
     private Long height;
 
     @Column(name = "owner_id", nullable = false)
@@ -54,75 +62,4 @@ public abstract class Component {
     )
     private List<Component> children = new ArrayList<>();
 
-    public boolean isContainer() {
-        return false;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getWidth() {
-        return width;
-    }
-
-    public void setWidth(Long width) {
-        this.width = width;
-    }
-
-    public Long getOwnerId() {
-        return ownerId;
-    }
-
-    public void setOwnerId(Long ownerId) {
-        this.ownerId = ownerId;
-    }
-
-    public Long getHeight() {
-        return height;
-    }
-
-    public void setHeight(Long height) {
-        this.height = height;
-    }
-
-    public List<Component> getChildren() {
-        return children;
-    }
-
-    public Long getRow() {
-        return row;
-    }
-
-    public void setRow(Long row) {
-        this.row = row;
-    }
-
-    public Long getColumn() {
-        return column;
-    }
-
-    public void setColumn(Long column) {
-        this.column = column;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Component component)) {
-            return false;
-        }
-        return Objects.equals(id, component.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
 }

@@ -39,11 +39,14 @@
 
 </nav>
 
-<div *ngIf="!!component">
-  <app-container-component *ngIf="component" [id]="'board-' + component.id" [depth]=0 [self]="component"
+<div *ngIf="!!component" style="position: relative;">
+
+  <div #preview class="preview-card"></div>
+
+  <app-board-component *ngIf="component" [id]="'board-' + component.id" [depth]=0 [self]="component"
     [inEditMode]="inEditMode" (startDraggingContainer)="startDragging($event)"
     (stopDraggingContainer)="stopDragging(undefined)">
-  </app-container-component>
+  </app-board-component>
 
 </div>
 
@@ -53,11 +56,11 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Delete {{this.forDeletion?.name ?? 'Component'}}?</h5>
+        <h5 class="modal-title" id="exampleModalLabel">Delete Component?</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body">
-        Are you sure you want to delete the component {{this.forDeletion?.name ? '\"' + this.forDeletion?.name + '\"' : 'of type \"' + this.forDeletion?.type + '\"'}}"?
+      <div class="modal-body" *ngIf="!!forDeletion">
+        {{getCompDeleteMsg(forDeletion)}}
         <br>
         All existing sub-components in this component will also be deleted!
       </div>

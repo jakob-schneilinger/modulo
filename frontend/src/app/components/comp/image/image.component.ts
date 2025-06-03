@@ -2,17 +2,24 @@ import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
 import { BaseComponent } from "../base/base.component";
 import { Image } from "src/app/dtos/component";
 import { CommonModule } from "@angular/common";
+import ComponentFactory from "src/app/global/ComponentFactory";
+import type { ContextMenuAction } from "../context-menu/context-menu.component";
 
 @Component({
   selector: "app-image-component",
-  imports: [CommonModule],
   templateUrl: "./image.component.html",
   styleUrls: ["./image.component.scss", "../base/base.component.scss"],
-  standalone: true,
+  standalone: false,
 })
 export class ImageComponent extends BaseComponent<Image> implements OnInit {
   @ViewChild("content") img: ElementRef<HTMLImageElement>;
   @ViewChild("input") input: ElementRef<HTMLInputElement>;
+
+  actions: ContextMenuAction[] = [
+    { label: "Change Image", action: () => this.focusFileInput() },
+    { label: "Enable Edit Mode", action: () => this.enableEditMode() },
+    { label: "Delete Image", action: () => this.deleteComponent() },
+  ];
 
   inputActive: boolean = false;
 
@@ -45,3 +52,4 @@ export class ImageComponent extends BaseComponent<Image> implements OnInit {
     this.input.nativeElement.click();
   }
 }
+ComponentFactory.addComponentType("image", ImageComponent);

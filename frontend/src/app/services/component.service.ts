@@ -1,9 +1,8 @@
 import { Injectable } from "@angular/core";
-import { Board, Component, Container, Image, ImageCreate, Text, Task } from "../dtos/component";
+import { Board, Component, Container, Image, ImageCreate, Text, Note, Task, Label } from "../dtos/component";
 import { Observable } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import { Globals } from "../global/globals";
-import { User } from "../dtos/user";
 
 @Injectable({
   providedIn: "root",
@@ -23,13 +22,13 @@ export class ComponentService {
     return this.httpClient.post<Text>(this.componentBaseUri + "/text", component);
   }
 
-  updateText(component: Text): Observable<Text> {
+  updateText(component: Partial<Text>): Observable<Text> {
     console.log("Updated Text Component: ", component);
-    return this.httpClient.put<Text>(this.componentBaseUri + "/text", component);
+    return this.httpClient.patch<Text>(this.componentBaseUri + "/text", component);
   }
 
-  createTask(task: Task): Observable<Task>{
-    return this.httpClient.post<Task>(this.componentBaseUri + "/task", task)
+  createTask(task: Task): Observable<Task> {
+    return this.httpClient.post<Task>(this.componentBaseUri + "/task", task);
   }
 
   createImage(image: ImageCreate, data?: Blob) {
@@ -52,39 +51,33 @@ export class ComponentService {
     return this.httpClient.put<Image>(this.componentBaseUri + "/image", form);
   }
 
-  updatePosAndSize<T extends Component>(comp: T): Observable<T> {
-    // TODO: implement a generic pos component update
-    switch (comp.type) {
-      case "board":
-        return this.httpClient.put<T>(this.componentBaseUri + "/board", comp); // TODO: maybe exchange container for specific object if needed
-      case "task":
-        return this.httpClient.put<T>(this.componentBaseUri + "/task", comp);
-      case "note":
-        return this.httpClient.put<T>(this.componentBaseUri + "/note", comp);
-      case "image":
-        const form = new FormData();
-        form.append("component", new Blob([JSON.stringify(comp)], { type: "application/json" }));
-        return this.httpClient.put<T>(this.componentBaseUri + "/image", form);
-      case "text":
-        return this.httpClient.put<T>(this.componentBaseUri + "/text", comp);
-      default: //TODO add default case if needed ??
-        return;
-    }
+  createNote(note: Partial<Note>) {
+    console.log("Create note component: ", note);
+    return this.httpClient.post<Text>(this.componentBaseUri + "/note", note);
   }
 
-  updateComponent(component: Component): Observable<Component> {
-    // used to update with/height/row/col
-    return this.httpClient.put<Component>(this.componentBaseUri + "/" + component.type, component);
+  updateNote(note: Partial<Note> & { id: number }) {
+    console.log("Update note component: ", note);
+    return this.httpClient.patch<Text>(this.componentBaseUri + "/note", note);
+  }
+
+  updatePosAndSize<T extends Component>(comp: T): Observable<T> {
+    const { column, height, width, row, id, parentId } = comp;
+    return this.httpClient.patch<T>(this.componentBaseUri, { column, height, width, row, id, parentId });
+  }
+
+  updateTask(task: Partial<Task>) {
+    return this.httpClient.put<Component>(this.componentBaseUri + "/task", task);
   }
 
   repeatTask(task: Container): Observable<Task> {
-    console.log("Repeat Task: " + task.id)
-    return this.httpClient.put<Task>(this.componentBaseUri + "/task/repeat", task)
+    console.log("Repeat Task: " + task.id);
+    return this.httpClient.put<Task>(this.componentBaseUri + "/task/repeat", task);
   }
 
-  updateBoard(board: Board): Observable<Board> {
+  updateBoard(board: Partial<Board>): Observable<Board> {
     console.log("Update Board: ", board);
-    return this.httpClient.put<Board>(this.componentBaseUri + "/board", board);
+    return this.httpClient.patch<Board>(this.componentBaseUri + "/board", board);
   }
 
   // TODO: maybe not needed
@@ -98,5 +91,9 @@ export class ComponentService {
 
   deleteComponent(componentId: number): Observable<boolean> {
     return this.httpClient.delete<boolean>(this.componentBaseUri + "/" + componentId);
+  }
+
+  setLabel(label: Label) {
+    return this.httpClient.post<Label>(this.componentBaseUri + "/label", label);
   }
 }

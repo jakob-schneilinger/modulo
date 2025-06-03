@@ -5,6 +5,7 @@ import at.ac.tuwien.sepr.groupphase.backend.entity.components.Component;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Task;
 import at.ac.tuwien.sepr.groupphase.backend.exception.NotFoundException;
 import at.ac.tuwien.sepr.groupphase.backend.repository.ComponentRepository;
+import at.ac.tuwien.sepr.groupphase.backend.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,11 +21,11 @@ public class TaskValidator extends ComponentValidator  {
 
 
     private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-    private ComponentRepository componentRepository;
+    private final ComponentRepository componentRepository;
 
 
-    public TaskValidator(ComponentRepository componentRepository) {
-        super(componentRepository);
+    public TaskValidator(ComponentRepository componentRepository, UserService userService) {
+        super(componentRepository, userService);
         this.componentRepository = componentRepository;
     }
 
@@ -36,7 +37,7 @@ public class TaskValidator extends ComponentValidator  {
         if (!errors.isEmpty()) {
             throw new at.ac.tuwien.sepr.groupphase.backend.exception.ValidationException("Validation for updating board failed", errors);
         }
-        super.validateContainerForUpdate(taskUpdateDto, task);
+        super.validateComponent(taskUpdateDto, taskUpdateDto.id());
     }
 
     private List<String> validDateRange(TaskUpdateDto taskDto) {

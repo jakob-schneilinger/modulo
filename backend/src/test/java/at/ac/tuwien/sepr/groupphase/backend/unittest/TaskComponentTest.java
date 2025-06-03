@@ -1,6 +1,5 @@
 package at.ac.tuwien.sepr.groupphase.backend.unittest;
 
-
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardCreateDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.TaskCreateDto;
@@ -35,7 +34,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TaskComponentTest {
 
-
     @Autowired
     UserRepository userRepository;
     @Autowired
@@ -46,25 +44,25 @@ public class TaskComponentTest {
     BoardService componentService;
     private ApplicationUser user;
 
-    private TaskCreateDto createDto(LocalDate start, LocalDate end, boolean repeating, boolean completed){
-        return new TaskCreateDto("task-Create", null, 1, 1, 1, 1, start, end, completed, repeating);
+    private TaskCreateDto createDto(LocalDate start, LocalDate end, boolean repeating, boolean completed) {
+        return new TaskCreateDto("task-Create", null, 1L, 1L, 1L, 1L, start, end, completed, repeating);
     }
 
     @BeforeEach
     @Transactional
     void prepareSecurityContext() {
-        if(user==null) {
+        if (user == null) {
             user = new ApplicationUser();
             user.setUsername("testUser01");
             user.setEmail("ah@ahhh.ah");
             user.setDisplayName("Test User");
             user = userRepository.save(user);
-        }else {
+        } else {
             user = userRepository.findByUsername("testUser01").orElseThrow();
         }
 
         var auth = new UsernamePasswordAuthenticationToken(
-            user.getUsername(), null, List.of());
+                user.getUsername(), null, List.of());
         SecurityContextHolder.getContext().setAuthentication(auth);
 
     }
@@ -82,9 +80,12 @@ public class TaskComponentTest {
     @Test
     void updateTask_updatesExistingEntity() {
 
-        TaskDetailDto taskParent = (TaskDetailDto) taskService.createTask(createDto(LocalDate.now(), LocalDate.now().plusDays(40), false, false));
-        TaskDetailDto task = (TaskDetailDto) taskService.createTask(createDto(LocalDate.now(), LocalDate.now().plusDays(1), false, false));
-        TaskUpdateDto taskUpdateDto = new TaskUpdateDto(task.id(), "newName",1,1,1,1,null,LocalDate.now().plusDays(1),LocalDate.now().plusDays(2),true,false,taskParent.id());
+        TaskDetailDto taskParent = (TaskDetailDto) taskService
+                .createTask(createDto(LocalDate.now(), LocalDate.now().plusDays(40), false, false));
+        TaskDetailDto task = (TaskDetailDto) taskService
+                .createTask(createDto(LocalDate.now(), LocalDate.now().plusDays(1), false, false));
+        TaskUpdateDto taskUpdateDto = new TaskUpdateDto(task.id(), "newName", 1L, 1L, 1L, 1L, null,
+                LocalDate.now().plusDays(1), LocalDate.now().plusDays(2), true, false, taskParent.id());
 
         TaskDetailDto updatedTask = (TaskDetailDto) taskService.updateTask(taskUpdateDto);
         assertEquals("newName", updatedTask.name());
@@ -97,10 +98,12 @@ public class TaskComponentTest {
 
     @Transactional
     @Test
-    void repeatTask_noChildrenOnlyParent_returnsRepeatedParentTask(){
-        ComponentDetailDto board = componentService.createBoard( new BoardCreateDto("new board", null, 1,1,2,2));
-        TaskDetailDto task = (TaskDetailDto) taskService.createTask(createDto(LocalDate.now().minusDays(10), LocalDate.now().minusDays(5), false, false));
-        TaskUpdateDto taskUpdateDto = new TaskUpdateDto(task.id(), "newName",1,1,1,1,null,LocalDate.now().minusDays(10), LocalDate.now().minusDays(5),true,true,board.id());
+    void repeatTask_noChildrenOnlyParent_returnsRepeatedParentTask() {
+        ComponentDetailDto board = componentService.createBoard(new BoardCreateDto("new board", null, 1L, 1L, 2L, 2L));
+        TaskDetailDto task = (TaskDetailDto) taskService
+                .createTask(createDto(LocalDate.now().minusDays(10), LocalDate.now().minusDays(5), false, false));
+        TaskUpdateDto taskUpdateDto = new TaskUpdateDto(task.id(), "newName", 1L, 1L, 1L, 1L, null,
+                LocalDate.now().minusDays(10), LocalDate.now().minusDays(5), true, true, board.id());
 
         TaskDetailDto repeatedTask = (TaskDetailDto) taskService.repeatTask(taskUpdateDto);
         assertEquals("newName", repeatedTask.name());
@@ -110,19 +113,22 @@ public class TaskComponentTest {
         assertThat(componentRepository.findById(repeatedTask.id())).isPresent();
         assertThat(componentRepository.findById(task.id())).isPresent();
 
-
     }
 
     @Transactional
     @Test
-    void repeatTask_withChildren_returnsRepeatedParentTask(){
-        ComponentDetailDto board = componentService.createBoard( new BoardCreateDto("new board", null, 1,1,2,2));
-        TaskDetailDto task = (TaskDetailDto) taskService.createTask(createDto(LocalDate.now().minusDays(10), LocalDate.now().minusDays(5), true, true));
-        TaskDetailDto child = (TaskDetailDto) taskService.createTask(createDto(LocalDate.now().minusDays(7), LocalDate.now().minusDays(6), false, true));
-        TaskUpdateDto taskChildDto = new TaskUpdateDto(child.id(), "newName",1,1,1,1,null,LocalDate.now().minusDays(7), LocalDate.now().minusDays(6),true,false,task.id());
+    void repeatTask_withChildren_returnsRepeatedParentTask() {
+        ComponentDetailDto board = componentService.createBoard(new BoardCreateDto("new board", null, 1L, 1L, 2L, 2L));
+        TaskDetailDto task = (TaskDetailDto) taskService
+                .createTask(createDto(LocalDate.now().minusDays(10), LocalDate.now().minusDays(5), true, true));
+        TaskDetailDto child = (TaskDetailDto) taskService
+                .createTask(createDto(LocalDate.now().minusDays(7), LocalDate.now().minusDays(6), false, true));
+        TaskUpdateDto taskChildDto = new TaskUpdateDto(child.id(), "newName", 1L, 1L, 1L, 1L, null,
+                LocalDate.now().minusDays(7), LocalDate.now().minusDays(6), true, false, task.id());
 
         ComponentDetailDto childDetailDto = taskService.updateTask(taskChildDto);
-        TaskUpdateDto taskParentDto = new TaskUpdateDto(task.id(), "parent",1,1,1,1,List.of(childDetailDto),LocalDate.now().minusDays(10), LocalDate.now().minusDays(5),true,true,board.id());
+        TaskUpdateDto taskParentDto = new TaskUpdateDto(task.id(), "parent", 1L, 1L, 1L, 1L, List.of(childDetailDto),
+                LocalDate.now().minusDays(10), LocalDate.now().minusDays(5), true, true, board.id());
 
         TaskDetailDto repeatedTask = (TaskDetailDto) taskService.repeatTask(taskParentDto);
         assertEquals("parent", repeatedTask.name());
@@ -134,8 +140,5 @@ public class TaskComponentTest {
         assertEquals(false, childTask.isCompleted());
 
     }
-
-
-
 
 }

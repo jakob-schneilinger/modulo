@@ -8,6 +8,7 @@ import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Specifically, it includes operations for managing boards within the application.
  */
 @RestController
-@RequestMapping(value = "/api/v1/component")
+@RequestMapping(value = "/api/v1/component/task")
 public class TaskEndpoint {
 
     private final TaskService service;
@@ -37,7 +38,7 @@ public class TaskEndpoint {
      * @return component detail of the task
      */
     @PermitAll
-    @PostMapping("/task")
+    @PostMapping("")
     public ResponseEntity<ComponentDetailDto> createTask(
         @RequestBody TaskCreateDto dto) {
         return new ResponseEntity<>(service.createTask(dto), HttpStatus.CREATED);
@@ -50,7 +51,7 @@ public class TaskEndpoint {
      * @return component detail of the task
      */
     @PermitAll
-    @PutMapping("/task")
+    @PutMapping("")
     public ResponseEntity<ComponentDetailDto> updateTask(
         @RequestBody TaskUpdateDto dto) {
         return new ResponseEntity<>(service.updateTask(dto), HttpStatus.OK);
@@ -63,11 +64,10 @@ public class TaskEndpoint {
      * @return component detail of the task
      */
     @PermitAll
-    @PutMapping("/task/repeat")
+    @PutMapping("/repeat")
     public ResponseEntity<ComponentDetailDto> repeatTask(
         @RequestBody TaskUpdateDto dto
     ) {
         return new ResponseEntity<>(service.repeatTask(dto), HttpStatus.OK);
     }
-
 }

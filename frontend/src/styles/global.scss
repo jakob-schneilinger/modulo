@@ -33,6 +33,12 @@ button {
     background-color: color.adjust($neutral, $lightness: -5%);
   }
 
+  &.compact {
+    border: none;
+    padding: 0;
+    padding: 0 0.25rem;
+  }
+
   &.primary {
     color: white;
     background-color: $primary;
@@ -95,4 +101,8 @@ span.error {
   &.between {
     justify-content: space-between;
   }
+}
+
+.hidden {
+  display: none;
 }

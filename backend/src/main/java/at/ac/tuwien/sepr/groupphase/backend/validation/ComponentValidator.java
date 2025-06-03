@@ -1,15 +1,14 @@
 package at.ac.tuwien.sepr.groupphase.backend.validation;
 
 
-import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardUpdateDto;
-import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDto;
-import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ContainerDto;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentUpdateDto;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Component;
 import at.ac.tuwien.sepr.groupphase.backend.exception.ConflictException;
 import at.ac.tuwien.sepr.groupphase.backend.exception.NotFoundException;
 import at.ac.tuwien.sepr.groupphase.backend.exception.UserNotAuthorizedException;
 import at.ac.tuwien.sepr.groupphase.backend.repository.ComponentRepository;
+import at.ac.tuwien.sepr.groupphase.backend.service.UserService;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +19,6 @@ import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @org.springframework.stereotype.Component
 @Primary
@@ -31,9 +29,12 @@ public class ComponentValidator {
 
     private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private final ComponentRepository componentRepository;
+    private final UserService userService;
 
-    public ComponentValidator(ComponentRepository componentRepository) {
+    @Autowired
+    public ComponentValidator(ComponentRepository componentRepository, UserService userService) {
         this.componentRepository = componentRepository;
+        this.userService = userService;
     }
 
     /**
@@ -42,31 +43,57 @@ public class ComponentValidator {
      *      - no overlapping
      *      - user is authorized
      *      - parentId does exist and does not equal self id
-     *      - column and row are not below 1
+     *      - column/row/width/height are not below 1
+     *      - max depth is not reached
+     *      - no circles by containers
      *
-     * @param component to be validated
-     * @param userId of the user
+     * @param dto to be validated
      * @param selfId od the component (can be -1L for creation)
-     * @return List of errors found
      */
     @Transactional
-    public List<String> validateComponent(ComponentDto component, long userId, Long selfId) {
-        LOG.trace("validateComponent({}, {})", component, selfId);
+    public List<String> validateComponent(ComponentDto dto, long selfId) {
+        LOG.trace("validateComponent({}, {})", dto, selfId);
         List<String> errors = new ArrayList<>();
+
+        ComponentDto component = dto;
+        Long userId = userService.getUserId();
+
+        if (selfId > 0) {
+            Component entity = componentRepository.findById(selfId)
+                .orElseThrow(() -> new NotFoundException("Component with ID " + selfId + " not found"));
+
+            if (!entity.getOwnerId().equals(userId)) {
+                throw new UserNotAuthorizedException("User is not owner of this component");
+            }
+
+            component = new ComponentUpdateDto(selfId,
+                dto.parentId() != null ? dto.parentId() : componentRepository.getParentId(selfId),
+                dto.width() != null ? dto.width() : entity.getWidth(),
+                dto.height() != null ? dto.height() : entity.getHeight(),
+                dto.column() != null ? dto.column() : entity.getColumn(),
+                dto.row() != null ? dto.row() : entity.getRow()
+            );
+
+            if (entity.isContainer()) {
+                int upwardDepth = componentRepository.getParentDepth(component.parentId()) + 1;
+                int downwardDepth = getMaxChildDepth(entity, 0, component.parentId());
+
+                if (upwardDepth + downwardDepth > MAX_DEPTH) {
+                    errors.add("Violates max depth requirement of " + MAX_DEPTH + " components");
+                }
+            }
+        }
+
         if (component.parentId() != null) {
-            Optional<Component> parentComponentOpt = componentRepository.findById(component.parentId());
 
-            if (parentComponentOpt.isEmpty()) {
-                throw new NotFoundException("Parent with given ID does not exist");
+            if (component.parentId().equals(selfId)) {
+                throw new ConflictException("The component cannot be its own parent", List.of());
             }
 
-            if (Objects.equals(component.parentId(), selfId)) {
-                throw new ConflictException("The component cannot be its own parent", new ArrayList<>());
-            }
+            Component parent = componentRepository.findById(component.parentId())
+                .orElseThrow(() -> new NotFoundException("Parent with given ID does not exist"));
 
-            Component parentComponent = parentComponentOpt.get();
-
-            if (!parentComponent.getOwnerId().equals(userId)) {
+            if (!parent.getOwnerId().equals(userId)) {
                 throw new UserNotAuthorizedException("User is not authorized for given parent");
             }
 
@@ -78,7 +105,19 @@ public class ComponentValidator {
                 errors.add("Column should be greater than zero");
             }
 
-            List<Component> siblings = parentComponent.getChildren().stream()
+            if (component.width() < 1) {
+                errors.add("Width should be greater than zero");
+            }
+
+            if (component.height() < 1) {
+                errors.add("Height should be greater than zero");
+            }
+
+            if (componentRepository.getParentDepth(component.parentId()) + 1 > MAX_DEPTH) {
+                errors.add("Violates max depth requirement of " + MAX_DEPTH + " components");
+            }
+
+            List<Component> siblings = parent.getChildren().stream()
                     .filter(child -> !Objects.equals(child.getId(), selfId)).toList();
 
             long x1 = component.column();
@@ -98,48 +137,6 @@ public class ComponentValidator {
                     throw new ConflictException("Conflict while trying to update a component", List.of("Component overlaps with existing component"));
                 }
             }
-        }
-        return errors;
-    }
-
-    /**
-     * Helper method for standard Container validation for creation.
-     *      Checks for:
-     *      - maximal depth
-     *
-     * @param component to be validated
-     * @return List of errors found
-     */
-    public List<String> validateContainerForCreation(ContainerDto component) {
-        LOG.trace("validateContainerForCreation({})", component);
-        List<String> errors = new ArrayList<>();
-        if (componentRepository.getParentDepth(component.parentId()) + 1 > MAX_DEPTH) {
-            errors.add("Violates max depth requirement of " + MAX_DEPTH + " components");
-        }
-        return errors;
-    }
-
-    /**
-     * Helper method for standard Container validation for update.
-     *      Checks for:
-     *      - maximal depth
-     *      - no circular structures
-     *
-     * @param component to be validated
-     * @param self entity of the component
-     * @return List of errors found
-     */
-    @Transactional
-    public List<String> validateContainerForUpdate(ComponentDto component, Component self) {
-        LOG.trace("validateContainerForUpdate({}, {})", component, self);
-
-        List<String> errors = new ArrayList<>();
-
-        int upwardDepth = componentRepository.getParentDepth(component.parentId()) + 1;
-        int downwardDepth = getMaxChildDepth(self, 0, component.parentId());
-
-        if (upwardDepth + downwardDepth > MAX_DEPTH) {
-            errors.add("Violates max depth requirement of " + MAX_DEPTH + " components");
         }
         return errors;
     }

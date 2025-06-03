@@ -1,8 +1,9 @@
-import { Component } from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { FormsModule } from "@angular/forms";
-import { Container, Text, Component as Comp } from "../../../dtos/component";
+import { Component, ElementRef, ViewChild } from "@angular/core";
+import { Text } from "../../../dtos/component";
 import { BaseComponent } from "../base/base.component";
+import ComponentFactory from "src/app/global/ComponentFactory";
+
+import type { ContextMenuAction } from "../context-menu/context-menu.component";
 
 /**
  * A simple, self‑contained text item that can live inside a Container.
@@ -13,62 +14,92 @@ import { BaseComponent } from "../base/base.component";
  */
 @Component({
   selector: "app-text-component",
-  standalone: true,
-  imports: [CommonModule, FormsModule],
   templateUrl: "./text.component.html",
   styleUrls: ["./text.component.scss", "../base/base.component.scss"],
+  standalone: false,
 })
 export class TextComponent extends BaseComponent<Text> {
-  fontSize = 16;
+  editing: boolean = false;
+  editBuffer: string = "";
 
-  editingTitle = false;
-  titleBuffer = "";
+  contextMenuActions: ContextMenuAction[] = [
+    { label: "Edit Text", action: () => this.edit() },
+    { label: "Enable Edit Mode", action: () => this.enableEditMode() },
+    { label: "Delete Text", action: () => this.deleteComponent() },
+  ];
 
-  /** local UI state */
-  editing = false;
-  buffer = "";
+  @ViewChild("content") contentPreview: ElementRef;
+  @ViewChild("input") input: ElementRef<HTMLInputElement>;
 
-  startEdit(): void {
-    this.buffer = this.self?.text;
+  edit() {
+    this.editBuffer = this.self.content;
     this.editing = true;
+    setTimeout(() => {
+      this.input.nativeElement.focus();
+    }, 50);
   }
 
   save(): void {
-    if (this.self) {
-      this.self.text = this.buffer.trim();
-    }
     this.editing = false;
-    this.eventService.emitTextChanged(this.self);
-  }
+    this.self.content = this.editBuffer;
 
-  cancel(): void {
-    this.editing = false;
+    this.eventService.emitTextChanged(this.self);
+    this.renderMd();
   }
 
   deleteComponent() {
     this.eventService.emitDelete(this.self);
   }
 
-  startEditTitle(): void {
-    this.titleBuffer = this.self.name;
-    this.editingTitle = true;
-  }
-
-  saveTitle(): void {
-    const trimmedTitle = this.titleBuffer.trim();
-    const changed = this.self.name !== trimmedTitle;
-    this.self.name = trimmedTitle;
-    this.editingTitle = false;
-    if (changed) {
-      this.eventService.emitTextChanged(this.self);
-    }
-  }
-
-  cancelTitle(): void {
-    this.editingTitle = false;
-  }
-
   ngAfterViewInit(): void {
-    this.fontSize = this.self.fontSize;
+    super.ngAfterViewInit();
+    this.renderMd();
   }
+
+  renderMd() {
+    let content = "Enter text here...";
+    if (this.self.content) content = mdToHtml(this.self.content);
+    this.contentPreview.nativeElement.innerHTML = content;
+  }
+}
+ComponentFactory.addComponentType("text", TextComponent);
+
+function mdToHtml(content: string) {
+  content = content.replace(/</g, "&lt");
+  content = content.replace(/>/g, "&gt");
+  let html = "";
+  const lines = content.split("\n");
+  let lastIdent = 0;
+  let ident = 0;
+  for (const l of lines) {
+    if (l.startsWith("#")) {
+      let end = l.lastIndexOf("#", 5);
+      html += `<h${end + 1}>${l.substring(end + 1)}</h${end + 1}>`;
+      continue;
+    }
+
+    let t = l;
+    let i = 0;
+    while (t.includes("**")) t = t.replace("**", i++ % 2 == 0 ? "<i>" : "</i>");
+    i = 0;
+    while (t.includes("*")) t = t.replace("*", i++ % 2 == 0 ? "<b>" : "</b>");
+    i = 0;
+    while (t.includes("`")) t = t.replace("`", i++ % 2 == 0 ? "<code>" : "</code>");
+
+    if (t.startsWith("-")) {
+      if (lastIdent == 0) {
+        ident++;
+        html += "<ul>";
+      }
+      let li = t.substring(t.indexOf("-") + 1).trim();
+      html += `<li>${li}</li>`;
+    } else if (lastIdent > 0) {
+      html += "</ul>";
+      ident == 0;
+    }
+    lastIdent = ident;
+
+    if (ident == 0) html += `<p>${t}</p>`;
+  }
+  return html;
 }

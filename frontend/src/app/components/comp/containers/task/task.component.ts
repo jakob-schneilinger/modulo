@@ -1,53 +1,31 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef, Input, OnDestroy,
-  OnInit,
-  ViewChild
-} from "@angular/core";
-import {
-  Component as Comp,
-  Container,
-  isTask,
-  Task,
-  Text as myText,
-  isText,
-  Image,
-  isImage
-} from "../../../../dtos/component";
-import {formatDate, NgClass, NgForOf, NgIf, NgStyle} from "@angular/common";
-import {TextComponent} from "../../text/text.component";
-import {FormsModule} from "@angular/forms";
-import {BaseComponent} from "../../base/base.component";
-import {TimerService} from "../../../../interaction-services/timer.service";
-import {Subscription} from "rxjs";
-import {inject} from "@angular/core";
-import {ImageComponent} from "../../image/image.component";
-
+import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from "@angular/core";
+import { Component as Comp, Task, isType } from "../../../../dtos/component";
+import { formatDate } from "@angular/common";
+import { TimerService } from "../../../../interaction-services/timer.service";
+import { Subscription } from "rxjs";
+import { inject } from "@angular/core";
+import ComponentFactory from "src/app/global/ComponentFactory";
+import { ContainerComponent } from "../container.component";
+import type { ContextMenuAction } from "../../context-menu/context-menu.component";
 
 @Component({
   selector: "app-task-component",
   templateUrl: "./task.component.html",
-  styleUrls: ["./task.component.scss", "../../base/base.component.scss"],
-  standalone: true,
-  imports: [
-    NgForOf,
-    NgIf,
-    TextComponent,
-    NgStyle,
-    NgClass,
-    FormsModule,
-    ImageComponent,
-  ]
+  styleUrls: ["./task.component.scss", "../../base/base.component.scss", "../container.component.scss"],
+  standalone: false,
 })
-export class TaskComponent extends BaseComponent<Container> implements OnInit, AfterViewInit, OnDestroy {
-
-  @ViewChild("grid", {static: false}) gridEl!: ElementRef;
+export class TaskComponent extends ContainerComponent<Task> implements OnInit, AfterViewInit, OnDestroy {
+  @ViewChild("grid", { static: false }) gridEl!: ElementRef;
 
   private timerService = inject(TimerService);
   private timerSub?: Subscription;
 
-  task: Task;
+  actions: ContextMenuAction[] = [
+    { label: "Edit Title", action: () => this.startEditTitle() },
+    { label: "Enable Edit Mode", action: () => this.enableEditMode() },
+    { label: "Delete Task", action: () => this.deleteComponent() },
+  ];
+
   isTask = false;
   @Input() isNotChildOfTask!: boolean;
   parent: ElementRef;
@@ -57,10 +35,18 @@ export class TaskComponent extends BaseComponent<Container> implements OnInit, A
   editingTitle = false;
   titleBuffer = "";
 
+  ngAfterViewInit(): void {
+    super.ngAfterViewInit();
+    this.handleRepeatable();
+  }
+
+  ngOnInit(): void {
+    this.timerSub = this.timerService.tick$.subscribe(() => this.handleRepeatable());
+  }
 
   onCompletedChange(checked: boolean) {
-    this.task.completed = checked;
-    this.save()
+    this.self.completed = checked;
+    this.save();
   }
 
   startEditTitle(): void {
@@ -74,7 +60,7 @@ export class TaskComponent extends BaseComponent<Container> implements OnInit, A
     this.self.name = trimmedTitle;
     this.editingTitle = false;
     if (changed) {
-      this.eventService.emitTitleChanged(this.self);
+      this.componentService.updateTask({ id: this.self.id, name: this.self.name }).subscribe();
     }
   }
 
@@ -82,41 +68,12 @@ export class TaskComponent extends BaseComponent<Container> implements OnInit, A
     this.editingTitle = false;
   }
 
-  get imageChildren(): Image[] {
-    return this.self.children.filter(isImage);
-  }
-
   save() {
     this.eventService.emitTaskChanged(this.self);
   }
 
-  deleteComponent() {
-    this.eventService.emitDelete(this.self);
-  }
-
-  // TODO: find a better way to seperate Containers and other Components
-  private isContainer(component: Comp): component is Container {
-    return (
-      (component.type === "board" ||
-        component.type === "task" ||
-        component.type === "note") &&
-      Array.isArray(component.children)
-    );
-  }
-
-  get containerChildren(): Container[] {
-    return this.self.children.filter(this.isContainer);
-  }
-
-  // TODO: change if found better way
-  get otherChildren(): Comp[] {
-    return this.self.children.filter(child => !this.isContainer(child));
-  }
-
   taskInProgress() {
-    if (this.task)
-      if (!this.task.completed) return !this.task.completed
-
+    if (this.self) if (!this.self.completed) return !this.self.completed;
   }
 
   getCompletedTasks(): number {
@@ -125,14 +82,12 @@ export class TaskComponent extends BaseComponent<Container> implements OnInit, A
 
   private countCompletedTasks(children: Comp[]): number {
     return children.reduce((sum, child) => {
-      let completed = 0;
-      if (child.type === "task") {
-        const task = child.type == 'task' ? child as Task : null
-        completed = task.completed ? 1 : 0;
-      }
+      if (!isType(child, "task")) return 0;
+
+      const completed = child.completed ? 1 : 0;
       const childCompleted = child.children ? this.countCompletedTasks(child.children) : 0;
       return completed + childCompleted + sum;
-    }, 0)
+    }, 0);
   }
 
   getTotalTasks(): number {
@@ -141,40 +96,31 @@ export class TaskComponent extends BaseComponent<Container> implements OnInit, A
 
   private countTasks(children: Comp[]): number {
     return children.reduce((sum, child) => {
-      const isTask = child.type == 'task' ? 1 : 0;
+      if (!isType(child, "task")) return 0;
       const sumTasks = child.children ? this.countTasks(child.children) : 0;
-      return isTask + sumTasks + sum;
-    }, 0)
+      return 1 + sumTasks + sum;
+    }, 0);
   }
 
   taskOverdue() {
-    if (this.isTask && this.task.endDate && !this.task.repeating) {
-      const end = new Date(this.task.endDate);
+    if (this.isTask && this.self.endDate && !this.self.repeating) {
+      const end = new Date(this.self.endDate);
       const now = new Date();
-      if (end.getTime() < new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() && !this.task.completed) {
+      if (
+        end.getTime() < new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() &&
+        !this.self.completed
+      ) {
         return true;
       }
     }
-    return false
-  }
-
-  get textChildren(): myText[] {
-    return this.otherChildren.filter(isText);
-  }
-
-
-  protected readonly isText = isText;
-
-
-  ngAfterViewInit(): void {
-    this.handleRepeatable();
+    return false;
   }
 
   private handleRepeatable() {
     if (this.isNotChildOfTask) {
-      if (this.task.repeating === true) {
-        if (this.task.startDate) {
-          const date = new Date(this.task.endDate);
+      if (this.self.repeating === true) {
+        if (this.self.startDate) {
+          const date = new Date(this.self.endDate);
           const now = new Date();
           if (date.getTime() < now.getTime()) {
             this.eventService.emitTaskRepeated(this.self);
@@ -184,97 +130,85 @@ export class TaskComponent extends BaseComponent<Container> implements OnInit, A
     }
   }
 
-
-  ngOnInit(): void {
-    if (this.self.type === "task") {
-      this.task = this.self as Task;
-      this.isTask = true;
-      this.timerSub = this.timerService.tick$
-        .subscribe(() => this.handleRepeatable());
-    }
-  }
-
-
   endDateEditable(): boolean {
-    return !!this.task.endDate;
+    return !!this.self.endDate;
   }
 
   startDateEditable() {
-    return !!this.task.startDate;
+    return !!this.self.startDate;
   }
 
   deleteStartDate() {
-    this.task.startDate = null;
+    this.self.startDate = null;
     this.editingStartDate = false;
     this.save();
   }
 
   deleteEndDate() {
-    this.task.endDate = null;
+    this.self.endDate = null;
     this.editingEndDate = false;
     this.save();
   }
 
   setRepeating() {
-    if (this.task.repeating) {
-      this.task.startDate = null;
-      this.task.repeating = false;
+    if (this.self.repeating) {
+      this.self.startDate = null;
+      this.self.repeating = false;
       this.save();
     } else {
-      if (!this.task.startDate) this.task.startDate = new Date();
-      this.task.repeating = true;
+      if (!this.self.startDate) this.self.startDate = new Date();
+      this.self.repeating = true;
       this.save();
     }
   }
 
   available(): boolean {
-    if (this.task.startDate) {
-      const date = new Date(this.task.startDate);
+    if (this.self.startDate) {
+      const date = new Date(this.self.startDate);
       const now = new Date();
       if (date.getTime() > now.getTime()) {
         return true;
       }
     }
     if (this.getCompletedTasks() < this.getTotalTasks()) {
-      this.task.completed = false;
+      this.self.completed = false;
       return true;
     }
     return false;
   }
 
-
   formatIsoDate(date: Date): string {
-    return formatDate(date, 'yyyy-MM-dd', 'en-DK');
+    return formatDate(date, "yyyy-MM-dd", "en-DK");
   }
 
   public get startDateText(): string {
-    if (!this.task.startDate) {
-      return '';
+    if (!this.self.startDate) {
+      return "";
     } else {
-      return this.formatIsoDate(this.task.startDate);
+      return this.formatIsoDate(this.self.startDate);
     }
   }
 
   public set startDateText(date: string) {
-    if (date == null || date === '') {
+    if (date == null || date === "") {
     } else {
-      this.task.startDate = new Date(date);
+      this.self.startDate = new Date(date);
       this.save();
     }
   }
 
   public get endDateText(): string {
-    if (!this.task.endDate) {
-      return '';
+    if (!this.self.endDate) {
+      return "";
     } else {
-      return this.formatIsoDate(this.task.endDate);
+      return this.formatIsoDate(this.self.endDate);
     }
   }
 
   public set endDateText(date: string) {
-    if (date == null || date === '') {
+    if (date == null || date === "") {
     } else {
-      this.task.endDate = new Date(date);
+      this.self.endDate = new Date(date);
       this.save();
     }
   }
@@ -282,5 +216,5 @@ export class TaskComponent extends BaseComponent<Container> implements OnInit, A
   ngOnDestroy() {
     this.timerSub?.unsubscribe();
   }
-
 }
+ComponentFactory.addComponentType("task", TaskComponent);

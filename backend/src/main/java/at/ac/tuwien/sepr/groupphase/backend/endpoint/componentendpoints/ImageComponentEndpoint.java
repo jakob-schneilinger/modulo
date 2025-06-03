@@ -64,7 +64,6 @@ public class ImageComponentEndpoint {
     public ResponseEntity<ComponentDetailDto> createImageComponent(
             @RequestPart(name = "component", required = true) ImageCreateDto image,
             @RequestPart(name = "image", required = false) MultipartFile file) {
-
         ComponentDetailDto result;
         try {
             if (file == null || file.isEmpty()) {

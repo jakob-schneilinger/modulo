@@ -9,7 +9,7 @@ import at.ac.tuwien.sepr.groupphase.backend.exception.NotFoundException;
 import at.ac.tuwien.sepr.groupphase.backend.repository.ComponentRepository;
 import at.ac.tuwien.sepr.groupphase.backend.service.componentservice.ComponentService;
 import at.ac.tuwien.sepr.groupphase.backend.service.componentservice.ImageService;
-import at.ac.tuwien.sepr.groupphase.backend.validation.ImageValidator;
+import at.ac.tuwien.sepr.groupphase.backend.validation.ImageComponentValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
-import java.util.Optional;
 
 @Service
 public class ImageServiceImpl implements ImageService {
@@ -33,11 +32,11 @@ public class ImageServiceImpl implements ImageService {
     private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private final ComponentRepository componentRepository;
     private final ComponentService componentService;
-    private final ImageValidator imageValidator;
+    private final ImageComponentValidator imageValidator;
 
     @Autowired
-    public ImageServiceImpl(ComponentRepository componentRepository, ImageValidator imageValidator,
-                            ComponentService componentService) {
+    public ImageServiceImpl(ComponentRepository componentRepository, ImageComponentValidator imageValidator,
+            ComponentService componentService) {
         this.componentRepository = componentRepository;
         this.imageValidator = imageValidator;
         this.componentService = componentService;
@@ -46,11 +45,9 @@ public class ImageServiceImpl implements ImageService {
     @Override
     public ComponentDetailDto createImage(ImageCreateDto imageDto, byte[] imageData) {
         LOG.trace("Creating image {}...", imageDto);
-        long userId = componentService.getUserId();
 
-        imageValidator.validateImageCreation(imageDto, imageData, userId);
-
-        ComponentDetailDto result = componentService.setComponent(imageDto, new Image(), userId);
+        imageValidator.validateImage(imageDto, imageData, -1L);
+        ComponentDetailDto result = componentService.setComponent(imageDto, new Image());
 
         if (imageData != null) {
             saveImageData(result.id(), imageData);
@@ -64,19 +61,13 @@ public class ImageServiceImpl implements ImageService {
     public ComponentDetailDto updateImage(ImageUpdateDto imageDto, byte[] imageData) {
         LOG.trace("Updating image {}...", imageDto);
 
-        Optional<Component> optionalComponent = componentRepository.findById(imageDto.id());
-        Component component;
+        Component component = componentRepository.findById(imageDto.id())
+                .filter(c -> c instanceof Image)
+                .map(c -> (Image) c)
+                .orElseThrow(() -> new NotFoundException("Image with given ID does not exist"));
 
-        if (optionalComponent.isPresent()) {
-            component = optionalComponent.get();
-        } else {
-            throw new NotFoundException("Image with given ID does not exist");
-        }
-
-        long userId = componentService.getUserId();
-        imageValidator.validateImageUpdate(imageDto, component, imageData, userId);
-
-        ComponentDetailDto result = componentService.setComponent(imageDto, component, userId);
+        imageValidator.validateImage(imageDto, imageData, component.getId());
+        ComponentDetailDto result = componentService.setComponent(imageDto, component);
 
         if (imageData != null) {
             saveImageData(result.id(), imageData);
