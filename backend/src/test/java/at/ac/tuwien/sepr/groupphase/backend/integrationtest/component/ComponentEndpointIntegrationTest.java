@@ -29,6 +29,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -95,7 +96,7 @@ public class ComponentEndpointIntegrationTest {
 
     static void parentBoard(MockMvc mockMvc, ObjectMapper objectMapper) throws Exception {
         // having a test datasource would of course help
-        BoardCreateDto boardParent = new BoardCreateDto("board test parent", null, 1,1,1,1);
+        BoardCreateDto boardParent = new BoardCreateDto("board test parent", null, 1L,1L,1L,1L);
 
         var response = mockMvc.perform(
             post("/api/v1/component/board")
@@ -134,7 +135,7 @@ public class ComponentEndpointIntegrationTest {
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     void canCreateBoardWithoutParentReturns201() throws Exception {
-        BoardCreateDto boardCreateDto = new BoardCreateDto("new board", null, 1,1,2,2);
+        BoardCreateDto boardCreateDto = new BoardCreateDto("new board", null, 1L,1L,2L,2L);
 
         var response = mockMvc.perform(
             post("/api/v1/component/board")
@@ -158,7 +159,7 @@ public class ComponentEndpointIntegrationTest {
 
     @Test
     void createWithNonexistentParentReturns404() throws Exception {
-        BoardCreateDto boardCreateDto = new BoardCreateDto("board test", -99L, 1,1,3,3);
+        BoardCreateDto boardCreateDto = new BoardCreateDto("board test", -99L, 1L,1L,3L,3L);
 
         var response = mockMvc.perform(
             post("/api/v1/component/board")
@@ -174,7 +175,7 @@ public class ComponentEndpointIntegrationTest {
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     void createWithParentCorrectly() throws Exception {
 
-        BoardCreateDto boardChild = new BoardCreateDto("board test child", parentId, 1,1,4,4);
+        BoardCreateDto boardChild = new BoardCreateDto("board test child", parentId, 1L,1L,4L,4L);
         var response = mockMvc.perform(
             post("/api/v1/component/board")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -197,7 +198,7 @@ public class ComponentEndpointIntegrationTest {
 
     @Test
     void createBoardWithParentOfOtherUserReturns403() throws Exception {
-        BoardCreateDto boardChild = new BoardCreateDto("board test child", parentId, 1,1,5,5);
+        BoardCreateDto boardChild = new BoardCreateDto("board test child", parentId, 1L,1L,5L,5L);
         var response = mockMvc.perform(
             post("/api/v1/component/board")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -210,7 +211,7 @@ public class ComponentEndpointIntegrationTest {
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     void createOnPositionOfExistingBoardReturns409() throws Exception {
-        BoardCreateDto boardCreateDto = new BoardCreateDto("new board", parentId, 1,1,6,6);
+        BoardCreateDto boardCreateDto = new BoardCreateDto("new board", parentId, 1L,1L,6L,6L);
 
         mockMvc.perform(
             post("/api/v1/component/board")
@@ -270,9 +271,9 @@ public class ComponentEndpointIntegrationTest {
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     void updateExistingBoardAndReturn200() throws Exception {
-        BoardUpdateDto boardChild = new BoardUpdateDto(parentId, "new name",null, 1,1,7,7);
+        BoardUpdateDto boardChild = new BoardUpdateDto(parentId, "new name",null, 1L,1L,7L,7L);
         var response = mockMvc.perform(
-            put("/api/v1/component/board")
+            patch("/api/v1/component/board")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(boardChild))
                 .header("Authorization", userToken)
@@ -294,9 +295,9 @@ public class ComponentEndpointIntegrationTest {
 
     @Test
     void updateNonexistentBoardReturns404() throws Exception {
-        BoardUpdateDto boardChild = new BoardUpdateDto(-100, "new name",null, 1,1,8,8);
+        BoardUpdateDto boardChild = new BoardUpdateDto(-100, "new name",null, 1L,1L,8L,8L);
         var response = mockMvc.perform(
-            put("/api/v1/component/board")
+            patch("/api/v1/component/board")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(boardChild))
                 .header("Authorization", userToken)
@@ -306,9 +307,9 @@ public class ComponentEndpointIntegrationTest {
 
     @Test
     void updateBoardOfOtherUserReturns403() throws Exception {
-        BoardUpdateDto boardChild = new BoardUpdateDto(parentId, "new name",null, 1,1,9,9);
+        BoardUpdateDto boardChild = new BoardUpdateDto(parentId, "new name",null, 1L,1L,9L,9L);
         var response = mockMvc.perform(
-            put("/api/v1/component/board")
+            patch("/api/v1/component/board")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(boardChild))
                 .header("Authorization", otherUserToken)
@@ -318,9 +319,9 @@ public class ComponentEndpointIntegrationTest {
 
     @Test
     void updateWithSelfAsParentReturns409() throws Exception {
-        BoardUpdateDto boardChild = new BoardUpdateDto(parentId, "new name", parentId, 1,1,10,10);
+        BoardUpdateDto boardChild = new BoardUpdateDto(parentId, "new name", parentId, 1L,1L,10L,10L);
         var response = mockMvc.perform(
-            put("/api/v1/component/board")
+            patch("/api/v1/component/board")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(boardChild))
                 .header("Authorization", userToken)
@@ -332,7 +333,7 @@ public class ComponentEndpointIntegrationTest {
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     void updateBoardAssignParentBoardAndReturn200() throws Exception {
 
-        BoardCreateDto boardChild = new BoardCreateDto( "new board",null, 1,1,11,11);
+        BoardCreateDto boardChild = new BoardCreateDto( "new board",null, 1L,1L,11L,11L);
         var response = mockMvc.perform(
             post("/api/v1/component/board")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -348,18 +349,12 @@ public class ComponentEndpointIntegrationTest {
                 .getResponse()
                 .getContentAsByteArray()).id();
 
-        BoardUpdateDto updateChild = new BoardUpdateDto(childId, "new board", parentId, 1, 1, 11, 11);
+        BoardUpdateDto updateChild = new BoardUpdateDto(childId, "new board", parentId, 1L, 1L, 11L, 11L);
         mockMvc.perform(
-            put("/api/v1/component/board")
+            patch("/api/v1/component/board")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(updateChild))
                 .header("Authorization", userToken)
         ).andExpect(status().isOk());
     }
-
-
-
-
 }
-
-

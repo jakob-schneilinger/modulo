@@ -8,13 +8,16 @@ import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
+/**
+ * REST controller for managing text component operations.
+ * This controller provides endpoints for creating and updating text components.
+ */
 @RestController
 @RequestMapping(value = "/api/v1/component/text")
 public class TextComponentEndpoint {
@@ -46,7 +49,7 @@ public class TextComponentEndpoint {
      * @return component detail of updated text component
      */
     @PermitAll
-    @PutMapping("")
+    @PatchMapping("")
     public ResponseEntity<ComponentDetailDto> updateTextComponent(
         @RequestBody TextUpdateDto textComponent) {
         return new ResponseEntity<>(service.updateTextComponent(textComponent), HttpStatus.CREATED);

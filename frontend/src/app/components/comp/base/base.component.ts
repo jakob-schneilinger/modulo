@@ -1,4 +1,3 @@
-import { CommonModule } from "@angular/common";
 import {
   Component as NgComponent,
   ElementRef,
@@ -8,6 +7,8 @@ import {
   ViewChild,
   HostListener,
   AfterViewInit,
+  ViewContainerRef,
+  SimpleChanges,
 } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { Component, Container } from "src/app/dtos/component";
@@ -15,13 +16,11 @@ import { EventService } from "src/app/interaction-services/event.service";
 import { ResizeService } from "src/app/interaction-services/resize.service";
 import { ComponentService } from "src/app/services/component.service";
 
-// TODO: Components as module instead of standalone
 @NgComponent({
   selector: "app-base-component",
   templateUrl: "./base.component.html",
   styleUrls: ["./base.component.scss"],
-  imports: [CommonModule],
-  standalone: true,
+  standalone: false,
 })
 export class BaseComponent<T extends Component> implements AfterViewInit {
   constructor(
@@ -30,7 +29,8 @@ export class BaseComponent<T extends Component> implements AfterViewInit {
     protected elementRef: ElementRef,
     protected eventService: EventService,
     protected resizeService: ResizeService,
-    protected componentService: ComponentService
+    protected componentService: ComponentService,
+    protected viewContainer: ViewContainerRef
   ) {}
 
   @Input() depth!: number;
@@ -40,7 +40,11 @@ export class BaseComponent<T extends Component> implements AfterViewInit {
   @Input() homeGridElInput!: ElementRef;
   @Input() inEditMode: boolean;
 
-  @Output() startDraggingContainer = new EventEmitter<{ component: Component; event: MouseEvent }>();
+  @Output() startDraggingContainer = new EventEmitter<{
+    component: Component;
+    preview: ElementRef;
+    event: MouseEvent;
+  }>();
   @Output() stopDraggingContainer = new EventEmitter<void>();
 
   @ViewChild("card", { static: false }) cardEl!: ElementRef;
@@ -115,7 +119,7 @@ export class BaseComponent<T extends Component> implements AfterViewInit {
   startContainerDrag(component: Component, event: MouseEvent) {
     if (!this.inEditMode) return;
     event.preventDefault();
-    this.startDraggingContainer.emit({ component, event });
+    this.startDraggingContainer.emit({ component, preview: this.previewCardEl, event });
   }
 
   stopContainerDrag() {

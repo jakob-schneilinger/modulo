@@ -9,7 +9,6 @@ import at.ac.tuwien.sepr.groupphase.backend.exception.NotFoundException;
 import at.ac.tuwien.sepr.groupphase.backend.repository.ComponentRepository;
 import at.ac.tuwien.sepr.groupphase.backend.repository.UserRepository;
 import at.ac.tuwien.sepr.groupphase.backend.service.componentservice.TextService;
-import at.ac.tuwien.sepr.groupphase.backend.service.componentservice.impl.ComponentServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,17 +37,14 @@ public class TextComponentTest {
 
     private ApplicationUser user;
 
-
     private TextCreateDto createDto(){
         return new TextCreateDto(
             "Hello World",
-            "textbox",
             null,
-            12,
-            1,
-            1,
-            1,
-            1
+            1L,
+            1L,
+            1L,
+            1L
         );
     }
 
@@ -78,18 +74,14 @@ public class TextComponentTest {
     void createTextComponent_persistsEntity() {
         TextCreateDto dto = new TextCreateDto(
             "Hello World",
-            "textbox",
             null,
-            12,
-            1, 1, 1, 1
+            1L, 1L, 1L, 1L
         );
 
         TextDetailDto created = (TextDetailDto) textService.createTextComponent(dto);
-        assertThat(created.text()).isEqualTo("Hello World");
+        assertThat(created.content()).isEqualTo("Hello World");
         assertThat(componentRepository.findById(created.id())).isPresent();
     }
-
-
 
     @Test
     @Transactional
@@ -99,11 +91,10 @@ public class TextComponentTest {
 
         TextDetailDto created = (TextDetailDto) textService.createTextComponent(dto);
 
-        TextUpdateDto updateDto = new TextUpdateDto(created.id(), "textbox", 100, "Updated", null,12,1L,1L,1L);
+        TextUpdateDto updateDto = new TextUpdateDto(created.id(), "textbox", null, 100L, 1L, 1L, 1L);
         TextDetailDto update = (TextDetailDto) textService.updateTextComponent(updateDto);
-        assertThat(update.text()).isEqualTo("Updated");
+        assertThat(update.content()).isEqualTo("textbox");
     }
-
 
     @Test
     @Transactional
@@ -115,7 +106,7 @@ public class TextComponentTest {
         other.setDisplayName("other User");
         other = userRepository.save(other);
 
-        Text text = new Text(); text.setName("text"); text.setWidth(50L); text.setText("Some text"); text.setFontSize(12); text.setOwnerId(user.getId()); text.setHeight(1L); text.setWidth(1L);
+        Text text = new Text(); text.setContent("text"); text.setWidth(50L); text.setOwnerId(user.getId()); text.setHeight(1L); text.setWidth(1L);
         text.setColumn(1L);
         text.setRow(1L);
 
@@ -128,10 +119,8 @@ public class TextComponentTest {
         TextUpdateDto dto = new TextUpdateDto(
             text.getId(),
             "textbox",
-            50L,
-            "New text",
             null,
-            12,
+            50L,
             1L,
             1L,
             1L
@@ -150,10 +139,8 @@ public class TextComponentTest {
         TextUpdateDto dto = new TextUpdateDto(
             999L,
             "some text",
-            50L,
-            "New text",
             null,
-            12,
+            50L,
             1L,
             1L,
             1L
@@ -161,6 +148,4 @@ public class TextComponentTest {
         assertThatThrownBy(() -> textService.updateTextComponent(dto))
             .isInstanceOf(NotFoundException.class);
     }
-
-
 }

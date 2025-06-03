@@ -65,19 +65,22 @@ describe("tests dragging and resizing a component", ()=>{
     it('should move a component by dragging', ()=>{
         cy.get("[data-cy-position='1 1']").should('exist')
 
+        //enable dragging
+        cy.get("[data-cy=home-edit-mode]").click()
+
         cy.get("[data-cy=grid]").then(([grid]) =>{
             const columnWidth = Math.round(grid.clientWidth / columnNumber)
             const xOffset = 5
             const yOffset = 4
-            cy.get('[data-cy=container-manage-icon]')
-                .trigger('mousedown', { which: 1 })
+            cy.get('[data-cy=board-manage-icon]')
+                .trigger('mousedown', { which: 1 , force:true})
                 .trigger('mousemove', columnWidth*xOffset, rowHeight*yOffset, {force: true})
                 .trigger('mouseup', { force: true })
             cy.get("[data-cy-position='1 1']").should('not.exist')
             cy.get(`[data-cy-position='${yOffset+1} ${xOffset+1}']`).should('exist')
 
-            cy.get('[data-cy=container-manage-icon]')
-                .trigger('mousedown', { which: 1 })
+            cy.get('[data-cy=board-manage-icon]')
+                .trigger('mousedown', { which: 1 , force:true})
                 .trigger('mousemove', -columnWidth*xOffset, -rowHeight*yOffset , {force: true})
                 .trigger('mouseup', { force: true })
             cy.get(`[data-cy-position='${yOffset+1} ${xOffset+1}']`).should('not.exist')
@@ -92,14 +95,18 @@ describe("tests dragging and resizing a component", ()=>{
     it('should not move a component by dragging in navbar', ()=>{
         cy.wait(2000)
         cy.get("[data-cy-position='1 1']").should('exist').then(()=>{
-            cy.get('[data-cy=container-manage-icon]')
-                .trigger('mousedown', { which: 1 })
-                .trigger('mousemove', { clientX: 0, clientY: -200 })
+            //enable dragging
+            cy.get("[data-cy=home-edit-mode]").click()
+
+            cy.get('[data-cy=board-manage-icon]')
+                .trigger('mousedown', { which: 1 , force:true})
+                .trigger('mousemove', { clientX: 0, clientY: -200 , force:true})
                 .trigger('mouseup', { force: true })
             // did not move
+            cy.wait(1000)
             cy.get("[data-cy-position='1 1']")
                 .should('exist')
-                .should('have.attr', 'data-cy', 'child-container')
+                .should('have.attr', 'data-cy', 'child-board')
         })
 
     })
@@ -107,14 +114,18 @@ describe("tests dragging and resizing a component", ()=>{
     it('should not move a component by dragging in sidebar', ()=>{
         cy.wait(2000)
         cy.get("[data-cy-position='1 1']").should('exist').then(()=>{
-            cy.get('[data-cy=container-manage-icon]')
-                .trigger('mousedown', { which: 1 })
-                .trigger('mousemove', { clientX: -300, clientY: 0 })
+            //enable dragging
+            cy.get("[data-cy=home-edit-mode]").click()
+
+            cy.get('[data-cy=board-manage-icon]')
+                .trigger('mousedown', { which: 1 , force:true})
+                .trigger('mousemove', { clientX: -300, clientY: 0 , force:true})
                 .trigger('mouseup', { force: true })
             // did not move
+            cy.wait(1000)
             cy.get("[data-cy-position='1 1']")
                 .should('exist')
-                .should('have.attr', 'data-cy', 'child-container')
+                .should('have.attr', 'data-cy', 'child-board')
         })
     })
 
@@ -125,20 +136,24 @@ describe("tests dragging and resizing a component", ()=>{
             const xOffset = 5
             const yOffset = 4
 
-            cy.get('[data-cy=container-resizer]')
-                .trigger('mousedown', { which: 1 })
+            //enable dragging
+            cy.get("[data-cy=home-edit-mode]").click()
+
+            cy.get('[data-cy=board-resizer]')
+                .trigger('mousedown', { which: 1 , force:true})
                 .trigger('mousemove', columnWidth*xOffset, rowHeight*yOffset, {force: true})
                 .trigger('mouseup', { force: true })
             // did not move and resized
             cy.wait(1000)
             cy.get("[data-cy-position='1 1']")
-                .should('exist').should('have.attr', 'data-cy-size', `${createBoard.width + xOffset} ${createBoard.height + yOffset-1}`)
+                .should('exist').should('have.attr', 'data-cy-size', `${createBoard.width + xOffset} ${createBoard.height + yOffset}`)
 
-            cy.get('[data-cy=container-resizer]')
-                .trigger('mousedown', { which: 1 })
-                .trigger('mousemove', -columnWidth*xOffset, -rowHeight*(yOffset-2), {force: true})
+            cy.get('[data-cy=board-resizer]')
+                .trigger('mousedown', { which: 1 , force:true})
+                .trigger('mousemove', -columnWidth*xOffset, -rowHeight*(yOffset), {force: true})
                 .trigger('mouseup', { force: true })
             // did not move and resized back
+            cy.wait(1000)
             cy.get("[data-cy-position='1 1']")
                 .should('exist').should('have.attr', 'data-cy-size', `${createBoard.width} ${createBoard.height}`)
 

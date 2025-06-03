@@ -1,9 +1,6 @@
 package at.ac.tuwien.sepr.groupphase.backend.validation;
 
-import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardCreateDto;
-import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardUpdateDto;
-import at.ac.tuwien.sepr.groupphase.backend.entity.components.Component;
-import at.ac.tuwien.sepr.groupphase.backend.exception.UserNotAuthorizedException;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardDto;
 import at.ac.tuwien.sepr.groupphase.backend.exception.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,47 +19,26 @@ public class BoardComponentValidator {
     }
 
     /**
-     * Validates a board that should be created.
+     * Validates a board component.
      *
-     * @param board to be created
-     * @param userId of the user that wants to create the board
+     * @param board to be validated
+     * @param selfId of the component itself
      */
-    public void validateBoardForCreation(BoardCreateDto board, long userId) {
-        LOG.trace("validateBoardForCreation({})", board);
+    public void validateBoardComponent(BoardDto board, long selfId) {
+        LOG.trace("validateBoard({})", board);
 
-        List<String> errors = new ArrayList<>();
-        errors.addAll(componentValidator.validateContainerForCreation(board));
-        errors.addAll(componentValidator.validateComponent(board, userId, null));
+        List<String> errors = new ArrayList<>(componentValidator.validateComponent(board, selfId));
 
-        if (board.name() == null || board.name().isEmpty()) {
-            errors.add("Board name is null or empty");
+        if (selfId < 1) {
+            if (board.name() == null) {
+                errors.add("Board name is null");
+            } else if (board.name().isEmpty()) {
+                errors.add("Board name is empty");
+            }
         }
 
-        if (!errors.isEmpty()) {
-            throw new ValidationException("Validation for updating board failed", errors);
-        }
-    }
-
-    /**
-     * Validates a board that should be updated.
-     *
-     * @param boardDto dto for board that should be created
-     * @param board current board entity in database
-     * @param userId of the user that wants to create the board
-     */
-    public void validateBoardForUpdate(BoardUpdateDto boardDto, Component board, long userId) {
-        LOG.trace("validateBoardForUpdate({}, {})", boardDto, board);
-
-        List<String> errors = new ArrayList<>();
-        if (!board.getOwnerId().equals(userId)) {
-            throw new UserNotAuthorizedException("User is not owner of this component");
-        }
-
-        errors.addAll(componentValidator.validateContainerForUpdate(boardDto, board));
-        errors.addAll(componentValidator.validateComponent(boardDto, userId, board.getId()));
-
-        if (boardDto.name() == null || boardDto.name().isEmpty()) {
-            errors.add("Board name is null or empty");
+        if (board.name() != null && board.name().length() > 255) {
+            errors.add("Board name exceeds maximum length of 255 characters");
         }
 
         if (!errors.isEmpty()) {

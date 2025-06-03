@@ -7,48 +7,19 @@ import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
+@Setter
+@Getter
 @Table(name = "text_content")
 @DiscriminatorValue("text")
 @PrimaryKeyJoinColumn(name = "id")
 
 public class Text extends Component {
 
-    private String name;
-
-    private String text;
-
-    private int fontSize;
-
-    @Override
-    public Long getId() {
-        return super.getId();
-    }
-
-    public int getFontSize() {
-        return fontSize;
-    }
-
-    public void setFontSize(int fontSize) {
-        this.fontSize = fontSize;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
+    private String content;
 
     @Override
     public ComponentDetailDto accept(MappingDepth depth) {

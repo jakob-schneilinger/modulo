@@ -1,4 +1,7 @@
 package at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components;
 
-public record ImageCreateDto(Long parentId, long width, long height, long column, long row) implements ImageDto {
+/**
+ * Dto for creating an image component.
+ */
+public record ImageCreateDto(Long parentId, Long width, Long height, Long column, Long row) implements ImageDto {
 }

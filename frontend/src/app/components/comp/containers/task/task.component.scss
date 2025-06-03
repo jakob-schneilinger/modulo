@@ -1,34 +1,11 @@
 @use "src/styles/global.scss" as *;
 @use "src/styles/variables.scss" as *;
 
-// ------ CARD/CONTAINER ------ //
-
-.container-grid {
-  display: grid;
-  grid-template-columns: repeat(var(--columns), 1fr);
-  grid-auto-rows: var(--rowHeight);
-  position: relative;
-  grid-auto-flow: row dense;
-  overflow: visible;
-}
-
-.container-header {
-  min-width: 0;
-  overflow: hidden;
-}
-
-.container-header h5 {
-  font-size: 1.1rem;
-  white-space: normal;
-  word-break: break-word;
-  margin-bottom: 0.1rem;
-}
-
 button.buttonDel {
   /* reset anything the global rule gave you: */
-  border: none;            /* kill the 4px transparent border */
+  border: none; /* kill the 4px transparent border */
   background: transparent; /* or #fff if you want white */
-  padding: 0;              /* kill the global padding */
+  padding: 0; /* kill the global padding */
 
   /* now turn it into a perfect square flex-centered icon holder */
   display: inline-flex;
@@ -38,24 +15,24 @@ button.buttonDel {
   /* size it to whatever you like: */
   width: 24px;
   height: 24px;
-  border-radius: 4px;      /* optional, to match your style */
+  border-radius: 4px; /* optional, to match your style */
   cursor: pointer;
 }
 
 button.buttonDel:hover {
-  background-color: #FFE4E1FF;
+  background-color: #ffe4e1ff;
 }
 button.buttonDel:active {
-  background-color: #FFBDBBFF;
+  background-color: #ffbdbbff;
 }
 button.buttonDel.Selected {
   background-color: #ffaaa7;
 }
 
 button.buttonDel i {
-  margin: 0;      /* no extra whitespace */
+  margin: 0; /* no extra whitespace */
   line-height: 1; /* ensure the font icon itself doesn’t add leading */
-  font-size: 1rem;/* or whatever size you need */
+  font-size: 1rem; /* or whatever size you need */
 }
 
 .buttonRep {
@@ -75,33 +52,29 @@ button.buttonDel i {
 .task-date {
   display: inline-flex;
   align-items: center;
-  font-size: 0.875rem;    /* ~14px */
-  color: #6c757d;         /* muted grey */
-  margin-right: 0.5rem;     /* space between dates */
+  font-size: 0.875rem; /* ~14px */
+  color: #6c757d; /* muted grey */
+  margin-right: 0.5rem; /* space between dates */
 }
 
 .task-date-arrow {
-
   display: inline-flex;
   align-items: center;
-  font-size: 0.875rem;    /* ~14px */
-  color: #6c757d;         /* muted grey */
-
-
+  font-size: 0.875rem; /* ~14px */
+  color: #6c757d; /* muted grey */
 }
 .task-date-arrow i {
-  font-size: 1rem;        /* ~16px */
-  margin-right: 0.50rem;
-  margin-left: 0.40rem;/* tiny gap between icon & text */
+  font-size: 1rem; /* ~16px */
+  margin-right: 0.5rem;
+  margin-left: 0.4rem; /* tiny gap between icon & text */
   vertical-align: middle;
   font-style: normal;
 }
 
-
 .task-date i {
-  font-size: 1rem;        /* ~16px */
+  font-size: 1rem; /* ~16px */
   margin-right: 0.25rem;
-  margin-left: 0.15rem;/* tiny gap between icon & text */
+  margin-left: 0.15rem; /* tiny gap between icon & text */
   vertical-align: middle;
   font-style: normal;
 }
@@ -129,14 +102,9 @@ button.buttonDel i {
   border: 2px solid #e60029;
 }
 .button-row {
-  display: flex;            /* makes children line up in a row */
-  flex-direction: row;      /* default, but explicit is nice */
-  align-items: center;      /* vertically center within the container */
-  gap: 8px;                 /* space between buttons */
-  height: 40px;             /* fixed row height */
+  display: flex; /* makes children line up in a row */
+  flex-direction: row; /* default, but explicit is nice */
+  align-items: center; /* vertically center within the container */
+  gap: 8px; /* space between buttons */
+  height: 40px; /* fixed row height */
 }
-
-
-
-
-

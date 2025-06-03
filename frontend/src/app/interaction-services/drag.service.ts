@@ -1,117 +1,115 @@
-import { Injectable } from "@angular/core";
-import { Container, Component as Comp } from "../dtos/component";
+import { ElementRef, Injectable } from "@angular/core";
+import { Container, Component as Comp, Board } from "../dtos/component";
 import { ResizeService } from "./resize.service";
-import {gridVar} from "../dtos/grid";
+import { gridVar } from "../dtos/grid";
 
 @Injectable({
   providedIn: "root",
 })
 export class DragService {
   private draggingContainer: Comp | null = null;
-  private previewContainer: Container | null = null;
+  private preview: ElementRef;
+
+  //private previewContainer: Container | null = null;
   private sourceParent: Container | null = null;
   private componentDepth: number;
 
+  private previewRow: number;
+  private previewColumn: number;
+  private previewParent: Container;
+
   constructor(private resizeService: ResizeService) {}
 
-  startDragging(data: { component: Comp; event: MouseEvent }, sourceParent: Container) {
+  startDragging(data: { component: Comp; event: MouseEvent; preview: ElementRef }, sourceParent: Container) {
     data.event.preventDefault();
     this.draggingContainer = data.component;
     this.sourceParent = sourceParent;
     this.componentDepth = this.getComponentDepth(this.draggingContainer);
 
-    this.previewContainer = {
-      ...data.component,
-      type: "board",
-      id: -1,
-      name: "",
-      children: [],
-    };
+    this.preview = data.preview;
+    console.log("start", this.preview, this.draggingContainer);
   }
 
-  onMouseMove(
-    event: MouseEvent,
-    rootContainer: Container,
-    callback: (container: Container, targetContainer: Container) => void
-  ) {
-    if (!this.draggingContainer || !this.previewContainer) return;
+  onMouseMove(event: MouseEvent, rootContainer: Container) {
+    if (!this.draggingContainer) return;
+    const rootElement = document.querySelector(`[data-id="${rootContainer.id}"]`);
 
-    const elementUnderMouse = document.elementFromPoint(event.clientX, event.clientY);
-    let targetContainer: Container = rootContainer;
-
-    let containerEl = elementUnderMouse instanceof HTMLElement ? elementUnderMouse : null;
-
-    let foundValidTarget = false;
-    while (containerEl && !foundValidTarget) {
-      const containerIdAttr = containerEl.getAttribute("data-id");
-      if (containerIdAttr && containerIdAttr !== "-1") {
-        const containerId = Number(containerIdAttr);
-        if (containerId !== this.draggingContainer.id) {
-          const target = this.findContainerById(containerId, rootContainer);
-          if (target && target.children) {
-            targetContainer = target;
-            foundValidTarget = true;
-          }
-        }
-      }
-      if (!foundValidTarget) {
-        containerEl = containerEl.parentElement;
-      }
+    let targetElement = event.target as HTMLElement;
+    while (
+      !targetElement.hasAttribute("data-id") ||
+      Number(targetElement.getAttribute("data-id")) === this.draggingContainer.id
+    ) {
+      targetElement = targetElement.parentElement;
+      if (targetElement == document.body) return;
     }
 
-    const grid = document.getElementById(`container-grid-${targetContainer?.id}`);
+    const target = this.findContainerById(Number(targetElement.getAttribute("data-id")), rootContainer);
+
+    const grid = document.getElementById(`container-grid-${target?.id}`);
     if (!grid) return;
 
     const rect = grid.getBoundingClientRect();
-    const columnWidth = rect.width / gridVar.columns;
+    const deltaX = event.clientX - rect.left;
+    const deltaY = event.clientY - rect.top;
+
+    const columnWidth = grid.offsetWidth / gridVar.columns;
     const rowHeight = gridVar.rowHeight;
 
-    const relativeX = event.clientX - rect.left - (this.draggingContainer.width * columnWidth);
-    const relativeY = event.clientY - rect.top;
+    const column = Math.max(
+      this.draggingContainer.width,
+      Math.min(gridVar.columns, Math.floor(deltaX / columnWidth)) + 1
+    );
+    const row = Math.max(1, Math.floor(deltaY / rowHeight) + 1);
 
-    const newColumn = Math.max(1, Math.min(gridVar.columns - this.draggingContainer.width + 1, Math.round(relativeX / columnWidth) + 1));
-    const newRow = Math.max(1, Math.floor(relativeY / rowHeight) + 1);
-
-    this.previewContainer.column = newColumn;
-    this.previewContainer.row = newRow;
-
-    this.previewContainer.parentId = targetContainer.id;
-
-    let testComponent = {
+    let testComponent: Board = {
       ...this.draggingContainer,
-      column: this.previewContainer.column,
-      row: this.previewContainer.row,
+      column: column - this.draggingContainer.width + 1,
+      row,
+      name: "",
+      children: [],
     };
 
-    const hasCycle = this.hasCycle(targetContainer, this.draggingContainer);
-    const totalDepth = this.getDepth(rootContainer, targetContainer.id);
-    let hasCollision = this.resizeService.hasCollisions(targetContainer, testComponent);
-    if (hasCollision == undefined) {
-      hasCollision = false;
-    }
+    const hasCycle = this.hasCycle(target, this.draggingContainer);
+    const totalDepth = this.getDepth(rootContainer, target.id);
+    let hasCollision = this.resizeService.hasCollisions(target, testComponent);
+    if (hasCollision == undefined) hasCollision = false;
 
-    if (hasCycle) {
-      this.previewContainer.name = "Recursive Components not allowed!"
-    } else if (totalDepth == -1) {
-      this.previewContainer.name = "Component depth to deep!"
-    } else if (hasCollision) {
-      this.previewContainer.name = "No Collisions allowed!"
-    } else {
-      this.previewContainer.name = ""
-    }
+    if (hasCycle) testComponent.name = "Recursive Components not allowed!";
+    else if (totalDepth == -1) testComponent.name = "Component depth to deep!";
+    else if (hasCollision) testComponent.name = "No Collisions allowed!";
+    else testComponent.name = "";
 
     const invalidPosition = hasCollision || hasCycle || totalDepth == -1;
 
-    const previewEl = document.querySelector(`.card[data-id='-1']`) as HTMLElement | null;
-    if (previewEl) {
-      previewEl.style.backgroundColor = invalidPosition ? "rgba(255, 0, 0, 0.15)" : "rgba(0, 123, 255, 0.15)";
-      previewEl.style.border = invalidPosition ? "2px dashed rgba(255, 0, 0, 0.5)" : "2px dashed rgba(0, 123, 255, 0.5)";
-    }
+    const w = this.draggingContainer.width * columnWidth;
+    const h = this.draggingContainer.height * rowHeight;
+    const rootRect = rootElement.getBoundingClientRect();
 
-    this.removePreviewFromAll(rootContainer);
-    this.insertPreview(this.previewContainer, rootContainer);
+    let x = event.clientX - rootRect.left + window.scrollX - w;
+    x += columnWidth - (x % columnWidth);
+    let y = event.clientY - rootRect.top;
+    y -= y % rowHeight;
 
-    callback(this.previewContainer, targetContainer);
+    x += 8 * totalDepth;
+    y += 8 * totalDepth;
+
+    let p = this.preview.nativeElement as HTMLElement;
+    p.style.position = "absolute";
+    p.style.left = `${x}px`;
+    p.style.top = `${y}px`;
+    p.style.width = `${w}px`;
+    p.style.height = `${h}px`;
+    p.style.display = "block";
+    p.style.zIndex = "5";
+    p.style.pointerEvents = "none";
+
+    p.style.backgroundColor = invalidPosition ? "rgba(255, 0, 0, 0.15)" : "rgba(0, 123, 255, 0.15)";
+    p.style.border = invalidPosition ? "2px dashed rgba(255, 0, 0, 0.5)" : "2px dashed rgba(0, 123, 255, 0.5)";
+    p.textContent = testComponent.name;
+
+    this.previewColumn = column - this.draggingContainer.width + 1;
+    this.previewRow = row;
+    this.previewParent = target;
   }
 
   stopDragging(
@@ -119,13 +117,48 @@ export class DragService {
     rootContainer: Container,
     callback: (component: Comp, targetContainer: Container) => void
   ) {
-    if (this.draggingContainer && this.previewContainer && this.sourceParent) {
-      const targetContainer = this.findContainerById(this.previewContainer.parentId!, rootContainer) || rootContainer;
+    if (this.draggingContainer /* && this.previewContainer */ && this.sourceParent) {
+      let testComponent: Board = {
+        ...this.draggingContainer,
+        column: this.previewColumn,
+        row: this.previewRow,
+        name: "",
+        children: [],
+      };
+
+      const hasCycle = this.hasCycle(this.previewParent, this.draggingContainer);
+      const totalDepth = this.getDepth(rootContainer, this.previewParent.id);
+      let hasCollision = this.resizeService.hasCollisions(this.previewParent, testComponent);
+      if (hasCollision == undefined) hasCollision = false;
+
+      const invalidPosition = hasCollision || hasCycle || totalDepth == -1;
+
+      console.log("hasCollision", hasCollision);
+      console.log("hasCycle", hasCycle);
+      console.log("totalDepth", totalDepth);
+
+      let p = this.preview.nativeElement as HTMLElement;
+      p.style.display = "none";
+
+      if (invalidPosition) {
+        console.log("TEST");
+        callback(this.draggingContainer, this.sourceParent);
+      } else {
+        this.removeComponentFromAll(this.draggingContainer.id, rootContainer);
+        this.draggingContainer.column = this.previewColumn;
+        this.draggingContainer.row = this.previewRow;
+        this.previewParent.children.push(this.draggingContainer);
+        console.log("Column", this.previewColumn);
+        console.log("Row", this.previewRow);
+        callback(this.draggingContainer, this.previewParent);
+      }
+
+      //const targetContainer = this.findContainerById(parentId, rootContainer) || rootContainer;
 
       // Remove preview
-      this.removePreviewFromAll(rootContainer);
+      //this.removePreviewFromAll(rootContainer);
 
-      const testComponent = {
+      /* const testComponent = {
         ...this.draggingContainer,
         column: this.previewContainer.column,
         row: this.previewContainer.row,
@@ -136,10 +169,8 @@ export class DragService {
       let hasCollision = this.resizeService.hasCollisions(targetContainer, testComponent);
       if (hasCollision == undefined) {
         hasCollision = false;
-      }
-
-      if (hasCycle || hasCollision || totalDepth == -1) {
-        callback(this.draggingContainer, this.sourceParent);
+      } */
+      /* if (hasCycle || hasCollision || totalDepth == -1) {
       } else {
         if (this.hasCycle(targetContainer, this.draggingContainer)) {
           callback(this.draggingContainer, this.sourceParent);
@@ -150,31 +181,32 @@ export class DragService {
           targetContainer.children.push(this.draggingContainer);
           callback(this.draggingContainer, targetContainer);
         }
-      }
+      } */
     }
 
     this.draggingContainer = null;
-    this.previewContainer = null;
     this.sourceParent = null;
+    this.preview = null;
   }
 
-  insertPreview(preview: Container, rootContainer: Container) {
+  /* insertPreview(preview: Container, rootContainer: Container) {
     const target = this.findContainerById(preview.parentId!, rootContainer);
     if (!target || !Array.isArray(target.children)) return;
 
     // Add preview
     target.children.push(preview);
-  }
+  } */
 
   hasCycle(target: Comp, component: Comp) {
-    const children = component.children;
-    for(let i = 0; i < children?.length; i++) {
-      const child = children[i]
+    if (!(component as any).children) return;
+    const children = (component as Container).children;
+    for (let i = 0; i < children?.length; i++) {
+      const child = children[i];
       if (child.id == target.id) {
         return true;
       }
-      if (child.children?.length > 0) {
-        return this.hasCycle(target, child)
+      if ((child as any).children?.length > 0) {
+        return this.hasCycle(target, child);
       }
     }
     return false;
@@ -196,10 +228,11 @@ export class DragService {
     return -1;
   }
 
-  private getComponentDepth(component: Comp):number {
+  private getComponentDepth(component: Comp): number {
+    if (!(component as Container).children) return 1;
     let depth = 1;
-    for (let i = 0; i < component.children?.length; i++) {
-      const childDepth = this.getComponentDepth(component.children[i]) + 1
+    for (let i = 0; i < (component as Container).children?.length; i++) {
+      const childDepth = this.getComponentDepth((component as Container).children[i]) + 1;
       if (depth < childDepth) {
         depth = childDepth;
       }
@@ -219,14 +252,14 @@ export class DragService {
     return null;
   }
 
-  private removePreviewFromAll(container: Container) {
+  /* private removePreviewFromAll(container: Container) {
     container.children = container.children.filter((c) => c.id !== -1);
     for (const child of container.children) {
       if (this.isContainer(child)) {
         this.removePreviewFromAll(child);
       }
     }
-  }
+  } */
 
   private removeComponentFromAll(id: number, container: Container): void {
     container.children = container.children.filter((c) => c.id !== id);

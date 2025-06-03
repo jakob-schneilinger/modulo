@@ -5,8 +5,6 @@ import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardUpdateDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Board;
-import at.ac.tuwien.sepr.groupphase.backend.entity.components.Component;
-import at.ac.tuwien.sepr.groupphase.backend.exception.ConflictException;
 import at.ac.tuwien.sepr.groupphase.backend.exception.NotFoundException;
 import at.ac.tuwien.sepr.groupphase.backend.repository.ComponentRepository;
 import at.ac.tuwien.sepr.groupphase.backend.service.componentservice.BoardService;
@@ -18,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.lang.invoke.MethodHandles;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -38,39 +35,27 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public ComponentDetailDto createBoard(BoardCreateDto boardDto) {
         LOG.trace("createBoard({})", boardDto);
-        long userId = componentService.getUserId();
-        boardValidator.validateBoardForCreation(boardDto, userId);
-        return setBoardComponent(boardDto, new Board(), userId);
+        boardValidator.validateBoardComponent(boardDto, -1L);
+        return setBoardComponent(boardDto, new Board());
     }
 
     @Override
     @Transactional
     public ComponentDetailDto updateBoard(BoardUpdateDto boardDto) {
         LOG.trace("updateBoard({})", boardDto);
+        boardValidator.validateBoardComponent(boardDto, boardDto.id());
 
-        Optional<Component> optionalComponent = componentRepository.findById(boardDto.id());
-        Component component;
+        Board board = componentRepository.findById(boardDto.id())
+            .filter(c -> c instanceof Board)
+            .map(c -> (Board) c)
+            .orElseThrow(() -> new NotFoundException("Board with given ID does not exist"));
 
-        if (optionalComponent.isPresent()) {
-            component = optionalComponent.get();
-        } else {
-            throw new NotFoundException("Board with given ID does not exist");
-        }
-
-        if (!(component instanceof Board board)) {
-            throw new ConflictException("Failed to update board",
-                    List.of("Id given does not reference a component with the type board"));
-        }
-
-        long userId = componentService.getUserId();
-        boardValidator.validateBoardForUpdate(boardDto, component, userId);
-        return setBoardComponent(boardDto, board, userId);
+        return setBoardComponent(boardDto, board);
     }
 
-    private ComponentDetailDto setBoardComponent(BoardDto boardDto, Board board, long userId) {
-        if (boardDto.name() != null) {
-            board.setBoardName(boardDto.name());
-        }
-        return componentService.setComponent(boardDto, board, userId);
+    private ComponentDetailDto setBoardComponent(BoardDto boardDto, Board board) {
+        LOG.trace("setBoardComponent({})", boardDto);
+        Optional.ofNullable(boardDto.name()).ifPresent(board::setBoardName);
+        return componentService.setComponent(boardDto, board);
     }
 }

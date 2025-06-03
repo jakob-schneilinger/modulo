@@ -1,17 +1,15 @@
 @use "src/styles/global.scss" as *;
 @use "src/styles/variables.scss" as *;
 
-// ------ CARD/CONTAINER ------ //
-
-.edit-overflow {
-  overflow: visible !important;
-}
-
 textarea {
   overflow: auto;
-  resize: vertical;
+  border: 2px solid lightgray;
+  border-radius: 4px;
+  resize: none;
+  background-color: #eee;
+
   width: 100%;
-  min-height: 50px;
+  height: 100%;
 }
 
 .container-header h5 {
@@ -19,4 +17,11 @@ textarea {
   white-space: normal;
   word-break: break-word;
   margin-bottom: 0.1rem;
+}
+
+.content {
+  width: 100%;
+  padding: 0.5rem;
+  background-color: #eee;
+  border-radius: 4px;
 }

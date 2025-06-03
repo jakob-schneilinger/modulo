@@ -1,4 +1,4 @@
-import { Board, Container, Text, Component as Comp, Task } from "../../dtos/component";
+import { Board, Container, Text, Component as Comp, Note, Task, isType } from "../../dtos/component";
 import { ComponentService } from "../../services/component.service";
 import { DragService } from "../../interaction-services/drag.service";
 import { AuthService } from "../../services/auth.service";
@@ -6,7 +6,7 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { Component, OnInit, ViewChild, ElementRef, OnDestroy } from "@angular/core";
 import { EventService } from "../../interaction-services/event.service";
 import { Subscription } from "rxjs";
-import {gridVar} from "../../dtos/grid";
+import { gridVar } from "../../dtos/grid";
 
 // for delete modal
 declare var bootstrap: any;
@@ -14,7 +14,7 @@ declare var bootstrap: any;
 @Component({
   selector: "app-home",
   templateUrl: "./home.component.html",
-  styleUrls: ["./home.component.scss"],
+  styleUrls: ["./home.component.scss", "../comp/base/base.component.scss"],
   standalone: false,
 })
 export class HomeComponent implements OnInit, OnDestroy {
@@ -29,8 +29,9 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   @ViewChild("name") nameElement;
   @ViewChild("deleteModal") deleteModal: ElementRef;
+  @ViewChild("preview", { static: false }) previewEl!: ElementRef;
 
-  inEditMode: boolean = true;
+  inEditMode: boolean = false;
 
   private subscriptions: Subscription[] = [];
 
@@ -38,39 +39,12 @@ export class HomeComponent implements OnInit, OnDestroy {
   dragging = false;
 
   // essentially all boards we are going to show, so all the root boards that have no parent
-  component: Container = undefined;
+  component: Board = undefined;
   forDeletion: Comp = undefined;
 
-  createTask() {
-    const neighbors = this.component.children
-    const row = this.findFirstFreeRow(2, 2)
-
-    const newTask: Task = {
-      children: [],
-      column: 1,
-      completed: false,
-      height: 3,
-      name: "New Task",
-      row: row,
-      repeating: false,
-      startDate: undefined,
-      type: "task",
-      width: 4,
-      parentId: this.component.id
-    }
-
-    this.compService.createTask(newTask).subscribe({
-      next: created => neighbors.push({...created, parentId: this.component.id}),
-      error: err => console.error(err)
-    });
-  }
-
   createBoard() {
-    // or child board beneath the lowest child component
-    const neighbors = this.component.children;
-
-    const width = Math.floor(gridVar.columns/4);
-    const height = Math.floor(gridVar.columns/4);
+    const width = Math.floor(gridVar.columns / 4);
+    const height = Math.floor(gridVar.columns / 4);
     const row = this.findFirstFreeRow(width, height);
 
     const newBoard: Board = {
@@ -85,37 +59,95 @@ export class HomeComponent implements OnInit, OnDestroy {
     };
 
     this.compService.createBoard(newBoard).subscribe({
-      next: (created) => neighbors.push({ ...created, parentId: this.component.id }),
+      next: (created) => this.addChild(created),
       error: (err) => console.error(err),
     });
   }
 
   createText() {
-    const neighbors = this.component.children;
-
-    const width = Math.floor(gridVar.columns/4);
-    const height = Math.floor(gridVar.columns/8);
+    const width = Math.floor(gridVar.columns / 4);
+    const height = Math.floor(gridVar.columns / 8);
     const row = this.findFirstFreeRow(width, height);
 
     const newText: Text = {
       column: 1,
-      height: Math.floor(gridVar.columns/8),
-      text: "Add Text here:",
-      width: Math.floor(gridVar.columns/4),
+      height: Math.floor(gridVar.columns / 8),
+      content: "Add Text here:",
+      width: Math.floor(gridVar.columns / 4),
       type: "text",
       row: row,
-      fontSize: 16,
-      name: "Text-Box",
       parentId: this.component.id,
     };
 
-    // TODO: look if changes are needed
     this.compService.createText(newText).subscribe({
-      next: (created) => {
-        neighbors.push({ ...created, parentId: this.component.id });
-      },
+      next: (created) => this.addChild(created),
       error: (err) => console.error(err),
     });
+  }
+
+  createImage() {
+    const width = Math.floor(gridVar.columns / 4);
+    const height = Math.floor(gridVar.columns / 4);
+    const row = this.findFirstFreeRow(width, height);
+    const column = 1;
+    this.compService
+      .createImage({ parentId: this.component.id, column, row, width: width, height: height }, null)
+      .subscribe({
+        next: (comp) => this.addChild(comp),
+        error: (e) => console.log(e),
+      });
+  }
+
+  createNote() {
+    const neighbors = this.component.children;
+    const width = Math.floor(gridVar.columns / 2);
+    const height = Math.floor(gridVar.columns / 4);
+
+    const createDto: Partial<Note> = {
+      type: "note",
+      row: this.getNextUnusedRow(neighbors),
+      column: 1,
+      width,
+      height,
+      title: "New Note",
+      labels: [{ name: "new" }],
+      content: "# Hello World\n\n`This is`: *bold* and **italic** text!\n- num1\n- num2",
+      parentId: this.component.id,
+    };
+    this.compService.createNote(createDto).subscribe({
+      next: (comp) => this.addChild(comp),
+      error: (e) => console.error(e),
+    });
+  }
+
+  createTask() {
+    const width = Math.floor(gridVar.columns / 4);
+    const height = Math.floor(gridVar.columns / 3);
+    const row = this.findFirstFreeRow(width, height);
+
+    const newTask: Task = {
+      children: [],
+      column: 1,
+      completed: false,
+      height: height,
+      name: "New Task",
+      row: row,
+      repeating: false,
+      startDate: undefined,
+      type: "task",
+      width: width,
+      parentId: this.component.id,
+    };
+
+    this.compService.createTask(newTask).subscribe({
+      next: (created) => this.addChild(created),
+      error: (err) => console.error(err),
+    });
+  }
+
+  addChild(comp: Comp) {
+    this.component.children.push(comp);
+    this.component = { ...this.component };
   }
 
   updateName() {
@@ -146,11 +178,11 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   titleChanged(event: { component: Comp }) {
-    this.compService.updatePosAndSize(event.component as any).subscribe({
+    alert("Deprecated, don't call!");
+    /* this.compService.updatePosAndSize(event.component as any).subscribe({
       next: () => console.log("Updated successfully"),
       error: (err) => console.error("Update failed", err),
-    });
-
+    }); */
   }
 
   findAndPatch(nodes: Comp[], updated: Comp): boolean {
@@ -159,7 +191,8 @@ export class HomeComponent implements OnInit, OnDestroy {
         Object.assign(node, updated);
         return true;
       }
-      if (node.children && this.findAndPatch(node.children, updated)) {
+      if (!(node as Container).children) continue;
+      else if (this.findAndPatch((node as Container).children, updated)) {
         return true;
       }
     }
@@ -167,23 +200,21 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   taskChanged(event: { component: Comp }) {
-    this.setRecursiveParentId(this.component)
-    this.compService.updateComponent(event.component as any).subscribe({
-      next: data => {
-        this.findAndPatch(this.component.children, data);
-      },
-      error: err => console.error('Update failed', err)
-    })
+    this.setRecursiveParentId(this.component);
+    this.compService.updateTask(event.component as any).subscribe({
+      next: (data) => this.findAndPatch(this.component.children, data),
+      error: (err) => console.error("Update failed", err),
+    });
   }
 
   taskRepeat(event: { component: Comp }) {
-    this.setRecursiveParentId(this.component)
+    this.setRecursiveParentId(this.component);
     this.compService.repeatTask(event.component as any).subscribe({
-      next: data => {
+      next: (data) => {
         this.findAndPatch(this.component.children, data);
       },
-      error: err => console.error('Update failed', err)
-    })
+      error: (err) => console.error("Update failed", err),
+    });
   }
 
   textChanged(event: { component: Comp }) {
@@ -205,8 +236,11 @@ export class HomeComponent implements OnInit, OnDestroy {
       case "image":
         this.createImage();
         break;
-      case 'task' :
+      case "task":
         this.createTask();
+        break;
+      case "note":
+        this.createNote();
         break;
       default:
         alert("not implemented yet!");
@@ -214,20 +248,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   }
 
-  createImage() {
-    const neighbors = this.component.children;
-
-    const width = Math.floor(gridVar.columns/4);
-    const height = Math.floor(gridVar.columns/4);
-    const row = this.findFirstFreeRow(width, height);
-    const column = 1;
-    this.compService.createImage({ parentId: this.component.id, column, row, width: width, height: height }, null).subscribe({
-      next: (comp) => this.component.children.push(comp),
-      error: (e) => console.log(e),
-    });
-  }
-
-  deleteBoard(){
+  deleteBoard() {
     this.compService.deleteComponent(this.component.id).subscribe({
       next: (value) => {
         window.dispatchEvent(
@@ -279,13 +300,14 @@ export class HomeComponent implements OnInit, OnDestroy {
     return row;
   }
 
-  startDragging(data: { component: Comp; event: MouseEvent }) {
+  startDragging(data: { component: Comp; preview: ElementRef; event: MouseEvent }) {
     this.dragging = true;
+    data.preview = this.previewEl;
     this.dragService.startDragging(data, <Container>this.component);
   }
 
   onMouseMove(event: MouseEvent) {
-    this.dragService.onMouseMove(event, <Container>this.component, (container, targetContainer) => {});
+    this.dragService.onMouseMove(event, <Container>this.component);
   }
 
   stopDragging(event: MouseEvent) {
@@ -293,15 +315,25 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.dragging = false;
     this.dragService.stopDragging(event, <Container>this.component, (container, targetContainer) => {
       container.parentId = targetContainer.id;
-      this.compService.updatePosAndSize({...container, parentId: targetContainer.id} as any).subscribe();
+      this.compService.updatePosAndSize({ ...container, parentId: targetContainer.id } as any).subscribe({
+        next: (value) => {
+          this.component = { ...this.component };
+        },
+        error: (err) => {
+          console.log("Error on dragging", err);
+        },
+      });
     });
   }
 
+  getCompDeleteMsg(comp: Comp<any>): string {
+    return `Are you sure you want to delete the component ${(comp as any)?.name || `of type ${comp.type}`}?`;
+  }
 
   // Opens delete Modal with specific component
   openDeleteModal(component: Comp) {
-    const modal = new bootstrap.Modal(this.deleteModal.nativeElement);
     this.forDeletion = component;
+    const modal = new bootstrap.Modal(this.deleteModal.nativeElement);
     modal.show();
   }
 
@@ -311,7 +343,11 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.deleteBoard();
     } else {
       this.compService.deleteComponent(this.forDeletion.id).subscribe({
-        next: (value) => (this.component.children = this.recursiveDelete(this.component.children, this.forDeletion.id)),
+        next: (value) =>
+          (this.component = {
+            ...this.component,
+            children: this.recursiveDelete(this.component.children, this.forDeletion.id),
+          }),
         error: (err) => console.error("unable to delete component", this.forDeletion.id, "with error", err),
       });
     }
@@ -340,12 +376,12 @@ export class HomeComponent implements OnInit, OnDestroy {
 
         this.compService.getComponent(id).subscribe({
           next: (comp) => {
-            this.component = comp as any
-            this.setRecursiveParentId(this.component)
+            this.component = comp as any;
+            this.setRecursiveParentId(this.component);
             if (this.nameElement?.nativeElement) {
-              this.nameElement.nativeElement.innerText = this.component.name
+              this.nameElement.nativeElement.innerText = this.component.name;
             }
-            console.log("All Components", this.component)
+            console.log("All Components", this.component);
           },
           error: (e) => {
             if (e.status == 404) {
@@ -365,28 +401,22 @@ export class HomeComponent implements OnInit, OnDestroy {
     );
 
     this.subscriptions.push(
-      this.eventService.titleChanged$.subscribe(({ component }) => {
-        this.titleChanged({ component });
-      })
-    );
-
-    this.subscriptions.push(
       this.eventService.textChanged$.subscribe(({ component }) => {
         this.textChanged({ component });
       })
     );
 
     this.subscriptions.push(
-      this.eventService.taskChanged$.subscribe(({component}) => {
-        this.taskChanged({component})
-        console.log("The Task status of the following component just changed:")
-        console.log(component)
+      this.eventService.taskChanged$.subscribe(({ component }) => {
+        this.taskChanged({ component });
+        console.log("The Task status of the following component just changed:");
+        console.log(component);
       })
     );
 
     this.subscriptions.push(
-      this.eventService.taskRepeated$.subscribe(({component}) => {
-        this.taskRepeat({component})
+      this.eventService.taskRepeated$.subscribe(({ component }) => {
+        this.taskRepeat({ component });
       })
     );
 
@@ -417,16 +447,18 @@ export class HomeComponent implements OnInit, OnDestroy {
       })
       .filter((comp) => {
         if ("children" in comp) {
-          comp.children = this.recursiveDelete(comp.children, id);
+          comp.children = this.recursiveDelete((comp as any).children, id);
         }
         return comp.id !== id;
       });
   }
 
   private setRecursiveParentId(parent: Comp) {
-    parent?.children?.forEach((child) => {
+    if (!(parent as any).children) return;
+
+    (parent as Container).children.forEach((child) => {
       child.parentId = parent.id;
       this.setRecursiveParentId(child);
-    })
+    });
   }
 }

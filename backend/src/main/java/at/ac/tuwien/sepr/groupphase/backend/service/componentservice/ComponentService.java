@@ -44,15 +44,8 @@ public interface ComponentService {
      *
      * @param componentDto dto of the component
      * @param component entity of the component
-     * @param userId to set as owner
      * @return details of the component
      */
-    ComponentDetailDto setComponent(ComponentDto componentDto, Component component, long userId);
+    ComponentDetailDto setComponent(ComponentDto componentDto, Component component);
 
-    /**
-     * Helper method to get userId.
-     *
-     * @return userId
-     */
-    long getUserId();
 }

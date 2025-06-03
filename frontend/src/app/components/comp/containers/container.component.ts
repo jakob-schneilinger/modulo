@@ -1,87 +1,75 @@
-import { AfterViewInit, Component, ElementRef, ViewChild } from "@angular/core";
 import {
-  Container,
-  Component as Comp,
-  isText,
-  Text as myText,
-  Image,
-  isImage,
-  Task,
-  isTask
-} from "../../../dtos/component";
-import { NgClass, NgForOf, NgIf, NgStyle } from "@angular/common";
-import { TextComponent } from "../text/text.component";
-import { FormsModule } from "@angular/forms";
+  Component as NgComponent,
+  ElementRef,
+  Input,
+  OnInit,
+  ViewChild,
+  ViewContainerRef,
+  ComponentRef,
+  OnChanges,
+  SimpleChanges,
+} from "@angular/core";
+import { Component, Container } from "../../../dtos/component";
 import { BaseComponent } from "../base/base.component";
-import { ImageComponent } from "../image/image.component";
-import {TaskComponent} from "./task/task.component";
+import ComponentFactory from "src/app/global/ComponentFactory";
 
-@Component({
+@NgComponent({
   selector: "app-container-component",
   templateUrl: "./container.component.html",
   styleUrls: ["./container.component.scss", "../base/base.component.scss"],
-  imports: [NgForOf, NgStyle, NgClass, NgIf, TextComponent, ImageComponent, FormsModule, TaskComponent],
-  standalone: true,
+  standalone: false,
 })
-export class ContainerComponent extends BaseComponent<Container> {
-  /* TODO: remove if event service is used instead
-  @Output() widthChanged = new EventEmitter<{ component: Comp }>();
-  @Output() titleChanged = new EventEmitter<{ component: Comp }>();
-   */
+export class ContainerComponent<T extends Container> extends BaseComponent<T> implements OnChanges {
+  private _children: Component[];
+  private _childrenRef: ComponentRef<BaseComponent<any>>[];
 
-  @ViewChild("grid", { static: false }) gridEl!: ElementRef;
+  @ViewChild("grid", { static: false }) gridEl: ElementRef;
+  @ViewChild("children", { read: ViewContainerRef }) childrenContainer: ViewContainerRef;
 
-  editingTitle = false;
-  titleBuffer = "";
-
-  // TODO: find a better way to seperate Containers and other Components
-  private isContainer(component: Comp): component is Container {
-    return (
-      (component.type === "board" || component.type === "note") &&
-      Array.isArray(component.children)
-    );
+  ngAfterViewInit() {
+    super.ngAfterViewInit();
+    this.loadChildren();
   }
 
-  asTask(comp: Comp): Task {
-    if(isTask(comp)) {
-      return comp as Task;
+  loadChildren() {
+    if (this._childrenRef) this._childrenRef.forEach((c) => c.destroy());
+    this._childrenRef = [];
+
+    if (!this.childrenContainer) return;
+
+    this._children = this.self.children || [];
+    for (const child of this._children) {
+      const COMP = ComponentFactory.get(child.type);
+      if (!COMP) {
+        console.error("Type: " + child.type + " not defined!");
+        continue;
+      }
+
+      const comp = this.childrenContainer.createComponent<BaseComponent<any>>(COMP as any);
+
+      comp.setInput("self", child);
+      comp.setInput("depth", this.depth + 1);
+      comp.setInput("parentContainer", this.self);
+      comp.setInput("parentGridElInput", this.gridEl);
+      if( this.depth === 0) {
+        comp.setInput("homeGridElInput", this.gridEl);
+      } else {
+        comp.setInput("homeGridElInput", this.homeGridElInput);
+      }
+      comp.setInput("inEditMode", this.inEditMode);
+
+      comp.instance.startDraggingContainer.subscribe((data) => this.startDraggingContainer.emit(data));
+      comp.instance.stopDraggingContainer.subscribe(() => this.stopDraggingContainer.emit());
+
+      this._childrenRef.push(comp);
     }
   }
 
-  get containerChildren(): Container[] {
-    return this.self.children.filter(this.isContainer);
-  }
-
-  get textChildren(): myText[] {
-    return this.self.children.filter(isText);
-  }
-
-  get imageChildren(): Image[] {
-    return this.self.children.filter(isImage);
-  }
-
-  get taskChildren(): Task[] {
-    return this.self.children.filter(isTask);
-  }
-
-  startEditTitle(): void {
-    this.titleBuffer = this.self.name;
-    this.editingTitle = true;
-  }
-
-  saveTitle(): void {
-    const trimmedTitle = this.titleBuffer.trim();
-    const changed = this.self.name !== trimmedTitle;
-    this.self.name = trimmedTitle;
-    this.editingTitle = false;
-    if (changed) {
-      this.eventService.emitTitleChanged(this.self);
+  ngOnChanges(changes: SimpleChanges): void {
+    if (!this._childrenRef) return;
+    for (const name in changes) {
+      if (name == "self") this.loadChildren(); // refresh children
+      else this._childrenRef.forEach((c) => c.setInput(name, changes[name].currentValue));
     }
   }
-
-  cancelTitle(): void {
-    this.editingTitle = false;
-  }
-
-  protected readonly isText = isText;
 }

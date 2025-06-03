@@ -4,7 +4,8 @@ import { ComponentService } from "src/app/services/component.service";
 import { UserService } from "src/app/services/user.service";
 import { ActivatedRoute, Router } from "@angular/router";
 
-import { Board, Component as Comp } from "../../dtos/component";
+import { Board, Component as Comp, isType } from "../../dtos/component";
+import { gridVar } from "src/app/dtos/grid";
 
 @Component({
   selector: "app-header",
@@ -16,7 +17,7 @@ export class HeaderComponent implements OnInit {
   profileImgSrc: string;
   hoverProfile: boolean = false;
 
-  roots: Comp[];
+  roots: Board[] = [];
 
   constructor(
     public router: Router,
@@ -36,7 +37,7 @@ export class HeaderComponent implements OnInit {
 
   ngOnInit() {
     this.compService.getRoots().subscribe({
-      next: (v) => (this.roots = v.filter((c) => c.type == "board")),
+      next: (v) => (this.roots = v.filter((c) => isType(c, "board"))),
       error: (e) => console.log(e),
     });
 
@@ -52,9 +53,9 @@ export class HeaderComponent implements OnInit {
     });
 
     window.addEventListener("board-created-homepage", (event) => {
-      const createdRoot = (event as any).detail
-      this.roots.push(createdRoot)
-    })
+      const createdRoot = (event as any).detail;
+      this.roots.push(createdRoot);
+    });
   }
 
   logout() {
@@ -63,12 +64,9 @@ export class HeaderComponent implements OnInit {
   }
 
   createBoard() {
-    const item: Board = { name: "Unnamed" } as any;
-    this.compService.createBoard(item).subscribe({
-      next: (board) => {
-        this.roots.push(board)
-        window.dispatchEvent(new CustomEvent("board-created-header", {detail: board}))
-      },
+    const item: Partial<Board> = { name: "Unnamed", column: 1, row: 1, width: gridVar.columns, height: 4 };
+    this.compService.createBoard(item as any).subscribe({
+      next: (board) => this.roots.push(board),
       error: (e) => console.error(e),
     });
   }

@@ -6,17 +6,10 @@ package at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components;
  */
 public interface TextDto extends ComponentDto {
 
-    String text();        // the actual text content
-
-    long width();
-
-    int fontSize();
-
     /**
-     * The parent container (board / task / …) the Text is added to.
+     * The actual text.
+     *
+     * @return text
      */
-    Long parentId();
-
-
-
+    String content();
 }

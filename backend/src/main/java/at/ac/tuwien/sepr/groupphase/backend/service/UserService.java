@@ -40,4 +40,11 @@ public interface UserService {
      * @param username the user to delete the avatar
      */
     void removeAvatar(String username);
+
+    /**
+     * Helper method to get userId.
+     *
+     * @return userId
+     */
+    long getUserId();
 }

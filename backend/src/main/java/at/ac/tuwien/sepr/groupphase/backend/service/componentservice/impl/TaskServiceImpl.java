@@ -51,7 +51,7 @@ public class TaskServiceImpl implements TaskService {
         LOG.debug("createTask({})", taskDto);
         long userId = getUserId();
         LOG.debug("userID({})", userId);
-        taskValidator.validateContainerForCreation(taskDto);
+        taskValidator.validateComponent(taskDto, -1L);
 
         return setTaskComponent(taskDto, new Task(), userId);
     }
@@ -161,5 +161,4 @@ public class TaskServiceImpl implements TaskService {
             .orElseThrow(() -> new NotFoundException("User not found"));
         return user.getId();
     }
-
 }

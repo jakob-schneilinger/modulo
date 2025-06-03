@@ -1,0 +1,40 @@
+<div #previewCard [attr.data-preview-id]="self.id" class="preview-card"></div>
+<div #card [attr.data-id]="self.id" class="p-2" [ngClass]="{'card':!!parentContainer}"
+[attr.data-cy]="!!parentContainer? 'child-board' : 'root-board'" [attr.data-cy-position]="self.row + ' ' + self.column"
+[attr.data-cy-size]="self.width + ' ' + self.height">
+
+    <!-- show title only when parent exists -->
+    @if (!!parentContainer) {
+    <!-- Title  -->
+    @if (editingTitle) {
+    <input class="title form-control form-control-sm mb-1" [(ngModel)]="titleBuffer" maxlength="255">
+    <div class="d-flex gap-1">
+        <button class="btn btn-sm btn-primary" (click)="saveTitle()">Save</button>
+        <button class="btn btn-sm btn-outline-secondary" (click)="cancelTitle()">Cancel</button>
+    </div>
+    } @else {
+    <h5 [ngClass]="{'resizing': isResizing}" (dblclick)="startEditTitle()">
+        {{ self.name }}
+    </h5>
+    }
+    @if (inEditMode) {
+    <!-- Drag & Resize -->
+    <div class="top-right" (mousedown)="startContainerDrag(self, $event)" (mouseup)="stopContainerDrag()"
+    [attr.data-cy]="'board-manage-icon'">
+        <i class="bi bi-arrows-move grab"></i>
+    </div>
+    <div class="resizer bottom-right" [id]="'resizer-' + self.id" [attr.data-cy]="'board-resizer'">
+        <i class="bi bi-arrows-angle-expand"></i>
+    </div>
+    } @else {
+    <!-- Context Menu -->
+    <app-context-menu class="top-right" [actions]="actions"></app-context-menu>
+    }
+    }
+
+    <!-- Create children -->
+    <div class="container-grid" [id]="'container-grid-' + self.id" #grid
+         [attr.data-cy]="!!parentContainer? 'child-grid' : 'grid'">
+        <ng-container #children></ng-container>
+    </div>
+</div>

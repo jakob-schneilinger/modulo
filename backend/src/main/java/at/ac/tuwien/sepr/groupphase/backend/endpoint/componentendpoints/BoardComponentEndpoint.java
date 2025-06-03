@@ -8,12 +8,16 @@ import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * REST controller for managing board component operations.
+ * This controller provides endpoints for creating and updating board components.
+ */
 @RestController
 @RequestMapping(value = "/api/v1/component/board")
 public class BoardComponentEndpoint {
@@ -35,7 +39,6 @@ public class BoardComponentEndpoint {
     @PostMapping("")
     public ResponseEntity<ComponentDetailDto> createBoardComponent(
             @RequestBody BoardCreateDto board) {
-
         return new ResponseEntity<>(service.createBoard(board), HttpStatus.CREATED);
     }
 
@@ -46,10 +49,9 @@ public class BoardComponentEndpoint {
      * @return component detail of updated board
      */
     @PermitAll // TODO: fix this
-    @PutMapping("")
+    @PatchMapping("")
     public ResponseEntity<ComponentDetailDto> updateBoardComponent(
             @RequestBody BoardUpdateDto board) {
-
         return new ResponseEntity<>(service.updateBoard(board), HttpStatus.OK);
     }
 }

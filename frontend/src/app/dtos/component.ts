@@ -1,32 +1,42 @@
-export interface Component {
+export type ComponentType = "board" | "task" | "note" | "text" | "image" | "video" | "sketch" | "calender";
+export interface ComponentNameTypeMap {
+  board: Board;
+  task: Task;
+  note: Note;
+  text: Text;
+  image: Image;
+  video: null;
+  sketch: null;
+  calender: null;
+}
+export interface Component<T extends ComponentType = any> {
   id?: number;
-  type: "board" | "task" | "note" | "text" | "image" | "video" | "sketch" | "calender";
+  type: T;
   ownerId?: number;
   parentId?: number;
   width: number;
   height: number;
   column: number;
   row: number;
-  name?: string;
-  children?: Component[];
-  tags?: string[];
 }
 
-export interface Container extends Component {
-  name: string;
+export interface Container<T extends ComponentType = any> extends Component<T> {
+  //name: string;
   children: Component[];
 }
 
-export interface Board extends Container {
+export interface Board extends Container<"board"> {
+  name: string;
   type: "board";
 }
 
-export interface Image extends Container {
+export interface Image extends Container<"image"> {
   type: "image";
 }
 
-export interface Task extends Container{
-  type: 'task';
+export interface Task extends Container<"task"> {
+  type: "task";
+  name: string;
   repeating: boolean;
   deadLineInDays?: number;
   startDate: Date;
@@ -34,57 +44,34 @@ export interface Task extends Container{
   completed: boolean;
 }
 
-export interface Note extends Container {
+/** DTO representing a note component */
+export interface Note extends Container<"note"> {
   type: "note";
-  tags: string[];
+  title?: string;
+  content?: string;
+  labels?: Label[];
 }
 
-export interface ImageCreate {
-  parentId: number;
-  width: number;
-  height: number;
-  column: number;
-  row: number;
-}
-
-export interface ImageCreate {
-  parentId: number;
-  width: number;
-  height: number;
-  column: number;
-  row: number;
-}
-
-export interface ImageCreate {
-  parentId: number;
-  width: number;
-  height: number;
-  column: number;
-  row: number;
-}
-
-export interface ImageCreate {
-  parentId: number;
-  width: number;
-  height: number;
-  column: number;
-  row: number;
-}
-
-export interface ImageCreate {
-  parentId: number;
-  width: number;
-  height: number;
-  column: number;
-  row: number;
-}
-
-export interface Text extends Component {
-  type: "text";
-  text: string;
+/** DTO representing a lable used for tagging components */
+export interface Label {
   name: string;
-  fontSize: number;
+  color?: string;
+}
+
+/** DTO used for creating an image component */
+export interface ImageCreate {
   parentId: number;
+  width: number;
+  height: number;
+  column: number;
+  row: number;
+}
+
+export interface Text extends Component<"text"> {
+  type: "text";
+  content: string;
+  // name: string;
+  // fontSize: number;
 }
 
 export function isText(component: Component): component is Text {
@@ -96,4 +83,8 @@ export function isTask(container: Component): container is Task {
 
 export function isImage(component: Component): component is Image {
   return component.type === "image";
+}
+
+export function isType<T extends ComponentType>(component: Component, type: T): component is ComponentNameTypeMap[T] {
+  return component.type === type;
 }

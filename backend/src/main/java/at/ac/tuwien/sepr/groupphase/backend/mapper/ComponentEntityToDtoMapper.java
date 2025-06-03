@@ -3,14 +3,15 @@ package at.ac.tuwien.sepr.groupphase.backend.mapper;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ImageDetailDto;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.LabelDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.TaskDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.TextDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Board;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Image;
-import at.ac.tuwien.sepr.groupphase.backend.entity.components.Component;
+import at.ac.tuwien.sepr.groupphase.backend.entity.components.Note;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Task;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.NoteDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Text;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -33,16 +34,18 @@ public class ComponentEntityToDtoMapper {
     public static TaskDetailDto visit(Task task, MappingDepth depth) {
         List<ComponentDetailDto> children = switch (depth) {
             case DEEP -> task.getChildren().stream()
-                .map(child -> child.accept(depth))
-                .toList();
+                    .map(child -> child.accept(depth))
+                    .toList();
             case SHALLOW -> List.of();
         };
-        return new TaskDetailDto(task.getId(), task.getTaskName(), task.getWidth(), task.getHeight(), task.getColumn(), task.getRow(), children, task.getStartDate(), task.getEndDate(), task.isCompleted(), task.isRepeatable());
+        return new TaskDetailDto(task.getId(), task.getTaskName(), task.getWidth(), task.getHeight(), task.getColumn(),
+                task.getRow(), children, task.getStartDate(), task.getEndDate(), task.isCompleted(),
+                task.isRepeatable());
     }
 
     public static TextDetailDto visit(Text text) {
-        return new TextDetailDto(text.getText(), text.getName(), text.getId(), text.getWidth(), text.getHeight(),
-                text.getColumn(), text.getRow(), text.getFontSize());
+        return new TextDetailDto(text.getId(), text.getContent(), text.getWidth(), text.getHeight(),
+                text.getColumn(), text.getRow());
     }
 
     public static ImageDetailDto visit(Image image) {
@@ -50,4 +53,10 @@ public class ComponentEntityToDtoMapper {
                 image.getRow());
     }
 
+    public static NoteDetailDto visit(Note note) {
+        return new NoteDetailDto(note.getId(), note.getTitle(),
+                note.getLabels().stream().map(entity -> new LabelDto(entity.getName(), entity.getColor())).toList(),
+                note.getWidth(), note.getHeight(), note.getColumn(), note.getRow(),
+                note.getChildren().stream().map(child -> child.accept(MappingDepth.DEEP)).toList());
+    }
 }
