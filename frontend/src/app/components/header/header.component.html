@@ -27,7 +27,7 @@
       <span class="flex"><img [src]="profileImgSrc" class="profile"><a data-cy="header-profile">Profile</a></span>
       <span><i *ngIf="hoverProfile" (click)="logout()" class="bi bi-box-arrow-right profile"></i></span>
     </li>
-    <li class="flex">
+    <li class="flex" routerLink="/friends">
       <i class="bi bi-people-fill"></i>
       <a>Friends</a>
     </li>

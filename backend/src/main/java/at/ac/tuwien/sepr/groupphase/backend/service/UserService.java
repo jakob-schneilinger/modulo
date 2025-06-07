@@ -6,7 +6,7 @@ import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.user.UserUpdateDto;
 public interface UserService {
 
     /**
-     * Updates an user.
+     * Updates a user.
      *
      * @param username the user to update
      * @param userUpdateDto the values to update, if null they won't be updated
@@ -14,14 +14,14 @@ public interface UserService {
     void update(String username, UserUpdateDto userUpdateDto);
 
     /**
-     * Gets an user.
+     * Gets a user.
      *
      * @param username the specified user
      */
     UserDto get(String username);
 
     /**
-     * Deletes an user.
+     * Deletes a user.
      *
      * @param username the user to delete
      */

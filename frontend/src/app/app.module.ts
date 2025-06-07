@@ -20,6 +20,7 @@ import { ResizeService } from "./interaction-services/resize.service";
 import { DragService } from "./interaction-services/drag.service";
 import { CommonModule } from "@angular/common";
 import { ComponentsModule } from "./components/comp/components.module";
+import { FriendlistComponent } from "./components/friendlist/friendlist.component";
 
 @NgModule({
   declarations: [
@@ -27,6 +28,7 @@ import { ComponentsModule } from "./components/comp/components.module";
     HeaderComponent,
     FooterComponent,
     HomeComponent,
+    FriendlistComponent,
     UserLoginComponent,
     UserCreateComponent,
     UserComponent,

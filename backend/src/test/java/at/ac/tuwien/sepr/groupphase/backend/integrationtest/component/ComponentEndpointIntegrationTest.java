@@ -61,7 +61,6 @@ public class ComponentEndpointIntegrationTest {
     void setup()
         throws Exception {
 
-        //TODO: Hotfix
         userRepository.deleteAll();
         componentRepository.deleteAll();
 
