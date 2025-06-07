@@ -9,3 +9,8 @@ export interface UserUpdateDto {
   displayName?: string;
   password?: string;
 }
+
+export interface FriendDto extends User{
+  requesterName: string;
+  accepted: boolean;
+}

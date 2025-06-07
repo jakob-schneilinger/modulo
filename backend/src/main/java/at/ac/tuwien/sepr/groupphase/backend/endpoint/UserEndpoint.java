@@ -2,23 +2,25 @@ package at.ac.tuwien.sepr.groupphase.backend.endpoint;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
-import javax.management.RuntimeErrorException;
-
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.user.FriendDto;
+import at.ac.tuwien.sepr.groupphase.backend.service.FriendService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,11 +42,13 @@ public class UserEndpoint {
     @Value("${global.location.avatars}")
     private String avatarPath;
 
-    private UserService userService;
-    private AuthService authService;
+    private final UserService userService;
+    private final FriendService friendService;
+    private final AuthService authService;
 
-    public UserEndpoint(UserService userService, AuthService authService) {
+    public UserEndpoint(UserService userService, FriendService friendService, AuthService authService) {
         this.userService = userService;
+        this.friendService = friendService;
         this.authService = authService;
     }
 
@@ -122,4 +126,51 @@ public class UserEndpoint {
         userService.removeAvatar(username);
         return ResponseEntity.ok().build();
     }
+
+    @PermitAll
+    @PostMapping("{username}/friends")
+    public ResponseEntity<Void> requestFriendship(@PathVariable(name = "username") String username,
+                                                  @RequestParam(name = "friendName") String friendName) {
+        friendService.requestFriendship(username, friendName);
+        return ResponseEntity.ok().build();
+    }
+
+    @PermitAll
+    @PutMapping("{username}/friends")
+    public ResponseEntity<Void> acceptFriendship(@PathVariable(name = "username") String username,
+                                                 @RequestParam(name = "friendName") String friendName) {
+        friendService.acceptFriendship(username, friendName);
+        return ResponseEntity.ok().build();
+    }
+
+    @PermitAll
+    @DeleteMapping("{username}/friends")
+    public ResponseEntity<Void> deleteFriendship(@PathVariable(name = "username") String username,
+                                                 @RequestParam(name = "friendName") String friendName) {
+        friendService.deleteFriendship(username, friendName);
+        return ResponseEntity.ok().build();
+    }
+
+    @PermitAll
+    @GetMapping("{username}/friends")
+    public ResponseEntity<List<FriendDto>> getAllFriends(@PathVariable(name = "username") String username,
+                                                         @RequestParam(name = "onlyfriends", defaultValue = "false") boolean onlyFriends) {
+        return ResponseEntity.ok(friendService.getAllFriends(username, onlyFriends));
+    }
+
+    @PermitAll
+    @RequestMapping(value = "{username}/friends/isfriend", method = RequestMethod.GET)
+    public ResponseEntity<Boolean> isFriend(@PathVariable(name = "username") String username,
+                                            @RequestParam(name = "friendName") String friendName) {
+        return ResponseEntity.ok(friendService.isFriend(username, friendName));
+    }
+
+    @PermitAll
+    @RequestMapping(value = "{username}/friends/friend", method = RequestMethod.GET)
+    public ResponseEntity<FriendDto> getFriend(@PathVariable(name = "username") String username,
+                                            @RequestParam(name = "friendName") String friendName) {
+        return ResponseEntity.ok(friendService.getFriend(username, friendName));
+    }
+
+
 }

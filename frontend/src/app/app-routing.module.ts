@@ -10,6 +10,7 @@ import { UserComponent } from "./components/user/user.component";
 
 import { NotFoundComponent } from "./components/not-found/not-found.component";
 import {HomepageComponent} from "./components/homepage/homepage.component";
+import {FriendlistComponent} from "./components/friendlist/friendlist.component";
 
 const routes: Routes = [
   //{ path: "", component: HomeComponent, canActivate: [AuthGuard] },
@@ -17,6 +18,7 @@ const routes: Routes = [
   { path: "login", component: LoginComponent },
   { path: "signup", component: CreateComponent },
   { path: "user/:name", component: UserComponent, canActivate: [AuthGuard] },
+  { path: "friends", component: FriendlistComponent, canActivate: [AuthGuard] },
   { path: "", component: HomepageComponent, canActivate: [AuthGuard] },
   { path: "**", component: NotFoundComponent, canActivate: [AuthGuard] },
 ];

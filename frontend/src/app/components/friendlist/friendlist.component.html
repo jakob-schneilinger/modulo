@@ -1,0 +1,81 @@
+<div class="container">
+
+  <!--Header-->
+  <div class="row align-self-center pt-2 m-4">
+    <div class="row">
+      <div class="col">
+        <h1>Friends and friend request </h1>
+        <span>🫂</span>
+      </div>
+      <h6 class="ms-3">Here is the list of your friends and friend requests</h6>
+    </div>
+
+
+
+    <hr>
+    @if (friends.length > 0){
+    <div class="row row-cols-auto justify-content-start" id="filtering"> <!-- consider group of radio-->
+      <div class="col align-content-center"><h5>choose filtering: </h5></div>
+      <div class="col"><button class="primary col pe-2 ps-2" (click)="allFriends()">All</button></div>
+      <div class="col"><button class="primary col" (click)="onlyFriends()">Friends</button></div>
+      <div class="col"><button class="primary" (click)="onlySent()">Sent Requests</button></div>
+      <div class="col"><button class="primary" (click)="onlyReceived()">Received Requests</button></div>
+    </div>
+    } @else {
+      <h2>You don't have any friends yet</h2>
+    }
+  </div>
+  <!--Listing-->
+  <div class="container">
+    @for(friend of displayedFriends; track friend){
+      <div class="row mb-1">
+
+        <div class="col" >
+          <div class="card" style="cursor: pointer" routerLink="/user/{{friend.username}}">
+            <div class="row">
+
+              <div class="col-auto align-content-center ps-4" >
+
+                <img id="avatar-{{friend.username}}" class="profile">
+
+
+              </div>
+
+              <div class="col-auto p-3" >
+                <div class="row">
+                  <h5 class="card-title">{{friend.username}}</h5>
+                </div>
+                <div class="row">
+                  <h6 id="email">{{friend.email}}</h6>
+                </div>
+              </div>
+
+              <div class="col" style=""></div>
+
+              <div class="col-auto align-content-center pe-5" style="">
+                <div>
+                  @if(!friend.accepted && friend.username === friend.requesterName){
+                    <button type="button" class="primary p-1" (click)="acceptFriend(friend, $event)">accept</button>
+                  }
+                  @if(!friend.accepted && friend.username !== friend.requesterName){
+                    <button type="button" class="primary" disabled>pending</button>
+                  }
+                  <button type="button" class="primary" (click)="deleteFriend(friend, $event)">delete</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    }
+
+  </div>
+
+
+
+
+
+
+</div>

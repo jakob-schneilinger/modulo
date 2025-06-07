@@ -2,8 +2,9 @@ import { Component, OnInit } from "@angular/core";
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
 import { map, switchMap } from "rxjs";
-import { User, UserUpdateDto } from "src/app/dtos/user";
+import {FriendDto, User, UserUpdateDto} from "src/app/dtos/user";
 import { UserService } from "src/app/services/user.service";
+import {AuthService} from "../../services/auth.service";
 
 @Component({
   selector: "app-user",
@@ -14,6 +15,8 @@ import { UserService } from "src/app/services/user.service";
 export class UserComponent implements OnInit {
   canManage: boolean = false;
   isOwn: boolean = false;
+  friendInfo: FriendDto = null;
+  sentFriendRequest: boolean = false;
   selectedAvatar: File;
   passwordChangeRequested: boolean = false;
   removeAvatarOnSave: boolean = false;
@@ -46,6 +49,7 @@ export class UserComponent implements OnInit {
   constructor(
     private formBuilder: UntypedFormBuilder,
     private userService: UserService,
+    private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute
   ) {
@@ -88,7 +92,17 @@ export class UserComponent implements OnInit {
               this.handleError(e);
             },
           });
-        },
+
+          this.userService.getFriend(this.authService.getLoggedInUser(), this.user.username).subscribe({
+            next: friend => {
+              this.friendInfo = friend
+            },
+            error: err => {
+              this.friendInfo = null
+            }
+          });
+
+            },
         error: (e) => {
           this.router.navigate(["/404"], { skipLocationChange: true });
         },
@@ -219,6 +233,28 @@ export class UserComponent implements OnInit {
   vanishError() {
     this.error = null;
   }
+
+  addAsFriend() {
+    if (this.friendInfo) {
+      return;
+    }
+    this.friendInfo = {accepted: false, email: "", requesterName: "", username : ""}
+    const me = this.authService.getLoggedInUser();
+    this.userService.sendFriendRequest(me, this.user.username).subscribe({
+      next: value => {},
+      error: console.error
+    })
+  }
+  get FriendLabel(){
+    if (!this.friendInfo) {
+      return "Add friend"
+    }
+    if (this.friendInfo.accepted) {
+      return "Friend"
+    }
+    return "Active Request"
+  }
+
 }
 
 const colors = [
@@ -229,7 +265,7 @@ const colors = [
 const canvas = document.createElement("canvas");
 canvas.width = 10;
 canvas.height = 10;
-function generateAvatar(seed: string): string {
+export function generateAvatar(seed: string): string {
   const ctx = canvas.getContext("2d");
   ctx.clearRect(0, 0, 10, 10);
   const data = ctx.getImageData(0, 0, 10, 10);

@@ -1,8 +1,8 @@
 import { Injectable } from "@angular/core";
 import { map, Observable, of, tap } from "rxjs";
-import { User, UserUpdateDto } from "../dtos/user";
+import {FriendDto, User, UserUpdateDto} from "../dtos/user";
 import { AuthService } from "./auth.service";
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpParams } from "@angular/common/http";
 import { Globals } from "../global/globals";
 
 @Injectable({
@@ -65,4 +65,54 @@ export class UserService {
     const url = `${this.userBaseUri}/${user.username}/avatar`;
     return this.httpClient.delete<void>(url);
   }
+
+  getFriends(user: User, onlyFriends: boolean) {
+    const url = `${this.userBaseUri}/${user.username}/friends`;
+    let params = new HttpParams();
+    params = params.set("onlyfriends", onlyFriends)
+
+    return this.httpClient.get<FriendDto[]>(url, {params: params})
+  }
+
+  sendFriendRequest(user: User, friendName: string) {
+    const url = `${this.userBaseUri}/${user.username}/friends`;
+    let params = new HttpParams();
+    params = params.set("friendName", friendName)
+
+    return this.httpClient.post<void>(url, null, {params: params})
+  }
+
+  acceptFriendRequest(user: User, friendName: string) {
+    const url = `${this.userBaseUri}/${user.username}/friends`;
+    let params = new HttpParams()
+    params = params.set("friendName", friendName)
+
+    return this.httpClient.put<void>(url, null, {params})
+  }
+
+  deleteFriend(user: User, friendName: string) {
+    const url = `${this.userBaseUri}/${user.username}/friends`;
+    let params = new HttpParams();
+    params = params.set("friendName", friendName)
+
+    return this.httpClient.delete<void>(url, {params: params})
+  }
+
+
+  isFriend(user: User, friendName: string) {
+    const url = `${this.userBaseUri}/${user.username}/friends/isfriend`;
+    let params = new HttpParams();
+    params = params.set("friendName", friendName)
+
+    return this.httpClient.get<boolean>(url, {params: params})
+  }
+
+  getFriend(user: User, friendName: string) {
+    const url = `${this.userBaseUri}/${user.username}/friends/friend`;
+    let params = new HttpParams();
+    params = params.set("friendName", friendName)
+
+    return this.httpClient.get<FriendDto>(url, {params: params})
+  }
+
 }
