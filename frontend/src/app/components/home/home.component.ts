@@ -85,7 +85,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
   }
 
-  createImage() {
+  createImage(isSketch: boolean = false) {
     const width = Math.floor(gridVar.columns / 4);
     const height = Math.floor(gridVar.columns / 4);
     const row = this.findFirstFreeRow(width, height);
@@ -93,7 +93,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.compService
       .createImage({ parentId: this.component.id, column, row, width: width, height: height }, null)
       .subscribe({
-        next: (comp) => this.addChild(comp),
+        next: (comp) => this.addChild({ ...comp, sketch: isSketch } as Comp),
         error: (e) => console.log(e),
       });
   }
@@ -241,6 +241,9 @@ export class HomeComponent implements OnInit, OnDestroy {
         break;
       case "note":
         this.createNote();
+        break;
+      case "sketch":
+        this.createImage(true);
         break;
       default:
         alert("not implemented yet!");
