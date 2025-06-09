@@ -1,13 +1,13 @@
-export type ComponentType = "board" | "task" | "note" | "text" | "image" | "video" | "sketch" | "calender";
+export type ComponentType = "board" | "task" | "note" | "text" | "image" | "video" | "sketch" | "calendar";
 export interface ComponentNameTypeMap {
   board: Board;
   task: Task;
   note: Note;
   text: Text;
   image: Image;
-  video: null;
-  sketch: null;
-  calender: null;
+  video: Video;
+  sketch: Sketch;
+  calendar: Calendar;
 }
 export interface Component<T extends ComponentType = any> {
   id?: number;
@@ -32,6 +32,19 @@ export interface Board extends Container<"board"> {
 
 export interface Image extends Container<"image"> {
   type: "image";
+}
+
+export interface Calendar extends Component<"calendar"> {
+  type: "calendar";
+  entries: CalendarEntry[];
+}
+
+export interface Video extends Component<"video"> {
+  type: "video";
+}
+
+export interface Sketch extends Component<"sketch"> {
+  type: "sketch";
 }
 
 export interface Task extends Container<"task"> {
@@ -65,6 +78,22 @@ export interface ImageCreate {
   height: number;
   column: number;
   row: number;
+}
+
+/** DTO used for creating a calendar component */
+export interface CalendarCreate {
+  parentId: number;
+  width: number;
+  height: number;
+  column: number;
+  row: number;
+}
+
+export interface CalendarEntry {
+  startDate: Date;
+  endDate: Date;
+  title: string;
+  description: string;
 }
 
 export interface Text extends Component<"text"> {

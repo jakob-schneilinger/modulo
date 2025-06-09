@@ -9,12 +9,14 @@ import { FormsModule } from "@angular/forms";
 import { BoardComponent } from "./containers/board/board.component";
 import { ContextMenuComponent } from "./context-menu/context-menu.component";
 import { TaskComponent } from "./containers/task/task.component";
+import {CalendarComponent} from "./calendar/calendar.component";
 
 @NgModule({
   declarations: [
     BaseComponent, //
     ContainerComponent,
     ImageComponent,
+    CalendarComponent,
     NoteComponent,
     TextComponent,
     BoardComponent,
@@ -30,6 +32,7 @@ import { TaskComponent } from "./containers/task/task.component";
     ContainerComponent,
     BoardComponent,
     ImageComponent,
+    CalendarComponent,
     NoteComponent,
     TextComponent,
     TaskComponent,

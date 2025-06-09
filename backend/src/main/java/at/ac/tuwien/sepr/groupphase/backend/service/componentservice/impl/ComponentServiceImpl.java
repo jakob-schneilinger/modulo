@@ -5,6 +5,7 @@ import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDto
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentUpdateDto;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Component;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Image;
+import at.ac.tuwien.sepr.groupphase.backend.entity.components.MyCalendar;
 import at.ac.tuwien.sepr.groupphase.backend.exception.NotFoundException;
 import at.ac.tuwien.sepr.groupphase.backend.exception.UserNotAuthorizedException;
 import at.ac.tuwien.sepr.groupphase.backend.exception.ValidationException;
@@ -37,6 +38,8 @@ public class ComponentServiceImpl implements ComponentService {
 
     @Value("${global.location.image}")
     private String imagePath;
+    @Value("${global.location.calendar}")
+    private String calendarPath;
 
     @Autowired
     public ComponentServiceImpl(ComponentRepository componentRepository, UserService userService, ComponentValidator validator) {
@@ -119,6 +122,11 @@ public class ComponentServiceImpl implements ComponentService {
 
         if (component instanceof Image) {
             File file = new File(imagePath, String.valueOf(id));
+            file.delete();
+        }
+
+        if (component instanceof MyCalendar) {
+            File file = new File(calendarPath, String.valueOf(id) + ".ics");
             file.delete();
         }
 
