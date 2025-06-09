@@ -1,5 +1,17 @@
 import { Injectable } from "@angular/core";
-import { Board, Component, Container, Image, ImageCreate, Text, Note, Task, Label } from "../dtos/component";
+import {
+  Board,
+  Component,
+  Container,
+  Image,
+  ImageCreate,
+  Text,
+  Note,
+  Task,
+  Label,
+  CalendarCreate,
+  Calendar
+} from "../dtos/component";
 import { Observable } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import { Globals } from "../global/globals";
@@ -49,6 +61,33 @@ export class ComponentService {
     form.append("component", new Blob([JSON.stringify(image)], { type: "application/json" }));
     form.append("image", data);
     return this.httpClient.put<Image>(this.componentBaseUri + "/image", form);
+  }
+
+  createCalendar(calendar: CalendarCreate) {
+    console.log("Create calendar: ", calendar);
+    return this.httpClient.post<Calendar>(this.componentBaseUri + "/calendar", calendar);
+  }
+
+  getCalendarContent(calendar: Calendar) {
+    return this.httpClient.get<Calendar>(this.componentBaseUri + "/calendar/" + calendar.id);
+  }
+
+  setCalendarUrl(calendar: Calendar, url: string) {
+    return this.httpClient.put<Calendar>(this.componentBaseUri + "/calendar/url/" + calendar.id, { url });
+  }
+
+  refreshCalendar(calendar: Calendar){
+    return this.httpClient.put<Calendar>(this.componentBaseUri + "/calendar/refresh/" + calendar.id, {});
+  }
+
+  clearCalendar(calendar: Calendar) {
+    return this.httpClient.put<Calendar>(this.componentBaseUri + "/calendar/clear/" + calendar.id, {});
+  }
+
+  setCalendarFile(calendar: Calendar, file: Blob) {
+    const form = new FormData()
+    form.append('file', new Blob([file], { type: 'text/calendar' }), 'event.ics');
+    return this.httpClient.put<Calendar>(this.componentBaseUri + "/calendar/file/" + calendar.id, form);
   }
 
   createNote(note: Partial<Note>) {

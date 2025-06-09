@@ -1,18 +1,22 @@
 package at.ac.tuwien.sepr.groupphase.backend.mapper;
 
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardDetailDto;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.CalendarDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ImageDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.LabelDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.TaskDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.TextDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Board;
+import at.ac.tuwien.sepr.groupphase.backend.entity.components.MyCalendar;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Image;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Note;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Task;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.NoteDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Text;
+import at.ac.tuwien.sepr.groupphase.backend.service.componentservice.impl.CalendarServiceImpl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -58,5 +62,13 @@ public class ComponentEntityToDtoMapper {
                 note.getLabels().stream().map(entity -> new LabelDto(entity.getName(), entity.getColor())).toList(),
                 note.getWidth(), note.getHeight(), note.getColumn(), note.getRow(),
                 note.getChildren().stream().map(child -> child.accept(MappingDepth.DEEP)).toList());
+    }
+
+
+    public static CalendarDetailDto visit(MyCalendar myCalendar) {
+        return new CalendarDetailDto(myCalendar.getId(), myCalendar.getWidth(),
+                myCalendar.getHeight(), myCalendar.getColumn(),
+                myCalendar.getRow(),
+                myCalendar.getEntries() == null ? new ArrayList<>() : MyCalendar.getCalendarEntries(myCalendar.getEntries()));
     }
 }

@@ -4,6 +4,7 @@
   <div class="container-grid" [id]="'container-grid-' + self.id" #grid>
     <ng-container #children></ng-container>
 
+
   </div>
   <div *ngIf="!!parentContainer && inEditMode && self.id !== -1" class="resizer" [id]="'resizer-' + self.id"
     data-cy="container-resizer">

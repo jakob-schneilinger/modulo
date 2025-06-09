@@ -1,12 +1,28 @@
 CREATE TABLE IF NOT EXISTS components (
 	id INT NOT NULL AUTO_INCREMENT UNIQUE,
-	type ENUM('text', 'image', 'board', 'note', 'task') NOT NULL,
+	type ENUM('text', 'image', 'board', 'note', 'task', 'calendar') NOT NULL,
 	owner_id INT NOT NULL,
 	width INT NOT NULL,
     height INT NOT NULL,
     component_column INT NOT NULL,
     component_row INT NOT NULL,
 	PRIMARY KEY(id)
+);
+
+CREATE TABLE IF NOT EXISTS calendar_content (
+    id INT NOT NULL PRIMARY KEY,
+    ical_url VARCHAR(255),
+    etag VARCHAR(63)
+);
+
+CREATE TABLE IF NOT EXISTS calendar_entries (
+    id INT NOT NULL AUTO_INCREMENT UNIQUE,
+    container_id INT NOT NULL,
+    start_date DATE,
+    end_date DATE,
+    description TEXT,
+    title VARCHAR(255),
+    rrule TEXT
 );
 
 CREATE TABLE IF NOT EXISTS task_content (
@@ -106,6 +122,12 @@ CREATE TABLE IF NOT EXISTS salts (
 	salt VARCHAR(255) NOT NULL
 );
 
+ALTER TABLE calendar_entries
+ADD FOREIGN KEY(container_id) REFERENCES calendar_content(id)
+ON UPDATE NO ACTION ON DELETE CASCADE;
+ALTER TABLE calendar_content
+ADD FOREIGN KEY(id) REFERENCES components(id)
+ON UPDATE NO ACTION ON DELETE CASCADE;
 CREATE TABLE IF NOT EXISTS friends (
     requester_id INT NOT NULL,
     accepter_id INT NOT NULL,

@@ -2,6 +2,7 @@ global:
   location:
     avatars: res/avatars/
     image: res/images/
+    calendar: res/calendar/
 
 logging:
   file.name: ./log/backend.log

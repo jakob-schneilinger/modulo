@@ -1,0 +1,117 @@
+
+button.buttonDel {
+  /* reset anything the global rule gave you: */
+  border: none; /* kill the 4px transparent border */
+  background: transparent; /* or #fff if you want white */
+  padding: 0; /* kill the global padding */
+
+  /* now turn it into a perfect square flex-centered icon holder */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  /* size it to whatever you like: */
+  width: 24px;
+  height: 24px;
+  border-radius: 4px; /* optional, to match your style */
+  cursor: pointer;
+}
+
+button.buttonDel:hover {
+  background-color: #ffe4e1ff;
+}
+button.buttonDel:active {
+  background-color: #ffbdbbff;
+}
+button.buttonDel.Selected {
+  background-color: #ffaaa7;
+}
+
+
+.card {
+  min-height: 100%;
+}
+
+.hidden {
+  display: none;
+}
+
+.no-cal-msg {
+  padding: 2rem 1rem;
+}
+
+.no-entry-msg {
+  padding: 1rem 0.5rem;
+}
+
+.calendar-entry {
+  position: relative;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  background-color: #f9f9f9;
+  transition: background-color 0.2s ease;
+  overflow: hidden;
+}
+
+.calendar-entry:hover {
+  background-color: rgba(240, 128, 128, 0.3);
+}
+
+.description {
+  max-height: 0;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  overflow: hidden;
+  font-size: 0.9em;
+  color: #444;
+  margin-top: 4px;
+}
+
+.calendar-entry:hover .description {
+  max-height: 200px;
+  opacity: 1;
+}
+
+.filter-row{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.filter-input {
+  display: flex;
+  flex-direction: column
+}
+
+label {
+  font-size: 12px;
+  color: grey;
+}
+
+.filter-input input[type="date"] {
+  padding: 4px 11px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.filter-input input[type="date"]:focus {
+  border-color: lightcoral;
+  box-shadow: 0 0 6px lightcoral;
+  outline: none;
+}
+
+.title {
+  font-weight: bold;
+  margin-bottom: 2px;
+}
+
+.date {
+  font-size: 0.9em;
+  color: #666;
+}
+

@@ -1,4 +1,4 @@
-import { Board, Container, Text, Component as Comp, Note, Task, isType } from "../../dtos/component";
+import { Board, Container, Text, Component as Comp, Note, Task, Calendar, isType } from "../../dtos/component";
 import { ComponentService } from "../../services/component.service";
 import { DragService } from "../../interaction-services/drag.service";
 import { AuthService } from "../../services/auth.service";
@@ -94,6 +94,19 @@ export class HomeComponent implements OnInit, OnDestroy {
       .createImage({ parentId: this.component.id, column, row, width: width, height: height }, null)
       .subscribe({
         next: (comp) => this.addChild({ ...comp, sketch: isSketch } as Comp),
+        error: (e) => console.log(e),
+      });
+  }
+
+  createCalendar() {
+    const width = Math.floor(gridVar.columns / 4);
+    const height = Math.floor(gridVar.columns / 4);
+    const row = this.findFirstFreeRow(width, height);
+    const column = 1;
+    this.compService
+      .createCalendar({ parentId: this.component.id, column, row, width: width, height: height })
+      .subscribe({
+        next: (comp) => this.addChild(comp),
         error: (e) => console.log(e),
       });
   }
@@ -245,6 +258,9 @@ export class HomeComponent implements OnInit, OnDestroy {
       case "sketch":
         this.createImage(true);
         break;
+      case "calendar":
+        this.createCalendar();
+        break;
       default:
         alert("not implemented yet!");
         console.error("unsupported type of component");
@@ -380,6 +396,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.compService.getComponent(id).subscribe({
           next: (comp) => {
             this.component = comp as any;
+
             this.setRecursiveParentId(this.component);
             if (this.nameElement?.nativeElement) {
               this.nameElement.nativeElement.innerText = this.component.name;
@@ -412,8 +429,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.eventService.taskChanged$.subscribe(({ component }) => {
         this.taskChanged({ component });
-        console.log("The Task status of the following component just changed:");
-        console.log(component);
       })
     );
 

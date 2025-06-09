@@ -1,0 +1,58 @@
+<div #previewCard class="preview-card" [attr.data-preview-id]="self.id"></div>
+<div #card  class="borders card p-2" [attr.data-id]="self.id"
+     [attr.data-cy]="'child-calendar'">
+  @if (inEditMode) {
+    <!-- Drag & Resize -->
+    <div class="top-right" (mousedown)="startContainerDrag(self, $event)" (mouseup)="stopContainerDrag()">
+      <i class="bi bi-arrows-move grab"></i>
+    </div>
+    <div class="resizer bottom-right" [id]="'resizer-' + self.id">
+      <i class="bi bi-arrows-angle-expand"></i>
+    </div>
+  } @else {
+    <app-context-menu class="top-right" [actions]="actions"></app-context-menu>
+  }
+
+  <div class="content">
+    @if (this.self.entries.length <= 0) {
+      <div class="no-cal-msg">
+        No calendar selected yet!
+        <button (click)="focusFileInput()">Set File</button>
+        <input #webCalUrlInput type="url" (keyup.enter)="setUrl(webCalUrlInput.value)" placeholder="Input WebCal-URL here:">
+      </div>
+      <input #input class="hidden" type="file" (change)="setFile($event.target.files[0])"
+             accept=".ics">
+    } @else {
+      <button title="Refresh the Calendar!" class="buttonDel" style="font-size:16px"
+              (click)="refresh()">
+        <i class="bi bi-arrow-clockwise"></i>
+      </button>
+      <div #content>
+        <div class="filter-row">
+          <div class="filter-input">
+            <label for="start-date">Filter Start Date</label>
+            <input id="start-date" type="date" [(ngModel)]="filterStartDate">
+          </div>
+          <div class="filter-input">
+            <label for="end-date">Filter End Date</label>
+            <input id="end-date" type="date" [(ngModel)]="filterEndDate">
+          </div>
+          <div class = "filter-input">
+          </div>
+        </div>
+
+        @if (entries.length <= 0) {
+          <p class="no-entry-msg">No Calendar Entries found!</p>
+        }
+
+        @for (entry of entries; track $index) {
+          <div class="calendar-entry">
+            <div class="title">{{ entry.title }}</div>
+            <div class="date">{{ formatDate(entry.startDate, entry.endDate) }}</div>
+            <div class="description">{{ entry.description }}</div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

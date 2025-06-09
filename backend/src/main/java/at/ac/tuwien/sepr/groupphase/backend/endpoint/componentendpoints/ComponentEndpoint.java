@@ -63,7 +63,7 @@ public class ComponentEndpoint {
      * @return updated component
      */
     @PermitAll
-    @PatchMapping()
+    @PatchMapping("")
     public ResponseEntity<ComponentDetailDto> updateComponent(@RequestBody ComponentUpdateDto dto) {
         return new ResponseEntity<>(service.updateComponent(dto), HttpStatus.OK);
     }
