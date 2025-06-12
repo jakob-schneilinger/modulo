@@ -9,7 +9,8 @@ import { FormsModule } from "@angular/forms";
 import { BoardComponent } from "./containers/board/board.component";
 import { ContextMenuComponent } from "./context-menu/context-menu.component";
 import { TaskComponent } from "./containers/task/task.component";
-import {CalendarComponent} from "./calendar/calendar.component";
+import { CalendarComponent } from "./calendar/calendar.component";
+import { PromptComponent } from "../prompt/prompt.component";
 
 @NgModule({
   declarations: [
@@ -26,6 +27,7 @@ import {CalendarComponent} from "./calendar/calendar.component";
   imports: [
     CommonModule, //
     FormsModule,
+    PromptComponent,
   ],
   exports: [
     // needed within containers

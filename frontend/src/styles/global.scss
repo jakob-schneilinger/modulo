@@ -21,7 +21,6 @@ h1 {
   -webkit-background-clip: text;
 }
 
-
 button {
   padding: 0.25rem;
   border-radius: 4px;
@@ -63,33 +62,6 @@ button {
   }
 }
 
-div.notification {
-  position: absolute;
-  top: 0;
-  right: 0;
-  padding: 1rem;
-  border-radius: 4px;
-  z-index: 1;
-
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-
-  button {
-    display: inline;
-    box-sizing: content-box;
-    border: none;
-    background: none;
-    font-size: 1.5rem;
-    color: inherit;
-  }
-
-  &.error {
-    color: white;
-    background-color: $error;
-  }
-}
-
 span.error {
   color: $error;
 }
@@ -106,4 +78,10 @@ span.error {
 
 .hidden {
   display: none;
+}
+
+@media (max-width: 800px) {
+  .onlyDesktop {
+    display: none;
+  }
 }

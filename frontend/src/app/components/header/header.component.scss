@@ -7,8 +7,49 @@ h1 {
 }
 
 #nav-components {
-  height: calc(100vh - 18rem);
-  overflow: auto;
+  > li {
+    display: inline-block;
+  }
+}
+
+.hideBtn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 1rem;
+  z-index: 50;
+
+  font-size: 1.5rem;
+  color: #eee;
+  cursor: pointer;
+}
+
+.showBtn {
+  position: absolute;
+  top: -0.5rem;
+  right: 0;
+  z-index: 50;
+
+  font-size: 1.5rem;
+  height: 1.5rem;
+  color: $nav-bg;
+  background-color: #eee;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+@media (min-width: 800px) {
+  #nav-components {
+    height: calc(100vh - 18rem);
+    overflow: auto;
+    > li {
+      display: list-item;
+    }
+  }
+
+  .hideBtn {
+    display: none;
+  }
 }
 
 nav {
@@ -92,6 +133,6 @@ hr {
   }
 }
 
-.logo{
+.logo {
   cursor: pointer;
 }

@@ -1,0 +1,16 @@
+<div class="overlay" (click)="blur()">
+
+    <div class="prompt" (click)="$event.stopPropagation()">
+        <div>{{promptText}}</div>
+        <form (submit)="submit($event)">
+            <input type="text" class="form-control" autofocus #prompt>
+            <div class="flex">
+                @if (cancelText) {
+                <button type="button" (click)="abort()">{{cancelText}}</button>
+                }
+                <button type="submit" class="primary">{{submitText}}</button>
+            </div>
+        </form>
+    </div>
+
+</div>

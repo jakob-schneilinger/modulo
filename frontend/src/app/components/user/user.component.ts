@@ -2,9 +2,10 @@ import { Component, OnInit } from "@angular/core";
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
 import { map, switchMap } from "rxjs";
-import {FriendDto, User, UserUpdateDto} from "src/app/dtos/user";
+import { FriendDto, User, UserUpdateDto } from "src/app/dtos/user";
 import { UserService } from "src/app/services/user.service";
-import {AuthService} from "../../services/auth.service";
+import { AuthService } from "../../services/auth.service";
+import { NotificationService } from "src/app/services/notification.service";
 
 @Component({
   selector: "app-user",
@@ -20,7 +21,6 @@ export class UserComponent implements OnInit {
   selectedAvatar: File;
   passwordChangeRequested: boolean = false;
   removeAvatarOnSave: boolean = false;
-  error = null;
 
   get isChanged() {
     return this.displayNameChanged || this.emailChanged || this.avatarChanged || this.passwordChanged;
@@ -51,7 +51,8 @@ export class UserComponent implements OnInit {
     private userService: UserService,
     private authService: AuthService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private notification: NotificationService
   ) {
     this.updateForm = this.formBuilder.group({
       displayName: [],
@@ -94,15 +95,14 @@ export class UserComponent implements OnInit {
           });
 
           this.userService.getFriend(this.authService.getLoggedInUser(), this.user.username).subscribe({
-            next: friend => {
-              this.friendInfo = friend
+            next: (friend) => {
+              this.friendInfo = friend;
             },
-            error: err => {
-              this.friendInfo = null
-            }
+            error: (err) => {
+              this.friendInfo = null;
+            },
           });
-
-            },
+        },
         error: (e) => {
           this.router.navigate(["/404"], { skipLocationChange: true });
         },
@@ -224,37 +224,32 @@ export class UserComponent implements OnInit {
     console.error(e);
 
     if (e.error instanceof ErrorEvent) {
-      this.error = e.error.message;
+      this.notification.error("Error", e.error.message);
     } else {
-      this.error = `Error (${e.status}): ${e.error}`;
+      this.notification.error("Error", e.error);
     }
-  }
-
-  vanishError() {
-    this.error = null;
   }
 
   addAsFriend() {
     if (this.friendInfo) {
       return;
     }
-    this.friendInfo = {accepted: false, email: "", requesterName: "", username : ""}
+    this.friendInfo = { accepted: false, email: "", requesterName: "", username: "" };
     const me = this.authService.getLoggedInUser();
     this.userService.sendFriendRequest(me, this.user.username).subscribe({
-      next: value => {},
-      error: console.error
-    })
+      next: (value) => {},
+      error: console.error,
+    });
   }
-  get FriendLabel(){
+  get FriendLabel() {
     if (!this.friendInfo) {
-      return "Add friend"
+      return "Add friend";
     }
     if (this.friendInfo.accepted) {
-      return "Friend"
+      return "Friend";
     }
-    return "Active Request"
+    return "Active Request";
   }
-
 }
 
 const colors = [

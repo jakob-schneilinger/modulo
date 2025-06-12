@@ -21,6 +21,7 @@ import { DragService } from "./interaction-services/drag.service";
 import { CommonModule } from "@angular/common";
 import { ComponentsModule } from "./components/comp/components.module";
 import { FriendlistComponent } from "./components/friendlist/friendlist.component";
+import { NotificationsComponent } from "./components/notification/notifications.component";
 
 @NgModule({
   declarations: [
@@ -32,6 +33,7 @@ import { FriendlistComponent } from "./components/friendlist/friendlist.componen
     UserLoginComponent,
     UserCreateComponent,
     UserComponent,
+    NotificationsComponent,
   ],
   bootstrap: [AppComponent],
   imports: [

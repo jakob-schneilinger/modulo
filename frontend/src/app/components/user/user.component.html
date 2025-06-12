@@ -1,8 +1,3 @@
-<div *ngIf="error" class="notification error">
-    {{ error }}
-    <button (click)="vanishError()" class="close">&times;</button>
-</div>
-
 <div class="container">
 
     <form class="form" [formGroup]="updateForm" (ngSubmit)="onSubmit()">
@@ -13,7 +8,8 @@
             <div *ngIf="canManage" class="avatar-ctrl remove" (click)="onRemoveAvatar()">
                 <i class="bi bi-x-circle-fill"></i>
             </div>
-            <div *ngIf="canManage" class="avatar-ctrl edit" (click)="changeAvatar()" [attr.data-cy]="'user-select-avatar'">
+            <div *ngIf="canManage" class="avatar-ctrl edit" (click)="changeAvatar()"
+                [attr.data-cy]="'user-select-avatar'">
                 <i class="bi bi-pencil-fill"></i>
             </div>
         </div>
@@ -27,20 +23,23 @@
             <!-- Change data -->
             <div class="form-group">
                 <label for="tbxDisplayName">Display name</label>
-                <input type="text" id="tbxDisplayName" class="form-control" formControlName="displayName" data-cy="user-displayname-input">
+                <input type="text" id="tbxDisplayName" class="form-control" formControlName="displayName"
+                    data-cy="user-displayname-input">
             </div>
 
 
             <div class="form-group">
                 <label for="tbxEmail">Email</label>
-                <input type="email" id="tbxEmail" class="form-control" formControlName="email" data-cy="user-email-input">
+                <input type="email" id="tbxEmail" class="form-control" formControlName="email"
+                    data-cy="user-email-input">
                 <span *ngIf="updateForm.controls.password?.errors?.email" class="error">
                     Invalid email format
                 </span>
             </div>
 
             <button *ngIf="!passwordChangeRequested" type="button" class="form-group"
-                (click)="passwordChangeRequested = true" [attr.data-cy]="'user-request-password-change'">Change Password</button>
+                (click)="passwordChangeRequested = true" [attr.data-cy]="'user-request-password-change'">Change
+                Password</button>
 
             <div *ngIf="passwordChangeRequested" class="form-group passwords">
                 <div>

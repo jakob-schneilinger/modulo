@@ -43,7 +43,7 @@ describe("register on modulo", ()=>{
         cy.get("[data-cy=login-input-password]").type("12345678")
         cy.get("[data-cy=login-input-username]").type("testuser")
         cy.get("[data-cy=login-button").click()
-        cy.get("[data-cy=auth-error]").should("exist")
+        cy.get("[data-cy=notification-error]").should("exist")
     });
 
     it('register new user', () => {
