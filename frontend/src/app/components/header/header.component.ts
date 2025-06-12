@@ -17,6 +17,8 @@ export class HeaderComponent implements OnInit {
   profileImgSrc: string;
   hoverProfile: boolean = false;
 
+  isVisible: boolean = true;
+
   roots: Board[] = [];
 
   constructor(

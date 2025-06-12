@@ -36,7 +36,10 @@
             <i class="bi bi-x" (click)="removeLbl(label)"></i>
         </span>
         }
-        <button class="compact" (click)="addLbl()"><i class="bi bi-plus"></i>add</button>
+        <button class="compact" (click)="showPrompt=true"><i class="bi bi-plus"></i>add</button>
+        @if (showPrompt) {
+        <app-prompt (finish)="addLbl($event)"></app-prompt>
+        }
     </div>
 
 

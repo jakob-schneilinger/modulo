@@ -1,12 +1,9 @@
 import { Component, OnInit } from "@angular/core";
-import {
-  UntypedFormBuilder,
-  UntypedFormGroup,
-  Validators,
-} from "@angular/forms";
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
 import { UserCreateDto } from "src/app/dtos/auth";
 import { AuthService } from "src/app/services/auth.service";
+import { NotificationService } from "src/app/services/notification.service";
 
 @Component({
   selector: "app-create",
@@ -18,14 +15,12 @@ export class CreateComponent implements OnInit {
   submitted: boolean = false;
   createForm: UntypedFormGroup;
 
-  error = false;
-  errorMessage = "";
-
   constructor(
     private formBuilder: UntypedFormBuilder,
     private authService: AuthService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private notification: NotificationService
   ) {
     this.createForm = this.formBuilder.group({
       username: ["", [Validators.required, Validators.maxLength(16)]],
@@ -37,14 +32,11 @@ export class CreateComponent implements OnInit {
 
   onUsernameInput(ev: Event) {
     if (this.createForm.controls.displayName.untouched) {
-      this.createForm.controls.displayName.setValue(
-        this.createForm.controls.username.value
-      );
+      this.createForm.controls.displayName.setValue(this.createForm.controls.username.value);
     }
   }
 
   onSubmit() {
-
     this.submitted = true;
     if (!this.createForm.valid) {
       console.log("invalid input!");
@@ -66,11 +58,11 @@ export class CreateComponent implements OnInit {
       error: (err) => {
         console.log("Could not sign up due to:");
         console.log(err);
-        this.error = true;
+
         if (typeof err.error === "object") {
-          this.errorMessage = err.error.detail;
+          this.notification.error("Can't create", err.error.detail);
         } else {
-          this.errorMessage = err.error;
+          this.notification.error("Can't create", err.error);
         }
       },
     });

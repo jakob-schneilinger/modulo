@@ -17,6 +17,7 @@ const labelColors = ["#b22222", "#fffacd", "#2e8b57", "#6a5acd"];
 export class NoteComponent extends ContainerComponent<Note> {
   @ViewChild("content") contentPreview: ElementRef<HTMLSpanElement>;
 
+  showPrompt = false;
   editingTitle = false;
   titleBuffer = "";
 
@@ -67,8 +68,12 @@ export class NoteComponent extends ContainerComponent<Note> {
     this.componentService.updateNote({ id: this.self.id, labels: this.self.labels }).subscribe();
   }
 
-  addLbl() {
-    let name = prompt("Name of new label: ");
+  addLbl(data: { value: string; aborted: boolean }) {
+    console.log(data);
+
+    this.showPrompt = false;
+    if (data.aborted) return;
+    const name = data.value;
     if (!name) return;
     this.self.labels.push({ name });
     this.componentService.updateNote({ id: this.self.id, labels: this.self.labels }).subscribe();

@@ -1,0 +1,28 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 10;
+  background-color: rgba(96, 81, 81, 0.701);
+}
+
+.prompt {
+  background-color: white;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+input {
+  margin: 0.5rem 0;
+}
+
+.flex {
+  justify-content: end;
+}

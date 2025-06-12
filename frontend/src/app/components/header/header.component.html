@@ -18,8 +18,10 @@
   </div>
 </nav> -->
 
+@if (isVisible) {
 <nav>
 
+  <i class="hideBtn bi bi-arrow-up-square-fill" (click)="isVisible=false"></i>
   <h1 routerLink="/" class="logo">Modulo</h1>
 
   <ul>
@@ -36,11 +38,13 @@
   <hr>
 
   <div class="control">
-    <button class="primary" (click)="createBoard()" data-cy="header-create-board"><i class="bi bi-plus-square-fill"></i>Create board</button>
+    <button class="primary" (click)="createBoard()" data-cy="header-create-board"><i
+        class="bi bi-plus-square-fill"></i>Create board</button>
   </div>
 
   <ul id="nav-components" *ngIf="!!roots">
-    <li *ngFor="let item of roots" [routerLink]="'component/'+item.id" [ngClass]="{'in-view': isCurrentlyViewed(item)}" [attr.data-cy]="'root-board-link'">
+    <li *ngFor="let item of roots" [routerLink]="'component/'+item.id" [ngClass]="{'in-view': isCurrentlyViewed(item)}"
+      [attr.data-cy]="'root-board-link'">
       <a>{{item.name}}</a>
     </li>
   </ul>
@@ -48,3 +52,7 @@
 
 
 </nav>
+}
+@else {
+<i class="showBtn bi bi-arrow-down-square-fill" (click)="isVisible=true"></i>
+}

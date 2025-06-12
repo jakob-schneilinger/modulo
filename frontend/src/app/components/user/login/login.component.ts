@@ -1,13 +1,9 @@
 import { Component, OnInit } from "@angular/core";
-import {
-  ReactiveFormsModule,
-  UntypedFormBuilder,
-  UntypedFormGroup,
-  Validators,
-} from "@angular/forms";
+import { ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, Validators } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
 import { AuthService } from "../../../services/auth.service";
 import { UserLoginDto } from "../../../dtos/auth";
+import { NotificationService } from "src/app/services/notification.service";
 
 @Component({
   selector: "app-login",
@@ -19,9 +15,6 @@ export class LoginComponent implements OnInit {
   loginForm: UntypedFormGroup;
   // After first submission attempt, form validation will start
   submitted = false;
-  // Error flag
-  error = false;
-  errorMessage = "";
 
   gotoAfterSuccess: string = "/";
 
@@ -29,7 +22,8 @@ export class LoginComponent implements OnInit {
     private formBuilder: UntypedFormBuilder,
     private authService: AuthService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private notification: NotificationService
   ) {
     this.loginForm = this.formBuilder.group({
       username: ["", [Validators.required]],
@@ -40,7 +34,9 @@ export class LoginComponent implements OnInit {
   /**
    * Form validation will start after the method is called, additionally an AuthRequest will be sent
    */
-  loginUser() {
+  loginUser(event: Event) {
+    event.preventDefault();
+
     this.submitted = true;
     if (this.loginForm.valid) {
       const loginDto: UserLoginDto = {
@@ -68,11 +64,11 @@ export class LoginComponent implements OnInit {
       error: (error) => {
         console.log("Could not log in due to:");
         console.log(error);
-        this.error = true;
+
         if (typeof error.error === "object") {
-          this.errorMessage = error.error.error;
+          this.notification.warn("Authentication problems!", error.error.error);
         } else {
-          this.errorMessage = error.error;
+          this.notification.warn("Authentication problems!", error.error);
         }
       },
     });
@@ -80,13 +76,6 @@ export class LoginComponent implements OnInit {
 
   // TODO: insert in Home when Login finished
   createBoard() {}
-
-  /**
-   * Error flag will be deactivated, which clears the error message
-   */
-  vanishError() {
-    this.error = false;
-  }
 
   ngOnInit() {
     this.gotoAfterSuccess = this.route.snapshot.queryParams["returnUrl"] || "/";

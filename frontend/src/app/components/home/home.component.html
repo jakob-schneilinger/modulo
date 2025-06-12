@@ -8,17 +8,20 @@
   <div class="flex gap">
 
     <div>
-      <button class="primary" data-bs-toggle="dropdown" aria-expanded="false" data-cy="create-sub-component">
+      <button class="primary" data-bs-toggle="dropdown" aria-expanded="false" data-cy="create-sub-component"
+        title="Create new component">
         <i class="bi bi-plus-square-fill"></i>
-        <span class="m-1"> Create </span>
+        <span class="m-1 onlyDesktop"> Create </span>
       </button>
       <div class="dropdown-menu add-child-menu">
         <div class="h6 add-child-header">Add to {{this.component?.name}}</div>
         <hr class="m-0 p-0">
         <div class="add-child-items m-0 p-0">
-          <div><a class="dropdown-item text-dark" (click)="createChild('board')" data-cy="create-sub-board">Board</a></div>
+          <div><a class="dropdown-item text-dark" (click)="createChild('board')" data-cy="create-sub-board">Board</a>
+          </div>
           <div><a class="dropdown-item text-dark" (click)="createChild('text')" data-cy="create-sub-text">Text</a></div>
-          <div><a class="dropdown-item text-dark" (click)="createChild('image')" data-cy="create-sub-image">Image</a></div>
+          <div><a class="dropdown-item text-dark" (click)="createChild('image')" data-cy="create-sub-image">Image</a>
+          </div>
           <div><a class="dropdown-item text-dark" (click)="createChild('note')">Note</a></div>
           <div><a class="dropdown-item text-dark" (click)="createChild('task')">Task</a></div>
           <div><a class="dropdown-item text-dark" (click)="createChild('sketch')">Sketch</a></div>
@@ -27,13 +30,14 @@
       </div>
     </div>
 
-    <button type="button" class="primary" (click)="openDeleteModal(this.component)" data-cy="home-board-delete-modal">
+    <button type="button" class="primary" (click)="openDeleteModal(this.component)" data-cy="home-board-delete-modal"
+      title="Delete Board">
       <i class="bi bi-trash-fill"></i>
-      <span class="m-1"> Delete Board </span>
+      <span class="m-1 onlyDesktop">Delete Board </span>
     </button>
-    <div class="form-check form-switch" title="Enable edit mode to drag and resize components">
-      <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault"
-        [(ngModel)]="inEditMode" [attr.data-cy]="'home-edit-mode'">
+    <div class="form-check form-switch onlyDesktop" title="Enable edit mode to drag and resize components">
+      <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" [(ngModel)]="inEditMode"
+        [attr.data-cy]="'home-edit-mode'">
       <label class="form-check-label" for="flexSwitchCheckDefault">Edit</label>
     </div>
 
@@ -68,8 +72,8 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" (click)="finishDeleteModal()"
-          data-bs-dismiss="modal" data-cy="home-board-delete-modal-confirm">Delete</button>
+        <button type="button" class="btn btn-primary" (click)="finishDeleteModal()" data-bs-dismiss="modal"
+          data-cy="home-board-delete-modal-confirm">Delete</button>
       </div>
     </div>
   </div>
