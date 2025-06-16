@@ -1,12 +1,27 @@
-import { Board, Container, Text, Component as Comp, Note, Task, Calendar, isType } from "../../dtos/component";
+import {
+  Board,
+  Container,
+  Text,
+  Component as Comp,
+  Note,
+  Task,
+  Calendar,
+  isType,
+  isContainer,
+} from "../../dtos/component";
 import { ComponentService } from "../../services/component.service";
 import { DragService } from "../../interaction-services/drag.service";
 import { AuthService } from "../../services/auth.service";
 import { ActivatedRoute, Router } from "@angular/router";
-import { Component, OnInit, ViewChild, ElementRef, OnDestroy } from "@angular/core";
+import { Component, OnInit, ViewChild, ElementRef, OnDestroy, ComponentRef } from "@angular/core";
 import { EventService } from "../../interaction-services/event.service";
 import { Subscription } from "rxjs";
 import { gridVar } from "../../dtos/grid";
+import { GroupService } from "../../services/group.service";
+import { Group, GroupWithPermission } from "../../dtos/group";
+import { type ComponentUpdate, WebsocketService } from "../../services/websocket.service";
+import { ContainerComponent } from "../comp/containers/container.component";
+import { update } from "lodash";
 
 // for delete modal
 declare var bootstrap: any;
@@ -23,15 +38,24 @@ export class HomeComponent implements OnInit, OnDestroy {
     public router: Router,
     public route: ActivatedRoute,
     public compService: ComponentService,
+    public groupService: GroupService,
     private dragService: DragService,
-    private eventService: EventService
+    private eventService: EventService,
+    private websocketService: WebsocketService
   ) {}
 
-  @ViewChild("name") nameElement;
+  @ViewChild("name") nameElement: ElementRef;
+  @ViewChild("board") set boardElement(comp: ContainerComponent<Board>) {
+    if (comp) this._board = comp;
+  }
+  private _board: ContainerComponent<Board>;
   @ViewChild("deleteModal") deleteModal: ElementRef;
   @ViewChild("preview", { static: false }) previewEl!: ElementRef;
 
   inEditMode: boolean = false;
+
+  readonlyMode : boolean = true;
+  isOwner: boolean = false;
 
   private subscriptions: Subscription[] = [];
 
@@ -42,19 +66,21 @@ export class HomeComponent implements OnInit, OnDestroy {
   component: Board = undefined;
   forDeletion: Comp = undefined;
 
+  myGroups: GroupWithPermission[] = [];
+
   createBoard() {
     const width = Math.floor(gridVar.columns / 4);
     const height = Math.floor(gridVar.columns / 4);
-    const row = this.findFirstFreeRow(width, height);
+    const {column, row} = this.findFirstFreeSpace(width, height);
 
     const newBoard: Board = {
       children: [],
-      column: 1,
-      height: height,
+      column,
+      height,
       name: "My New Board",
       type: "board",
-      width: width,
-      row: row,
+      width,
+      row,
       parentId: this.component.id,
     };
 
@@ -67,15 +93,15 @@ export class HomeComponent implements OnInit, OnDestroy {
   createText() {
     const width = Math.floor(gridVar.columns / 4);
     const height = Math.floor(gridVar.columns / 8);
-    const row = this.findFirstFreeRow(width, height);
+    const {column, row} = this.findFirstFreeSpace(width, height);
 
     const newText: Text = {
-      column: 1,
-      height: Math.floor(gridVar.columns / 8),
+      column,
+      height,
       content: "Add Text here:",
-      width: Math.floor(gridVar.columns / 4),
+      width,
       type: "text",
-      row: row,
+      row,
       parentId: this.component.id,
     };
 
@@ -88,41 +114,40 @@ export class HomeComponent implements OnInit, OnDestroy {
   createImage(isSketch: boolean = false) {
     const width = Math.floor(gridVar.columns / 4);
     const height = Math.floor(gridVar.columns / 4);
-    const row = this.findFirstFreeRow(width, height);
-    const column = 1;
+    const {column, row} = this.findFirstFreeSpace(width, height);
     this.compService
-      .createImage({ parentId: this.component.id, column, row, width: width, height: height }, null)
+      .createImage({ parentId: this.component.id, column, row, width, height }, null)
       .subscribe({
         next: (comp) => this.addChild({ ...comp, sketch: isSketch } as Comp),
-        error: (e) => console.log(e),
+        error: (e) => console.error(e),
       });
   }
 
   createCalendar() {
     const width = Math.floor(gridVar.columns / 4);
     const height = Math.floor(gridVar.columns / 4);
-    const row = this.findFirstFreeRow(width, height);
-    const column = 1;
+    const {column, row} = this.findFirstFreeSpace(width, height);
     this.compService
-      .createCalendar({ parentId: this.component.id, column, row, width: width, height: height })
+      .createCalendar({ parentId: this.component.id, column, row, width, height })
       .subscribe({
         next: (comp) => this.addChild(comp),
-        error: (e) => console.log(e),
+        error: (e) => console.error(e),
       });
   }
 
   createNote() {
     const neighbors = this.component.children;
-    const width = Math.floor(gridVar.columns / 2);
+    const width = Math.floor(gridVar.columns / 4);
     const height = Math.floor(gridVar.columns / 4);
+    const {column, row} = this.findFirstFreeSpace(width, height);
 
     const createDto: Partial<Note> = {
       type: "note",
-      row: this.getNextUnusedRow(neighbors),
-      column: 1,
+      row,
+      column,
       width,
       height,
-      title: "New Note",
+      name: "New Note",
       labels: [{ name: "new" }],
       content: "# Hello World\n\n`This is`: *bold* and **italic** text!\n- num1\n- num2",
       parentId: this.component.id,
@@ -135,20 +160,20 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   createTask() {
     const width = Math.floor(gridVar.columns / 4);
-    const height = Math.floor(gridVar.columns / 3);
-    const row = this.findFirstFreeRow(width, height);
+    const height = Math.floor(gridVar.columns / 8);
+    const {column, row} = this.findFirstFreeSpace(width, height);
 
     const newTask: Task = {
       children: [],
-      column: 1,
+      column,
       completed: false,
-      height: height,
+      height,
       name: "New Task",
-      row: row,
+      row,
       repeating: false,
       startDate: undefined,
       type: "task",
-      width: width,
+      width,
       parentId: this.component.id,
     };
 
@@ -278,68 +303,64 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
   }
 
-  private findFirstFreeRow(width: number, height: number, column: number = 1): number {
-    const children = this.component.children;
-
+  private findFirstFreeSpace(width: number, height: number): {column: number, row: number} {
+    const children= this.component.children;
     let row = 1;
-    let found = false;
+    while (true) {
+      for (let i = 1; i <= gridVar.columns + 1 - width; i++) {
 
-    while (!found) {
-      // Define the new board's area
-      const newArea = {
-        left: column,
-        right: column + width,
-        top: row,
-        bottom: row + height,
-      };
-
-      // Check for collision with any existing board
-      const collision = children.some((child) => {
-        const childArea = {
-          left: child.column,
-          right: child.column + child.width,
-          top: child.row,
-          bottom: child.row + child.height,
+        const newArea = {
+          left: i,
+          right: i + width,
+          top: row,
+          bottom: row + height,
         };
 
-        return !(
-          newArea.right <= childArea.left ||
-          newArea.left >= childArea.right ||
-          newArea.bottom <= childArea.top ||
-          newArea.top >= childArea.bottom
-        );
-      });
+        const collision = children.some((child) => {
+          const childArea = {
+            left: child.column,
+            right: child.column + child.width,
+            top: child.row,
+            bottom: child.row + child.height,
+          };
 
-      if (!collision) {
-        found = true;
-      } else {
-        row++; // move down and try again
+          return !(
+            newArea.right <= childArea.left ||
+            newArea.left >= childArea.right ||
+            newArea.bottom <= childArea.top ||
+            newArea.top >= childArea.bottom
+          );
+        });
+
+        if (!collision) {
+          return {column: i, row}
+        }
       }
+      row++;
     }
-    return row;
   }
 
-  startDragging(data: { component: Comp; preview: ElementRef; event: MouseEvent }) {
+  startDragging(data: { component: Comp; preview: ElementRef; event: MouseEvent | TouchEvent }) {
     this.dragging = true;
     data.preview = this.previewEl;
     this.dragService.startDragging(data, <Container>this.component);
   }
 
-  onMouseMove(event: MouseEvent) {
+  onMouseMove(event: MouseEvent | TouchEvent) {
     this.dragService.onMouseMove(event, <Container>this.component);
   }
 
-  stopDragging(event: MouseEvent) {
+  stopDragging(event: MouseEvent | TouchEvent) {
     if (!this.dragging) return;
     this.dragging = false;
     this.dragService.stopDragging(event, <Container>this.component, (container, targetContainer) => {
-      container.parentId = targetContainer.id;
+      //container.parentId = targetContainer.id;
       this.compService.updatePosAndSize({ ...container, parentId: targetContainer.id } as any).subscribe({
         next: (value) => {
-          this.component = { ...this.component };
+          console.log("Drag/Resize success");
         },
         error: (err) => {
-          console.log("Error on dragging", err);
+          console.error("Error on dragging", err);
         },
       });
     });
@@ -347,6 +368,30 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   getCompDeleteMsg(comp: Comp<any>): string {
     return `Are you sure you want to delete the component ${(comp as any)?.name || `of type ${comp.type}`}?`;
+  }
+
+  onReadChange(groupWithPermission: GroupWithPermission): void {
+    if (!groupWithPermission.permission.read && groupWithPermission.permission.write) {
+      groupWithPermission.permission.write = false;
+    }
+    this.sendUpdate(groupWithPermission);
+  }
+
+  onWriteChange(groupWithPermission: GroupWithPermission): void {
+    if (groupWithPermission.permission.write) {
+      groupWithPermission.permission.read = true;
+    }
+    this.sendUpdate(groupWithPermission);
+  }
+
+  private sendUpdate(groupWithPermission: GroupWithPermission): void {
+    // Replace with actual update logic
+    const permissions = groupWithPermission.permission;
+    if (!permissions.read) {
+      this.groupService.removeGroupFromBoard(groupWithPermission.groupId, this.component.id).subscribe();
+    } else {
+      this.groupService.addGroupToBoard(groupWithPermission).subscribe();
+    }
   }
 
   // Opens delete Modal with specific component
@@ -377,16 +422,68 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.router.navigate(["/login"]);
   }
 
-  deleteUser() {}
+  minAllowedDepth = 2;
+  maxAllowedDepth = 8;
+  currentDepth: number;
+
+  incrementDepth() {
+    if (this.currentDepth < this.maxAllowedDepth) {
+      this.currentDepth++;
+      this.compService.changeBoardDepth(this.component.id, this.currentDepth).subscribe()
+    }
+  }
+
+  decrementDepth() {
+    if (this.currentDepth > this.minAllowedDepth && this.getContainerDepth(this.component) < this.currentDepth) {
+      this.currentDepth--;
+      this.compService.changeBoardDepth(this.component.id, this.currentDepth).subscribe()
+    } else {
+      console.error("Can't decrease board depth, check your board!")
+    }
+  }
+
+  preventInvalidInput(event: KeyboardEvent) {
+    if (["+", "-", ".", "e", "E", ",", " "].includes(event.key)) {
+      event.preventDefault();
+    }
+  }
+
+  sanitizeDepth() {
+    const containerDepth = this.getContainerDepth(this.component);
+    if (typeof this.currentDepth !== 'number' || isNaN(this.component.depth)) {
+      this.currentDepth = containerDepth;
+    } else {
+      if(this.currentDepth < this.getContainerDepth(this.component)) {
+        this.currentDepth = containerDepth;
+      } else if (this.component.depth < this.minAllowedDepth) {
+        this.component.depth = this.minAllowedDepth;
+      } else if (this.component.depth > this.maxAllowedDepth) {
+        this.component.depth = this.maxAllowedDepth;
+      }
+    }
+    this.compService.changeBoardDepth(this.component.id, this.component.depth).subscribe()
+  }
+
+  private getContainerDepth(component: Comp): number {
+    if (!isContainer(component) || !component.children?.length) {
+      return 0;
+    }
+
+    return 1 + Math.max(...component.children.map((child) => this.getContainerDepth(child)));
+  }
 
   ngOnInit() {
     window.addEventListener("mousemove", this.onMouseMove.bind(this));
     window.addEventListener("mouseup", this.stopDragging.bind(this));
 
+    window.addEventListener("touchmove", this.onMouseMove.bind(this));
+    window.addEventListener("touchend", this.stopDragging.bind(this));
+
     // for a user fetch his root boards
 
     this.route.params.subscribe({
       next: (params) => {
+        this.inEditMode = false;
         const id = params["id"];
         if (!id) {
           this.router.navigate(["/404"], { skipLocationChange: true });
@@ -396,6 +493,40 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.compService.getComponent(id).subscribe({
           next: (comp) => {
             this.component = comp as any;
+
+            this.groupService.getBoardPermission(this.component.id).subscribe({
+              next: (value) => {
+                console.log("Permission Value:", value);
+                if (value == null) {
+                  this.isOwner = true;
+                  this.readonlyMode = false;
+
+                  this.groupService.getBoardGroups(this.component?.id).subscribe({
+                    next: (value) => {
+                      this.myGroups = [];
+                      for (let i = 0; i < value.length; i++) {
+                        if (value[i].permission == null) {
+                          this.myGroups.push({ ...value[i], permission: { read: false, write: false } });
+                        } else {
+                          this.myGroups.push(value[i]);
+                        }
+                      }
+                    },
+                    error: (err) => console.error(err),
+                  });
+                } else {
+                  this.isOwner = false;
+                  this.readonlyMode = !value;
+                }
+              },
+              error: (err) => console.error("Fetch Permission Error:", err),
+            });
+
+            this.websocketService.connect().then(() => {
+              this.websocketService.subscribe(this.component?.id, (update) => {
+                this.syncUpdate(update);
+              });
+            });
 
             this.setRecursiveParentId(this.component);
             if (this.nameElement?.nativeElement) {
@@ -453,7 +584,63 @@ export class HomeComponent implements OnInit, OnDestroy {
     );
   }
 
+  syncUpdate(update: ComponentUpdate) {
+    console.log("Update:", update);
+    if (this.component.id == update.selfId) {
+      // Updates on root
+      switch (update.type) {
+        case "changed":
+          // update own fields like name
+          this.compService.getComponent(update.selfId).subscribe({
+            next: (comp) => this._board.setData(comp),
+          });
+          break;
+        case "deleted":
+          // Alert that this board has been deleted and send to home
+          // alert("Board has been deleted!");
+          window.dispatchEvent(
+            new CustomEvent("board-delete", { detail: { id: this.component.id, name: this.component.name } })
+          );
+          this.router.navigate(["/"]);
+          break;
+      }
+    } else {
+      // Updates within this component
+      switch (update.type) {
+        case "changed":
+          // find component and reload it
+          this.compService.getComponent(update.selfId).subscribe({
+            next: (comp) => {
+              // has parent been changed?
+              console.log("Update12:", update);
+              if (this._board.findChild(comp.id)?.parentId == comp.parentId) {
+                // no -> simply update data
+                if (!this._board.updateData(update.selfId, comp)) {
+                  // or create new child
+                  this._board.insert(comp.parentId, comp);
+                }
+              } else {
+                console.log("Update123:", update);
+                // yes
+                // *move* the html element to the new parent
+                // also move the comp ref
+                // or simply for now: (TODO: this is not optimal, since we create new elements)
+                this._board.remove(update.selfId);
+                this._board.insert(comp.parentId, comp);
+              }
+            },
+          });
+          break;
+        case "deleted":
+          // find component and remove it
+          this._board.remove(update.selfId);
+          break;
+      }
+    }
+  }
+
   ngOnDestroy() {
+    this.websocketService.disconnect();
     this.subscriptions.forEach((s) => s.unsubscribe());
   }
 
@@ -479,4 +666,9 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.setRecursiveParentId(child);
     });
   }
+
+  trackByGroupId(index: number, item: GroupWithPermission): number {
+    return item.groupId;
+  }
+
 }

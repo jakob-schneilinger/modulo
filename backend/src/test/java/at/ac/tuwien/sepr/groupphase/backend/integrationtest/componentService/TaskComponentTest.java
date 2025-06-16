@@ -1,4 +1,4 @@
-package at.ac.tuwien.sepr.groupphase.backend.unittest;
+package at.ac.tuwien.sepr.groupphase.backend.integrationtest.componentService;
 
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardCreateDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDetailDto;
@@ -44,8 +44,11 @@ public class TaskComponentTest {
     BoardService componentService;
     private ApplicationUser user;
 
-    private TaskCreateDto createDto(LocalDate start, LocalDate end, boolean repeating, boolean completed) {
-        return new TaskCreateDto("task-Create", null, 1L, 1L, 1L, 1L, start, end, completed, repeating);
+    @Autowired
+    private BoardService boardService;
+
+    private TaskCreateDto createDto(LocalDate start, LocalDate end, boolean repeating, boolean completed, Long parentId) {
+        return new TaskCreateDto("task-Create", parentId, 1L, 1L, 1L, 1L, start, end, completed, repeating);
     }
 
     @BeforeEach
@@ -70,7 +73,7 @@ public class TaskComponentTest {
     @Transactional
     @Test
     void createTask_persistsEntity() {
-        TaskCreateDto dto = createDto(LocalDate.now(), LocalDate.now().plusDays(1), false, false);
+        TaskCreateDto dto = createDto(LocalDate.now(), LocalDate.now().plusDays(1), false, false, null);
         TaskDetailDto task = (TaskDetailDto) taskService.createTask(dto);
         assertThat(task.name()).isEqualTo("task-Create");
         assertThat(componentRepository.findById(task.id())).isPresent();
@@ -79,11 +82,18 @@ public class TaskComponentTest {
     @Transactional
     @Test
     void updateTask_updatesExistingEntity() {
+        BoardCreateDto root = new BoardCreateDto(
+            "name", null, null, null, null, null, null
+        );
+
+        ComponentDetailDto detail = boardService.createBoard(root);
 
         TaskDetailDto taskParent = (TaskDetailDto) taskService
-                .createTask(createDto(LocalDate.now(), LocalDate.now().plusDays(40), false, false));
+                .createTask(createDto(LocalDate.now(), LocalDate.now().plusDays(40), false, false, detail.id()));
+
         TaskDetailDto task = (TaskDetailDto) taskService
-                .createTask(createDto(LocalDate.now(), LocalDate.now().plusDays(1), false, false));
+                .createTask(createDto(LocalDate.now(), LocalDate.now().plusDays(1), false, false, taskParent.id()));
+
         TaskUpdateDto taskUpdateDto = new TaskUpdateDto(task.id(), "newName", 1L, 1L, 1L, 1L, null,
                 LocalDate.now().plusDays(1), LocalDate.now().plusDays(2), true, false, taskParent.id());
 
@@ -99,9 +109,9 @@ public class TaskComponentTest {
     @Transactional
     @Test
     void repeatTask_noChildrenOnlyParent_returnsRepeatedParentTask() {
-        ComponentDetailDto board = componentService.createBoard(new BoardCreateDto("new board", null, 1L, 1L, 2L, 2L));
+        ComponentDetailDto board = componentService.createBoard(new BoardCreateDto("new board", null, null, 1L, 1L, 2L, 2L));
         TaskDetailDto task = (TaskDetailDto) taskService
-                .createTask(createDto(LocalDate.now().minusDays(10), LocalDate.now().minusDays(5), false, false));
+                .createTask(createDto(LocalDate.now().minusDays(10), LocalDate.now().minusDays(5), false, false, null));
         TaskUpdateDto taskUpdateDto = new TaskUpdateDto(task.id(), "newName", 1L, 1L, 1L, 1L, null,
                 LocalDate.now().minusDays(10), LocalDate.now().minusDays(5), true, true, board.id());
 
@@ -118,11 +128,17 @@ public class TaskComponentTest {
     @Transactional
     @Test
     void repeatTask_withChildren_returnsRepeatedParentTask() {
-        ComponentDetailDto board = componentService.createBoard(new BoardCreateDto("new board", null, 1L, 1L, 2L, 2L));
+        BoardCreateDto root = new BoardCreateDto(
+            "name", null, null, null, null, null, null
+        );
+
+        ComponentDetailDto detail = boardService.createBoard(root);
+
+        ComponentDetailDto board = componentService.createBoard(new BoardCreateDto("new board", null, null, 1L, 1L, 2L, 2L));
         TaskDetailDto task = (TaskDetailDto) taskService
-                .createTask(createDto(LocalDate.now().minusDays(10), LocalDate.now().minusDays(5), true, true));
+                .createTask(createDto(LocalDate.now().minusDays(10), LocalDate.now().minusDays(5), true, true, board.id()));
         TaskDetailDto child = (TaskDetailDto) taskService
-                .createTask(createDto(LocalDate.now().minusDays(7), LocalDate.now().minusDays(6), false, true));
+                .createTask(createDto(LocalDate.now().minusDays(7), LocalDate.now().minusDays(6), false, true, detail.id()));
         TaskUpdateDto taskChildDto = new TaskUpdateDto(child.id(), "newName", 1L, 1L, 1L, 1L, null,
                 LocalDate.now().minusDays(7), LocalDate.now().minusDays(6), true, false, task.id());
 

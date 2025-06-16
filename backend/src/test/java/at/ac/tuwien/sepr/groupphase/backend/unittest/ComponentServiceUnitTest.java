@@ -14,6 +14,7 @@ import at.ac.tuwien.sepr.groupphase.backend.repository.ComponentRepository;
 import at.ac.tuwien.sepr.groupphase.backend.repository.UserRepository;
 import at.ac.tuwien.sepr.groupphase.backend.service.UserService;
 import at.ac.tuwien.sepr.groupphase.backend.service.componentservice.impl.ComponentServiceImpl;
+import at.ac.tuwien.sepr.groupphase.backend.service.componentservice.impl.ComponentUpdateNotifier;
 import at.ac.tuwien.sepr.groupphase.backend.validation.ComponentValidator;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -29,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class ComponentServiceUnitTest {
@@ -36,34 +38,36 @@ public class ComponentServiceUnitTest {
 
     @Test
     void contextLoads(){
-        new ComponentServiceImpl(null, null, null);
+        new ComponentServiceImpl(null, null, null, null, null);
     }
 
 
     // should behave the same for all components
     @Test
-    void setComponentForBoard(){
-        // mock the dependency that is used by tested class in this case
+    void setComponentForBoard() {
+        // mock the dependencies
+
+        // mock UpdateNotifier
+        ComponentUpdateNotifier notifier = mock(ComponentUpdateNotifier.class);
+
         ComponentRepository componentRepository = Mockito.mock(ComponentRepository.class);
         Board initial = initialBoard();
         Board changed = changedBoard();
 
-        when(componentRepository.save((Board)any())).thenReturn(changed);
+        when(componentRepository.save((Board) any())).thenReturn(changed);
         when(componentRepository.getParentId(initial.getId())).thenReturn(null);
+        when(componentRepository.findById(changed.getId())).thenReturn(Optional.of(changed)); // <-- wichtig!
 
-        // mock user service
         UserService userService = mockUserService();
 
-        // initialize unit with mocked dependencies
-        ComponentServiceImpl componentService = new ComponentServiceImpl(componentRepository, userService, null);
+        ComponentServiceImpl componentService = new ComponentServiceImpl(componentRepository, userService, null, notifier, null);
+
         ComponentDetailDto reference = changedBoardDetailDto();
-        // perform tested operation
         ComponentDetailDto updated = componentService.setComponent(changedBoardDto(), initial);
 
-        // assert correctness
         assertThat(updated).isNotNull();
         assertThat(updated.id()).isEqualTo(reference.id());
-        assertThat(((BoardDetailDto)updated).name()).isEqualTo(((BoardDetailDto)reference).name());
+        assertThat(((BoardDetailDto) updated).name()).isEqualTo(((BoardDetailDto) reference).name());
         assertThat(updated.width()).isEqualTo(reference.width());
     }
 
@@ -72,8 +76,9 @@ public class ComponentServiceUnitTest {
         ComponentRepository componentRepository = Mockito.mock(ComponentRepository.class);
         Board initial = initialBoard();
         when(componentRepository.findById(initial.getId())).thenReturn(Optional.of(initial));
+        UserService userService = mockUserService();
 
-        ComponentServiceImpl componentService = new ComponentServiceImpl(componentRepository, null, null);
+        ComponentServiceImpl componentService = new ComponentServiceImpl(componentRepository, userService, null, null, null);
         ComponentDetailDto componentById = componentService.getComponentById(initial.getId());
 
         assertThat(componentById).isNotNull();
@@ -88,7 +93,7 @@ public class ComponentServiceUnitTest {
         Board initial = initialBoard();
         when(componentRepository.findById(initial.getId())).thenReturn(Optional.empty());
 
-        ComponentServiceImpl componentService = new ComponentServiceImpl(componentRepository, null, null);
+        ComponentServiceImpl componentService = new ComponentServiceImpl(componentRepository, null, null, null, null);
         assertThatThrownBy(() -> componentService.getComponentById(initial.getId())).isInstanceOf(NotFoundException.class);
     }
 
@@ -105,7 +110,7 @@ public class ComponentServiceUnitTest {
         when(componentRepository.findById(component.getId())).thenReturn(Optional.of(component));
 
         // initialize unit with mocked dependencies
-        ComponentServiceImpl componentService = new ComponentServiceImpl(componentRepository, userService, null);
+        ComponentServiceImpl componentService = new ComponentServiceImpl(componentRepository, userService, null, null, null);
         // perform tested operation
         List<ComponentDetailDto> roots = componentService.getRootComponents();
 
@@ -126,6 +131,9 @@ public class ComponentServiceUnitTest {
         ApplicationUser user = testUser();
         UserService userService = mockUserService();
 
+        // mock UpdateNotifier
+        ComponentUpdateNotifier notifier = mock(ComponentUpdateNotifier.class);
+
         // mock component repository
         Board component = initialBoard();
         ComponentRepository componentRepository = Mockito.mock(ComponentRepository.class);
@@ -139,7 +147,7 @@ public class ComponentServiceUnitTest {
         when(componentValidator.validateComponent(updateDto, user.getId())).thenReturn(new ArrayList<>());
 
         // initialize mocked unit
-        ComponentServiceImpl componentService = new ComponentServiceImpl(componentRepository, userService, componentValidator);
+        ComponentServiceImpl componentService = new ComponentServiceImpl(componentRepository, userService, componentValidator, notifier, null);
         // perform tested operation
         ComponentUpdateDto transformedUpdateDto = new ComponentUpdateDto(
             updateDto.id(),
@@ -174,7 +182,7 @@ public class ComponentServiceUnitTest {
         when(componentValidator.validateComponent(updateDto, user.getId())).thenReturn(new ArrayList<>());
 
         // initialize mocked unit
-        ComponentServiceImpl componentService = new ComponentServiceImpl(componentRepository, userService, componentValidator);
+        ComponentServiceImpl componentService = new ComponentServiceImpl(componentRepository, userService, componentValidator, null, null);
         // perform tested operation
         ComponentUpdateDto transformedUpdateDto = new ComponentUpdateDto(
             updateDto.id(),
@@ -207,7 +215,7 @@ public class ComponentServiceUnitTest {
         when(componentValidator.validateComponent(updateDto, user.getId())).thenReturn(List.of("error!"));
 
         // initialize mocked unit
-        ComponentServiceImpl componentService = new ComponentServiceImpl(componentRepository, userService, componentValidator);
+        ComponentServiceImpl componentService = new ComponentServiceImpl(componentRepository, userService, componentValidator, null, null);
         // perform tested operation
         ComponentUpdateDto transformedUpdateDto = new ComponentUpdateDto(
             updateDto.id(),
@@ -225,6 +233,9 @@ public class ComponentServiceUnitTest {
         // mock user service
         UserService userService = mockUserService();
 
+        // mock UpdateNotifier
+        ComponentUpdateNotifier notifier = mock(ComponentUpdateNotifier.class);
+
         // mock component repository
         Board component = initialBoard();
         ComponentRepository componentRepository = Mockito.mock(ComponentRepository.class);
@@ -232,7 +243,7 @@ public class ComponentServiceUnitTest {
         when(componentRepository.findById(component.getId())).thenReturn(Optional.of(component));
 
         // initialize mocked unit
-        ComponentServiceImpl componentService = new ComponentServiceImpl(componentRepository, userService, null);
+        ComponentServiceImpl componentService = new ComponentServiceImpl(componentRepository, userService, null, notifier, null);
 
         assertDoesNotThrow(() -> componentService.deleteComponent(initialBoard().getId()));
     }
@@ -248,12 +259,10 @@ public class ComponentServiceUnitTest {
         when(componentRepository.findById(component.getId())).thenReturn(Optional.empty());
 
         // initialize mocked unit
-        ComponentServiceImpl componentService = new ComponentServiceImpl(componentRepository, userService, null);
+        ComponentServiceImpl componentService = new ComponentServiceImpl(componentRepository, userService, null, null, null);
 
         assertThatThrownBy(() -> componentService.deleteComponent(initialBoard().getId())).isInstanceOf(NotFoundException.class);
     }
-
-
 
     private Board initialBoard(){
         Board board = new Board();
@@ -286,14 +295,14 @@ public class ComponentServiceUnitTest {
     }
 
     private ComponentDetailDto initialBoardDetailDto(){
-        return new BoardDetailDto(1, "boardname", 1, 1, 1, 1, null);
+        return new BoardDetailDto(1, null, "boardname", 5, 1, 1, 1, 1, null);
     }
 
     private ComponentDto changedBoardDto(){
-        return new BoardUpdateDto(1, "boardname", 1L, 100L, 1L, 1L, 1L);
+        return new BoardUpdateDto(1, "boardname", 5, 1L, 100L, 1L, 1L, 1L);
     }
     private ComponentDetailDto changedBoardDetailDto(){
-        return new BoardDetailDto(1, "boardname", 100, 1, 1, 1, null);
+        return new BoardDetailDto(1, null, "boardname", 5, 100, 1, 1, 1, null);
     }
 
     private ApplicationUser testUser(){
@@ -321,7 +330,7 @@ public class ComponentServiceUnitTest {
 
     private UserService mockUserService(){
         UserService userService = Mockito.mock(UserService.class);
-        when(userService.getUserId()).thenReturn(testUser().getId());
+        when(userService.getUser()).thenReturn(testUser());
         return userService;
     }
 }

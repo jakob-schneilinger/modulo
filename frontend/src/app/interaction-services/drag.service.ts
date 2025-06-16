@@ -20,7 +20,7 @@ export class DragService {
 
   constructor(private resizeService: ResizeService) {}
 
-  startDragging(data: { component: Comp; event: MouseEvent; preview: ElementRef }, sourceParent: Container) {
+  startDragging(data: { component: Comp; event: MouseEvent | TouchEvent; preview: ElementRef }, sourceParent: Container) {
     data.event.preventDefault();
     this.draggingContainer = data.component;
     this.sourceParent = sourceParent;
@@ -30,17 +30,35 @@ export class DragService {
     console.log("start", this.preview, this.draggingContainer);
   }
 
-  onMouseMove(event: MouseEvent, rootContainer: Container) {
-    if (!this.draggingContainer) return;
-    const rootElement = document.querySelector(`[data-id="${rootContainer.id}"]`);
+  onMouseMove(event: MouseEvent | TouchEvent, rootContainer: Container) {
 
-    let targetElement = event.target as HTMLElement;
+    if (!this.draggingContainer) return;
+    console.log(event)
+    let e;
+    if (typeof TouchEvent !== 'undefined' && event instanceof TouchEvent && 'touches' in event) {
+      if (event.touches.length === 1) {
+        e = event.touches[0];
+      } else {
+        return;
+      }
+    } else {
+      e = event;
+    }
+
+    const rootElement = document.querySelector(`[data-id="${rootContainer.id}"]`);
+    console.log(e)
+    let targetElement = e.target as HTMLElement;
+
+    if (!document.body.contains(targetElement)) {
+      return;
+    }
+
     while (
       !targetElement.hasAttribute("data-id") ||
       Number(targetElement.getAttribute("data-id")) === this.draggingContainer.id
     ) {
       targetElement = targetElement.parentElement;
-      if (targetElement == document.body) return;
+      if (targetElement == document.body || targetElement == null) return;
     }
 
     const target = this.findContainerById(Number(targetElement.getAttribute("data-id")), rootContainer);
@@ -49,8 +67,8 @@ export class DragService {
     if (!grid) return;
 
     const rect = grid.getBoundingClientRect();
-    const deltaX = event.clientX - rect.left;
-    const deltaY = event.clientY - rect.top;
+    const deltaX = e.clientX - rect.left;
+    const deltaY = e.clientY - rect.top;
 
     const columnWidth = grid.offsetWidth / gridVar.columns;
     const rowHeight = gridVar.rowHeight;
@@ -85,9 +103,9 @@ export class DragService {
     const h = this.draggingContainer.height * rowHeight;
     const rootRect = rootElement.getBoundingClientRect();
 
-    let x = event.clientX - rootRect.left + window.scrollX - w;
+    let x = e.clientX - rootRect.left + window.scrollX - w;
     x += columnWidth - (x % columnWidth);
-    let y = event.clientY - rootRect.top;
+    let y = e.clientY - rootRect.top;
     y -= y % rowHeight;
 
     x += 8 * totalDepth;
@@ -113,7 +131,7 @@ export class DragService {
   }
 
   stopDragging(
-    event: MouseEvent,
+    event: MouseEvent | TouchEvent,
     rootContainer: Container,
     callback: (component: Comp, targetContainer: Container) => void
   ) {
@@ -133,69 +151,24 @@ export class DragService {
 
       const invalidPosition = hasCollision || hasCycle || totalDepth == -1;
 
-      console.log("hasCollision", hasCollision);
-      console.log("hasCycle", hasCycle);
-      console.log("totalDepth", totalDepth);
-
       let p = this.preview.nativeElement as HTMLElement;
       p.style.display = "none";
 
       if (invalidPosition) {
-        console.log("TEST");
         callback(this.draggingContainer, this.sourceParent);
       } else {
-        this.removeComponentFromAll(this.draggingContainer.id, rootContainer);
+        //this.removeComponentFromAll(this.draggingContainer.id, rootContainer);
         this.draggingContainer.column = this.previewColumn;
         this.draggingContainer.row = this.previewRow;
-        this.previewParent.children.push(this.draggingContainer);
-        console.log("Column", this.previewColumn);
-        console.log("Row", this.previewRow);
+        //this.previewParent.children.push(this.draggingContainer);
         callback(this.draggingContainer, this.previewParent);
       }
-
-      //const targetContainer = this.findContainerById(parentId, rootContainer) || rootContainer;
-
-      // Remove preview
-      //this.removePreviewFromAll(rootContainer);
-
-      /* const testComponent = {
-        ...this.draggingContainer,
-        column: this.previewContainer.column,
-        row: this.previewContainer.row,
-      };
-
-      const hasCycle = this.hasCycle(targetContainer, this.draggingContainer);
-      const totalDepth = this.getDepth(rootContainer, targetContainer.id);
-      let hasCollision = this.resizeService.hasCollisions(targetContainer, testComponent);
-      if (hasCollision == undefined) {
-        hasCollision = false;
-      } */
-      /* if (hasCycle || hasCollision || totalDepth == -1) {
-      } else {
-        if (this.hasCycle(targetContainer, this.draggingContainer)) {
-          callback(this.draggingContainer, this.sourceParent);
-        } else {
-          this.removeComponentFromAll(this.draggingContainer.id, rootContainer);
-          this.draggingContainer.column = this.previewContainer.column;
-          this.draggingContainer.row = this.previewContainer.row;
-          targetContainer.children.push(this.draggingContainer);
-          callback(this.draggingContainer, targetContainer);
-        }
-      } */
     }
 
     this.draggingContainer = null;
     this.sourceParent = null;
     this.preview = null;
   }
-
-  /* insertPreview(preview: Container, rootContainer: Container) {
-    const target = this.findContainerById(preview.parentId!, rootContainer);
-    if (!target || !Array.isArray(target.children)) return;
-
-    // Add preview
-    target.children.push(preview);
-  } */
 
   hasCycle(target: Comp, component: Comp) {
     if (!(component as any).children) return;
@@ -213,7 +186,7 @@ export class DragService {
   }
 
   private getDepth(baseContainer: Comp, targetId: number, depth: number = 0) {
-    if (depth + this.componentDepth > 4 || !this.isContainer(baseContainer)) {
+    if (depth + this.componentDepth > (this.sourceParent as Board).depth || !this.isContainer(baseContainer)) {
       return -1;
     }
     if (baseContainer.id === targetId) {
@@ -252,16 +225,9 @@ export class DragService {
     return null;
   }
 
-  /* private removePreviewFromAll(container: Container) {
-    container.children = container.children.filter((c) => c.id !== -1);
-    for (const child of container.children) {
-      if (this.isContainer(child)) {
-        this.removePreviewFromAll(child);
-      }
-    }
-  } */
-
   private removeComponentFromAll(id: number, container: Container): void {
+    alert("Don't call here! Deprecated. Will be handled in Home");
+
     container.children = container.children.filter((c) => c.id !== id);
     for (const child of container.children) {
       if (this.isContainer(child)) {

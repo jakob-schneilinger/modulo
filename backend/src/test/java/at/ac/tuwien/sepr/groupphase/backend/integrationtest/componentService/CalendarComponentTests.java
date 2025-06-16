@@ -1,4 +1,4 @@
-package at.ac.tuwien.sepr.groupphase.backend.unittest;
+package at.ac.tuwien.sepr.groupphase.backend.integrationtest.componentService;
 
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.CalendarCreateDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.CalendarDetailDto;
@@ -12,7 +12,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +23,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -102,7 +100,7 @@ public class CalendarComponentTests {
             CalendarCreateDto dto = createDto();
             CalendarDetailDto calendar = (CalendarDetailDto) calendarService.createCalendar(dto);
             byte[] dummyIcs = Files.readAllBytes(
-                Path.of("src/test/java/at/ac/tuwien/sepr/groupphase/backend/unittest/modulosepm@gmail.com.ics"));
+                Path.of("src/test/resources/modulosepm@gmail.com.ics"));
             MockMultipartFile filePart = new MockMultipartFile(
                 "calendar",
                 dummyIcs);
@@ -118,7 +116,7 @@ public class CalendarComponentTests {
             CalendarCreateDto dto = createDto();
             CalendarDetailDto calendar = (CalendarDetailDto) calendarService.createCalendar(dto);
             byte[] dummyIcs = Files.readAllBytes(
-                Path.of("src/test/java/at/ac/tuwien/sepr/groupphase/backend/unittest/modulosepm@gmail.com.ics"));
+                Path.of("src/test/resources/modulosepm@gmail.com.ics"));
             MockMultipartFile filePart = new MockMultipartFile(
                 "calendar",
                 dummyIcs);

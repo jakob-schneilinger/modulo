@@ -27,6 +27,13 @@ public interface ComponentDetailDto {
     long id();
 
     /**
+     * Parent id of the component.
+     *
+     * @return parentId
+     */
+    Long parentId();
+
+    /**
      * Height of the component.
      *
      * @return height

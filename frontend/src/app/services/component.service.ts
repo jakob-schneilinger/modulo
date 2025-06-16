@@ -119,9 +119,14 @@ export class ComponentService {
     return this.httpClient.patch<Board>(this.componentBaseUri + "/board", board);
   }
 
+  changeBoardDepth(id: number, depth: number) {
+    console.log("Update depth of board: ", id, " with depth ", depth);
+    return this.httpClient.patch<Board>(this.componentBaseUri + "/board", {id, depth});
+  }
+
   // TODO: maybe not needed
-  getComponent(componentId: number): Observable<Component> {
-    return this.httpClient.get<Component>(this.componentBaseUri + "/" + componentId);
+  getComponent<T extends Component>(componentId: number): Observable<T> {
+    return this.httpClient.get<T>(this.componentBaseUri + "/" + componentId);
   }
 
   getRoots(): Observable<Component[]> {

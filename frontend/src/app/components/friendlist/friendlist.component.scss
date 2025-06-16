@@ -15,8 +15,6 @@
 .card {
   min-height: 100%;
   height: 100%;
-  overflow: auto;
-  overflow-x: hidden;
   position: relative;
   border: 1px solid #ccc;
   border-radius: 10px;
@@ -41,6 +39,16 @@ div.dropdown-menu {
   z-index: 1000;
 }
 
+.add-child-header{
+  padding-left: 3%;
+  padding-right: 2%;
+  cursor: default;
+}
+
+.add-child-items {
+  cursor: pointer;
+}
+
 img.profile {
   background-color: $primary;
   border-radius: 50%;
@@ -58,8 +66,24 @@ img.profile {
 
 h1{
   display: inline;
-
 }
+
+.dropdown-item:active {
+  background-color: $dropdown-active;
+}
+
+.form-check-input:checked {
+  background-color: $primary;
+  border-color: $primary;
+}
+
+.buttons {
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+  gap: 1rem;
+}
+
 h1+span{
   font-size: 2rem;
 }

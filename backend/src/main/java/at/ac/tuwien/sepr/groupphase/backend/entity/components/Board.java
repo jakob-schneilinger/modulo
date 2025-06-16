@@ -8,8 +8,12 @@ import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import jakarta.persistence.PrimaryKeyJoinColumn;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "board_content")
 @DiscriminatorValue("board")
 @PrimaryKeyJoinColumn(name = "id")
@@ -18,13 +22,8 @@ public class Board extends Component {
     @Column(name = "board_name")
     private String boardName;
 
-    public String getBoardName() {
-        return boardName;
-    }
-
-    public void setBoardName(String boardName) {
-        this.boardName = boardName;
-    }
+    @Column(name = "max_depth")
+    private Integer depth;
 
     @Override
     public ComponentDetailDto accept(MappingDepth depth) {

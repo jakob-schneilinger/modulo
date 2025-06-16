@@ -1,6 +1,17 @@
 @use "src/styles/global.scss" as *;
 @use "src/styles/variables.scss" as *;
 
+.read-only-mode {
+  app-context-menu {
+    display: none;
+  }
+
+  .hide-in-read-only-mode {
+    display: none;
+  }
+
+}
+
 :host {
   position: relative;
 }

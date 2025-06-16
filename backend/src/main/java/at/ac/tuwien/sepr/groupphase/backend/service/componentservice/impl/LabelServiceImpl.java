@@ -29,15 +29,13 @@ public class LabelServiceImpl implements LabelService {
         LOG.trace("Setting label: {}", labelDto);
         validateLabel(labelDto);
 
-        Label label = new Label();
+        Label label = labelRepository.findById(labelDto.name()).orElse(new Label());
         label.setName(labelDto.name());
         if (labelDto.color() != null) {
             label.setColor(labelDto.color());
         }
 
-        labelRepository.save(label);
-
-        return label;
+        return labelRepository.save(label);
     }
 
     @Override

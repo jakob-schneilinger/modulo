@@ -1,11 +1,11 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from "@angular/core";
+import { Component as NgComponent, ElementRef, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { BaseComponent } from "../base/base.component";
-import { Image } from "src/app/dtos/component";
+import { Component, Image } from "src/app/dtos/component";
 import { CommonModule } from "@angular/common";
 import ComponentFactory from "src/app/global/ComponentFactory";
 import type { ContextMenuAction } from "../context-menu/context-menu.component";
 
-@Component({
+@NgComponent({
   selector: "app-image-component",
   templateUrl: "./image.component.html",
   styleUrls: ["./image.component.scss", "../base/base.component.scss"],
@@ -16,7 +16,12 @@ export class ImageComponent extends BaseComponent<Image> implements OnInit, OnDe
 
   private img: ElementRef<HTMLImageElement>;
   @ViewChild("content") set content(v: ElementRef<HTMLImageElement>) {
-    if (v) this.img = v;
+    this.img = v;
+
+    // wait for ui to completely refresh before changing next state
+    setTimeout(() => {
+      if (v && this.dataUrl) this.img.nativeElement.src = this.dataUrl;
+    }, 0);
   }
   private dataUrl: string;
 
@@ -45,11 +50,26 @@ export class ImageComponent extends BaseComponent<Image> implements OnInit, OnDe
   inputActive: boolean = false;
 
   ngOnInit(): void {
-    this.componentService.getImageContent(this.self).subscribe({
-      next: (v) => {
-        this.dataUrl = window.URL.createObjectURL(v);
-        this.img.nativeElement.src = this.dataUrl;
-      },
+    this.fetchImage();
+
+    this.mouseDown = this.mouseDown.bind(this);
+    this.mouseUp = this.mouseUp.bind(this);
+
+    document.body.addEventListener("mousedown", this.mouseDown);
+    document.body.addEventListener("mouseup", this.mouseUp);
+  }
+
+  showImage(v: Blob | string) {
+    if (typeof v === "string") this.dataUrl = v;
+    else if (typeof v === "object") this.dataUrl = window.URL.createObjectURL(v);
+    else return;
+
+    if (this.img) this.img.nativeElement.src = this.dataUrl;
+  }
+
+  fetchImage() {
+    return this.componentService.getImageContent(this.self).subscribe({
+      next: (v) => this.showImage(v),
       error: (e) => {
         if (e.status == 404) {
           this.inputActive = true;
@@ -58,12 +78,6 @@ export class ImageComponent extends BaseComponent<Image> implements OnInit, OnDe
         console.error(e);
       },
     });
-
-    this.mouseDown = this.mouseDown.bind(this);
-    this.mouseUp = this.mouseUp.bind(this);
-
-    document.body.addEventListener("mousedown", this.mouseDown);
-    document.body.addEventListener("mouseup", this.mouseUp);
   }
 
   ngAfterViewInit(): void {
@@ -83,33 +97,51 @@ export class ImageComponent extends BaseComponent<Image> implements OnInit, OnDe
     this.componentService.setImageContent(this.self, image).subscribe({
       next: () => {
         this.inputActive = false;
-        this.dataUrl = window.URL.createObjectURL(image);
-        this.img.nativeElement.src = this.dataUrl;
+        this.showImage(image);
       },
       error: (e) => console.error(e),
     });
   }
 
   focusFileInput() {
+    if (this.readonlyMode) return;
+
     this.input.nativeElement.click();
+  }
+
+  setData(data: Component) {
+    super.setData(data);
+
+    this.fetchImage();
   }
 
   private ctx: CanvasRenderingContext2D;
   sketch() {
+    if (this.readonlyMode) return;
+
+    const size = { w: 300, h: 100 };
+    if (this.img?.nativeElement.src) {
+      size.w = this.img.nativeElement.naturalWidth;
+      size.h = this.img.nativeElement.naturalHeight;
+      console.log(size);
+    }
+
     this.sketching = true;
 
     setTimeout(() => {
       const canvas = this._canvas.nativeElement;
-      if (this.img.nativeElement.src) {
-        canvas.width = this.img.nativeElement.width;
-        canvas.height = this.img.nativeElement.height;
-      }
+      canvas.width = size.w;
+      canvas.height = size.h;
 
       this.ctx = canvas.getContext("2d");
       this.ctx.lineJoin = "round";
       this.ctx.lineCap = "round";
 
-      if (this.img.nativeElement.src) this.ctx.drawImage(this.img.nativeElement, 0, 0);
+      if (this.dataUrl) {
+        const img = new Image();
+        img.src = this.dataUrl;
+        img.onload = () => this.ctx.drawImage(img, 0, 0);
+      }
     }, 0);
   }
 
@@ -171,17 +203,10 @@ export class ImageComponent extends BaseComponent<Image> implements OnInit, OnDe
     this._canvas.nativeElement.toBlob((blob) => {
       this.componentService.setImageContent(this.self, blob).subscribe();
     });
-
-    setTimeout(() => {
-      this.img.nativeElement.src = this._canvas.nativeElement.toDataURL();
-    }, 0);
   }
 
   end() {
     this.sketching = false;
-    setTimeout(() => {
-      this.img.nativeElement.src = this.dataUrl;
-    }, 0);
   }
 }
 ComponentFactory.addComponentType("image", ImageComponent);

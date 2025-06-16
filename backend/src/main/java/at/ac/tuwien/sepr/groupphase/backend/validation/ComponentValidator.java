@@ -1,13 +1,17 @@
 package at.ac.tuwien.sepr.groupphase.backend.validation;
 
-
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentUpdateDto;
+import at.ac.tuwien.sepr.groupphase.backend.entity.ApplicationUser;
+import at.ac.tuwien.sepr.groupphase.backend.entity.components.Board;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Component;
+import at.ac.tuwien.sepr.groupphase.backend.entity.group.Permission;
 import at.ac.tuwien.sepr.groupphase.backend.exception.ConflictException;
 import at.ac.tuwien.sepr.groupphase.backend.exception.NotFoundException;
 import at.ac.tuwien.sepr.groupphase.backend.exception.UserNotAuthorizedException;
+import at.ac.tuwien.sepr.groupphase.backend.exception.ValidationException;
 import at.ac.tuwien.sepr.groupphase.backend.repository.ComponentRepository;
+import at.ac.tuwien.sepr.groupphase.backend.repository.PermissionRepository;
 import at.ac.tuwien.sepr.groupphase.backend.service.UserService;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -24,17 +28,19 @@ import java.util.Objects;
 @Primary
 public class ComponentValidator {
 
-    //Maximal depth for rekursive containers (not including root board)
-    private static final int MAX_DEPTH = 5;
-
     private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private final ComponentRepository componentRepository;
     private final UserService userService;
+    private final PermissionRepository permissionRepository;
+
+    private static final int MAX_DEPTH = 5;
 
     @Autowired
-    public ComponentValidator(ComponentRepository componentRepository, UserService userService) {
+    public ComponentValidator(ComponentRepository componentRepository, UserService userService,
+                              PermissionRepository permissionRepository) {
         this.componentRepository = componentRepository;
         this.userService = userService;
+        this.permissionRepository = permissionRepository;
     }
 
     /**
@@ -56,14 +62,23 @@ public class ComponentValidator {
         List<String> errors = new ArrayList<>();
 
         ComponentDto component = dto;
-        Long userId = userService.getUserId();
+        ApplicationUser user = userService.getUser();
+
+        //Maximal depth for rekursive containers (not including root board)
+        int maxDepth = 5;
 
         if (selfId > 0) {
             Component entity = componentRepository.findById(selfId)
                 .orElseThrow(() -> new NotFoundException("Component with ID " + selfId + " not found"));
 
-            if (!entity.getOwnerId().equals(userId)) {
-                throw new UserNotAuthorizedException("User is not owner of this component");
+            Component componentRoot = getRootComponent(entity);
+            if (!(componentRoot instanceof Board root)) {
+                throw new ValidationException("Validation failed", List.of("Root component not a board"));
+            }
+            maxDepth = root.getDepth() == null ? MAX_DEPTH : root.getDepth();
+
+            if (!isUserAuthorizedToWrite(root, user)) {
+                throw new UserNotAuthorizedException("User is not authorized for this component");
             }
 
             component = new ComponentUpdateDto(selfId,
@@ -75,11 +90,14 @@ public class ComponentValidator {
             );
 
             if (entity.isContainer()) {
-                int upwardDepth = componentRepository.getParentDepth(component.parentId()) + 1;
+                int upwardDepth = 0;
+                if (component.parentId() != null) {
+                    upwardDepth = componentRepository.getParentDepth(component.parentId()) + 1;
+                }
                 int downwardDepth = getMaxChildDepth(entity, 0, component.parentId());
 
-                if (upwardDepth + downwardDepth > MAX_DEPTH) {
-                    errors.add("Violates max depth requirement of " + MAX_DEPTH + " components");
+                if (upwardDepth + downwardDepth > maxDepth) {
+                    errors.add("Violates max depth requirement of " + maxDepth + " components");
                 }
             }
         }
@@ -93,7 +111,13 @@ public class ComponentValidator {
             Component parent = componentRepository.findById(component.parentId())
                 .orElseThrow(() -> new NotFoundException("Parent with given ID does not exist"));
 
-            if (!parent.getOwnerId().equals(userId)) {
+            Component componentRoot = getRootComponent(parent);
+            if (!(componentRoot instanceof Board root)) {
+                throw new ValidationException("Validation failed", List.of("Root component not a board"));
+            }
+            maxDepth = root.getDepth() == null ? MAX_DEPTH : root.getDepth();
+
+            if (!isUserAuthorizedToWrite(getRootComponent(root), userService.getUser())) {
                 throw new UserNotAuthorizedException("User is not authorized for given parent");
             }
 
@@ -113,8 +137,8 @@ public class ComponentValidator {
                 errors.add("Height should be greater than zero");
             }
 
-            if (componentRepository.getParentDepth(component.parentId()) + 1 > MAX_DEPTH) {
-                errors.add("Violates max depth requirement of " + MAX_DEPTH + " components");
+            if (componentRepository.getParentDepth(component.parentId()) + 1 > maxDepth) {
+                errors.add("Violates max depth requirement of " + maxDepth + " components");
             }
 
             List<Component> siblings = parent.getChildren().stream()
@@ -158,5 +182,27 @@ public class ComponentValidator {
             maxDepth = Math.max(maxDepth, depth);
         }
         return maxDepth;
+    }
+
+    private boolean isUserAuthorizedToWrite(Component component, ApplicationUser user) {
+        if (component.getOwnerId().equals(user.getId())) {
+            return true;
+        }
+
+        for (Permission permission : permissionRepository.findByComponent_Id(component.getId())) {
+            if (permission.isWrite() && permission.getGroup().getMembers().contains(user)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public Component getRootComponent(Component component) {
+        Component rootComponent = component;
+        while (!rootComponent.getParents().isEmpty()) {
+            rootComponent = rootComponent.getParents().getFirst();
+        }
+        return rootComponent;
     }
 }

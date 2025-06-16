@@ -40,7 +40,9 @@
             ],
             "scripts": [
               "node_modules/jquery/dist/jquery.slim.min.js",
-              "node_modules/bootstrap/dist/js/bootstrap.bundle.js"
+              "node_modules/bootstrap/dist/js/bootstrap.bundle.js",
+              "node_modules/sockjs-client/dist/sockjs.min.js",
+              "node_modules/webstomp-client/dist/webstomp.min.js"
             ],
             "extractLicenses": false,
             "sourceMap": true,

@@ -7,9 +7,9 @@ package at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components;
 public interface BoardDto extends ContainerDto {
 
     /**
-     * Name of the board.
+     * Maximum depth for root component.
      *
-     * @return name
+     * @return depth
      */
-    String name();
+    Integer depth();
 }

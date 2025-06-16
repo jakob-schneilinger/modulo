@@ -17,7 +17,6 @@
         <!-- username -->
         <span>{{user?.username}}</span>
         <h3 [attr.data-cy]="'user-displayname'">{{user?.displayName}}</h3>
-        <span *ngIf="friendInfo" [attr.data-cy]="'user-is-friend'">Friend</span>
 
         <div *ngIf="canManage">
             <!-- Change data -->
@@ -68,7 +67,7 @@
         </div>
 
         <div *ngIf="!isOwn">
-            <button type="button" (click)="addAsFriend()">{{FriendLabel}}</button>
+            <button type="button" (click)="addAsFriend()" [attr.disabled]="FriendLabel === 'Add friend'" >{{FriendLabel}}</button>
         </div>
 
     </form>

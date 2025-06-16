@@ -5,5 +5,5 @@ import java.util.List;
 /**
  * Dto for retrieving a board component.
  */
-public record BoardDetailDto(long id, String name, long width, long height, long column, long row, List<ComponentDetailDto> children) implements ComponentDetailDto {
+public record BoardDetailDto(long id, Long parentId, String name, Integer depth, long width, long height, long column, long row, List<ComponentDetailDto> children) implements ComponentDetailDto {
 }

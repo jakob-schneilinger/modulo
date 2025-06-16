@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,10 +23,12 @@ public interface UserRepository extends JpaRepository<ApplicationUser, String> {
     boolean existsByEmail(String email);
 
     @Modifying
+    @Transactional
     @Query(nativeQuery = true, value = "insert into friends values (:myId, :friendId, false)")
     void createFriendRequest(@Param("myId") Long myId, @Param("friendId") Long friendId);
 
     @Modifying
+    @Transactional
     @Query(nativeQuery = true, value = """
         update friends
         set accepted = true
@@ -34,6 +37,7 @@ public interface UserRepository extends JpaRepository<ApplicationUser, String> {
     void acceptFriendRequest(@Param("myId") Long myId, @Param("friendId") Long friendId);
 
     @Modifying
+    @Transactional
     @Query(nativeQuery = true, value = """
         delete from friends
         where (requester_id = :myId and accepter_id = :friendId) or (requester_id = :friendId and accepter_id = :myId)""")

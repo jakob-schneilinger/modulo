@@ -15,6 +15,7 @@ import at.ac.tuwien.sepr.groupphase.backend.validation.NoteComponentValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.invoke.MethodHandles;
 import java.util.Optional;
@@ -37,6 +38,7 @@ public class NoteServiceImpl implements NoteService {
     }
 
     @Override
+    @Transactional
     public ComponentDetailDto createNote(NoteCreateDto noteDto) {
         LOG.trace("Creating new note({})", noteDto);
         noteValidator.validateNoteComponent(noteDto, -1L);
@@ -44,6 +46,7 @@ public class NoteServiceImpl implements NoteService {
     }
 
     @Override
+    @Transactional
     public ComponentDetailDto updateNote(NoteUpdateDto noteDto) {
         LOG.trace("Updating note({})", noteDto);
         noteValidator.validateNoteComponent(noteDto, noteDto.id());
@@ -66,7 +69,7 @@ public class NoteServiceImpl implements NoteService {
             note.setLabels(labels);
         }
 
-        Optional.ofNullable(noteDto.title()).ifPresent(note::setTitle);
+        Optional.ofNullable(noteDto.name()).ifPresent(note::setTitle);
         return componentService.setComponent(noteDto, note);
     }
 }

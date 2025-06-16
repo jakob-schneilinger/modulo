@@ -56,6 +56,11 @@ public class FriendServiceImpl implements FriendService {
         String myAuthUsername = currentUserName();
         LOGGER.trace("friendship request for {} from {}", friendUsername, myUsername);
 
+        // check if not sending request to yourself
+        if (myUsername.equals(friendUsername)) {
+            throw new ConflictException("Cannot add yourself as a friend", new ArrayList<>());
+        }
+
         // make sure both users exist
         validateUser(myUsername, myAuthUsername);
         ApplicationUser me = userExists(myUsername);
@@ -75,10 +80,21 @@ public class FriendServiceImpl implements FriendService {
         String myAuthUsername = currentUserName();
         LOGGER.trace("friendship accept request for {} from {}", friendUsername, myUsername);
 
+        // check if not sending request to yourself
+        if (myUsername.equals(friendUsername)) {
+            throw new ConflictException("Cannot add yourself as a friend", new ArrayList<>());
+        }
+
         // make sure both users exist
         validateUser(myUsername, myAuthUsername);
         ApplicationUser me = userExists(myUsername);
         ApplicationUser friend = userExists(friendUsername);
+
+        // check if the request already exists
+        if (!userRepository.requestExists(me.getId(), friend.getId())) {
+            throw new ConflictException("There is no friend request between given users, so there is nothing to accept",
+                new ArrayList<>());
+        }
 
         userRepository.acceptFriendRequest(me.getId(), friend.getId());
     }

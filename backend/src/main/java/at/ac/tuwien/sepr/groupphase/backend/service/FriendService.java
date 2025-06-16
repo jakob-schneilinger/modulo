@@ -17,7 +17,7 @@ public interface FriendService {
      *
      * @throws ForbiddenException - in case authentication problem
      * @throws NotFoundException - in case given user(s) do not exist
-     * @throws ConflictException - if request already exists
+     * @throws ConflictException - if request already exists or requesting self
      */
     void requestFriendship(String myUsername, String friendUsername)
         throws ForbiddenException, NotFoundException, ConflictException;
@@ -32,6 +32,7 @@ public interface FriendService {
      *
      * @throws ForbiddenException - in case authentication problem
      * @throws NotFoundException - in case given user(s) do not exist
+     * @throws ConflictException - in case there is no request to accept or accepting self
      */
     void acceptFriendship(String myUsername, String friendUsername)
         throws ForbiddenException, NotFoundException;

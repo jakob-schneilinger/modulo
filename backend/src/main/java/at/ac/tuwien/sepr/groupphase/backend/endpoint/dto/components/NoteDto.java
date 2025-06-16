@@ -9,13 +9,6 @@ import java.util.List;
 public interface NoteDto extends ContainerDto {
 
     /**
-     * Title of the note.
-     *
-     * @return title
-     */
-    String title();
-
-    /**
      * List of labels associated with the note.
      *
      * @return List of labels

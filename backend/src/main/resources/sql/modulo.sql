@@ -66,7 +66,8 @@ CREATE TABLE IF NOT EXISTS label_component (
 
 CREATE TABLE IF NOT EXISTS board_content (
 	id INT NOT NULL PRIMARY KEY,
-	board_name VARCHAR(255) NOT NULL
+	board_name VARCHAR(255) NOT NULL,
+    max_depth INT
 );
 
 
@@ -91,8 +92,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS groups (
 	id INT NOT NULL AUTO_INCREMENT UNIQUE,
 	owner_id INT NOT NULL,
-	name VARCHAR(255),
-	is_friendlist BOOLEAN NOT NULL,
+	name VARCHAR(30),
 	PRIMARY KEY(id)
 );
 

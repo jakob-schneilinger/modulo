@@ -1,6 +1,7 @@
 package at.ac.tuwien.sepr.groupphase.backend.service.componentservice.impl;
 
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardCreateDto;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardUpdateDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDetailDto;
@@ -24,12 +25,14 @@ public class BoardServiceImpl implements BoardService {
     private final ComponentRepository componentRepository;
     private final BoardComponentValidator boardValidator;
     private final ComponentService componentService;
+    private final ComponentUpdateNotifier updateNotifier;
 
     public BoardServiceImpl(ComponentRepository componentRepository, BoardComponentValidator boardValidator,
-            ComponentService componentService) {
+            ComponentService componentService, ComponentUpdateNotifier updateNotifier) {
         this.componentRepository = componentRepository;
         this.boardValidator = boardValidator;
         this.componentService = componentService;
+        this.updateNotifier = updateNotifier;
     }
 
     @Override
@@ -37,6 +40,8 @@ public class BoardServiceImpl implements BoardService {
         LOG.trace("createBoard({})", boardDto);
         boardValidator.validateBoardComponent(boardDto, -1L);
         return setBoardComponent(boardDto, new Board());
+        // TODO: send new board update
+        // updateNotifier.notifyRootAdded(new BoardDetailDto(0, null, null, 0, 0, 0, 0, null));
     }
 
     @Override
@@ -56,6 +61,10 @@ public class BoardServiceImpl implements BoardService {
     private ComponentDetailDto setBoardComponent(BoardDto boardDto, Board board) {
         LOG.trace("setBoardComponent({})", boardDto);
         Optional.ofNullable(boardDto.name()).ifPresent(board::setBoardName);
+        Optional.ofNullable(boardDto.depth()).ifPresent(board::setDepth);
+        if (board.getDepth() == null) {
+            board.setDepth(5);
+        }
         return componentService.setComponent(boardDto, board);
     }
 }

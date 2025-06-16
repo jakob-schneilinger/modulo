@@ -21,7 +21,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -62,4 +65,23 @@ public abstract class Component {
     )
     private List<Component> children = new ArrayList<>();
 
+    @ManyToMany(mappedBy = "children", fetch = FetchType.LAZY)
+    private List<Component> parents = new ArrayList<>();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Component component = (Component) o;
+        return Objects.equals(id, component.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

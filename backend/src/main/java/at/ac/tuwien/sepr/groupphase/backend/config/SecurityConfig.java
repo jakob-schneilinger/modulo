@@ -46,7 +46,8 @@ public class SecurityConfig {
                                 "/health",
                                 "/api/v1/authentication/**",
                                 "/api/v1/user/register",
-                                "/h2-console/**")
+                                "/h2-console/**",
+                                "/ws/**")
                         .permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
@@ -65,7 +66,7 @@ public class SecurityConfig {
         @Override
         public void addCorsMappings(CorsRegistry registry) {
             registry.addMapping("/**")
-                    .allowedOriginPatterns("http://localhost:4200", "https://*.apps.student.inso-w.at")
+                    .allowedOriginPatterns("http://localhost:4200", "http://192.168.0.2:4200", "https://*.apps.student.inso-w.at")
                     .allowedMethods("GET", "POST", "OPTIONS", "HEAD", "DELETE", "PUT", "PATCH")
                     .allowedHeaders("*")
                     .allowCredentials(true);

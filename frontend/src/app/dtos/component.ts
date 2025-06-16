@@ -28,6 +28,7 @@ export interface Container<T extends ComponentType = any> extends Component<T> {
 export interface Board extends Container<"board"> {
   name: string;
   type: "board";
+  depth?: number;
 }
 
 export interface Image extends Container<"image"> {
@@ -60,7 +61,7 @@ export interface Task extends Container<"task"> {
 /** DTO representing a note component */
 export interface Note extends Container<"note"> {
   type: "note";
-  title?: string;
+  name?: string;
   content?: string;
   labels?: Label[];
 }
@@ -103,6 +104,17 @@ export interface Text extends Component<"text"> {
   // fontSize: number;
 }
 
+export interface GroupComponent<T extends ComponentType = any> {
+  id?: number;
+  type: T;
+  ownerId?: number;
+  parentId?: number;
+  width: number;
+  height: number;
+  column: number;
+  row: number;
+}
+
 export function isText(component: Component): component is Text {
   return component.type === "text";
 }
@@ -116,4 +128,13 @@ export function isImage(component: Component): component is Image {
 
 export function isType<T extends ComponentType>(component: Component, type: T): component is ComponentNameTypeMap[T] {
   return component.type === type;
+}
+
+export function isContainer<T extends ComponentType>(component: Component<T>): component is Container<T> {
+  return (
+    isType(component, "board") || //
+    isType(component, "task") ||
+    isType(component, "note") ||
+    (component as any).children
+  );
 }

@@ -1,6 +1,7 @@
 package at.ac.tuwien.sepr.groupphase.backend.service.componentservice.impl;
 
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.CalendarCreateDto;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.CalendarUpdateDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.CalendarEntry;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.MyCalendar;
@@ -30,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
@@ -83,13 +85,13 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
+    @Transactional
     public ComponentDetailDto updateCalendarUrl(long id, String url) throws ValidationException, ConflictException {
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create(url))
             .GET()
             .build();
         byte[] data;
-        String etag = null;
         try {
             HttpResponse<byte[]> response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
             int status = response.statusCode();
@@ -102,30 +104,34 @@ public class CalendarServiceImpl implements CalendarService {
             throw new ConflictException("The server could not be reached", Arrays.asList(e.getMessage()));
         }
 
-        Calendar ical = icalBuilder(data);
+        String etag = null;
         storeIcs(id, data);
-        etag = calendarHash(ical);
         MyCalendar calendar = getCalendar(id);
-        calendar.setEntries(getCalendarEntries(ical));
+        Calendar ical = icalBuilder(data);
+        etag = calendarHash(ical);
+        calendar.getEntries().clear();
+        calendar.getEntries().addAll(getCalendarEntries(ical));
         calendar.setIcalUrl(url);
         calendar.setEtag(etag);
-        componentRepository.save(calendar);
+        componentService.setComponent(new CalendarUpdateDto(id, null, null, null, null, null), calendar);
         return calendar.accept(MappingDepth.SHALLOW);
     }
 
 
     @Override
+    @Transactional
     public ComponentDetailDto updateCalendarIcs(long id, MultipartFile file) throws ValidationException {
         MyCalendar calendar = getCalendar(id);
         try {
-            Calendar ical = icalBuilder(file.getBytes());
             storeIcs(id, file.getBytes());
+            Calendar ical = icalBuilder(file.getBytes());
             if (calendar.getIcalUrl() != null) {
                 calendar.setIcalUrl(null);
                 calendar.setEtag(null);
             }
-            calendar.setEntries(getCalendarEntries(ical));
-            componentRepository.save(calendar);
+            calendar.getEntries().clear();
+            calendar.getEntries().addAll(getCalendarEntries(ical));
+            componentService.setComponent(new CalendarUpdateDto(id, null, null, null, null, null), calendar);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -134,11 +140,12 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
+    @Transactional
     public ComponentDetailDto clearCalendar(long id) {
         MyCalendar calendar = getCalendar(id);
-        calendar.setEntries(new ArrayList<>());
+        calendar.getEntries().clear();
         calendar.setIcalUrl(null);
-        componentRepository.save(calendar);
+        componentService.setComponent(new CalendarUpdateDto(id, null, null, null, null, null), calendar);
         Path icalPath = Paths.get(icsPath);
         Path targetPath = icalPath.resolve(id + ".ics");
         try {
@@ -151,6 +158,7 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
+    @Transactional
     public ComponentDetailDto checkAndUpdateCalendar(long id) {
         MyCalendar calendar = getCalendar(id);
         if (calendar.getEtag() == null || calendar.getIcalUrl() == null) {
@@ -179,9 +187,10 @@ public class CalendarServiceImpl implements CalendarService {
             return null;
         }
         storeIcs(calendar.getId(), data);
-        calendar.setEntries(getCalendarEntries(ical));
+        calendar.getEntries().clear();
+        calendar.getEntries().addAll(getCalendarEntries(ical));
         calendar.setEtag(hash);
-        componentRepository.save(calendar);
+        componentService.setComponent(new CalendarUpdateDto(id, null, null, null, null, null), calendar);
         return calendar.accept(MappingDepth.SHALLOW);
     }
 
@@ -283,13 +292,16 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     private MyCalendar getCalendar(long id) {
+        at.ac.tuwien.sepr.groupphase.backend.entity.components.Component component = componentRepository.findById(id).orElseThrow(() -> new NotFoundException("Calendar with given ID does not exist"));
+        MyCalendar calendar = (MyCalendar) component;
+
+        return calendar;
+
+        /*
         return componentRepository.findById(id)
             .filter(c -> c instanceof MyCalendar)
             .map(c -> (MyCalendar) c)
             .orElseThrow(() -> new NotFoundException("Calendar with given ID does not exist"));
+        */
     }
-
-
 }
-
-

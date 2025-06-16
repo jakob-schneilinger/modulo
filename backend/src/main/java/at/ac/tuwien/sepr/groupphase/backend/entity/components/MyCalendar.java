@@ -4,7 +4,6 @@ import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.CalendarEntr
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.mapper.ComponentEntityToDtoMapper;
 import at.ac.tuwien.sepr.groupphase.backend.mapper.MappingDepth;
-import at.ac.tuwien.sepr.groupphase.backend.service.componentservice.impl.CalendarServiceImpl;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
@@ -49,8 +48,10 @@ public class MyCalendar extends Component {
         nullable           = false
     )
     private List<CalendarEntry> entries;
+
     @Column(name = "ical_url")
     private String icalUrl;
+
     private String etag;
 
     public static List<CalendarEntryDetailDto> getCalendarEntries(List<CalendarEntry> calendar) {

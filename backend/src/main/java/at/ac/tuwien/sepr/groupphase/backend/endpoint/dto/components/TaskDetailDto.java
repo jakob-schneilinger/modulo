@@ -6,6 +6,7 @@ import java.util.List;
 
 public record TaskDetailDto(
     long id,
+    Long parentId,
     String name,
     long width,
     long height,

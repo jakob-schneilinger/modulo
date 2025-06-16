@@ -5,4 +5,11 @@ package at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components;
  * Data Transfer Objects (DTOs) for container components.
  */
 public interface ContainerDto extends ComponentDto {
+
+    /**
+     * Name of this container.
+     *
+     * @return name
+     */
+    String name();
 }

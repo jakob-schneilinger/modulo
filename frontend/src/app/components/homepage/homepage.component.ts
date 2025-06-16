@@ -21,7 +21,7 @@ export class HomepageComponent implements OnInit {
   ngOnInit(): void {
     this.compService.getRoots().subscribe({
       next: (v) => (this.roots = v.filter((c) => isType(c, "board"))),
-      error: (e) => console.log(e),
+      error: (e) => console.error(e),
     });
 
     window.addEventListener("board-created-header", (event) => {
@@ -35,7 +35,7 @@ export class HomepageComponent implements OnInit {
     this.compService.createBoard(item).subscribe({
       next: (board) => {
         this.roots.push(board);
-        window.dispatchEvent(new CustomEvent("board-created-homepage", { detail: board }));
+        window.dispatchEvent(new CustomEvent("board-created", { detail: board }));
       },
       error: (e) => console.error(e),
     });

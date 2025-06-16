@@ -5,7 +5,9 @@ import at.ac.tuwien.sepr.groupphase.backend.entity.components.Component;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Task;
 import at.ac.tuwien.sepr.groupphase.backend.exception.NotFoundException;
 import at.ac.tuwien.sepr.groupphase.backend.repository.ComponentRepository;
+import at.ac.tuwien.sepr.groupphase.backend.repository.PermissionRepository;
 import at.ac.tuwien.sepr.groupphase.backend.service.UserService;
+import at.ac.tuwien.sepr.groupphase.backend.service.componentservice.ComponentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,9 +25,8 @@ public class TaskValidator extends ComponentValidator  {
     private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private final ComponentRepository componentRepository;
 
-
-    public TaskValidator(ComponentRepository componentRepository, UserService userService) {
-        super(componentRepository, userService);
+    public TaskValidator(ComponentRepository componentRepository, UserService userService, PermissionRepository permissionRepository) {
+        super(componentRepository, userService, permissionRepository);
         this.componentRepository = componentRepository;
     }
 

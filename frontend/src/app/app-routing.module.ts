@@ -10,7 +10,9 @@ import { UserComponent } from "./components/user/user.component";
 
 import { NotFoundComponent } from "./components/not-found/not-found.component";
 import {HomepageComponent} from "./components/homepage/homepage.component";
+import {GroupoverviewComponent} from "./components/group/groupoverview.component";
 import {FriendlistComponent} from "./components/friendlist/friendlist.component";
+import {GroupdetailComponent} from "./components/group/detail/groupdetail.component";
 
 const routes: Routes = [
   //{ path: "", component: HomeComponent, canActivate: [AuthGuard] },
@@ -20,6 +22,8 @@ const routes: Routes = [
   { path: "user/:name", component: UserComponent, canActivate: [AuthGuard] },
   { path: "friends", component: FriendlistComponent, canActivate: [AuthGuard] },
   { path: "", component: HomepageComponent, canActivate: [AuthGuard] },
+  { path: "group", component: GroupoverviewComponent, canActivate: [AuthGuard] },
+  { path: "group/:id", component: GroupdetailComponent, canActivate: [AuthGuard] },
   { path: "**", component: NotFoundComponent, canActivate: [AuthGuard] },
 ];
 

@@ -6,13 +6,10 @@ import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDet
 import at.ac.tuwien.sepr.groupphase.backend.service.componentservice.CalendarService;
 import jakarta.annotation.security.PermitAll;
 import jakarta.validation.Valid;
-import jakarta.validation.ValidationException;
 import jakarta.validation.constraints.NotNull;
-import net.fortuna.ical4j.data.ParserException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -22,8 +19,6 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.management.ServiceNotFoundException;
-import java.io.IOException;
 
 /**
  * REST controller for managing component operations.
@@ -83,11 +78,9 @@ public class CalendarComponentEndpoint {
     public ResponseEntity<ComponentDetailDto> updateCalendarWithUrl(
         @PathVariable(name = "id") long id,
         @RequestBody @Valid UrlDto dto) {
-        System.out.println("urlDto:\n\n " + dto);
         return new ResponseEntity<>(calendarService.updateCalendarUrl(id, dto.url()), HttpStatus.OK);
 
     }
-
 
     /**
      * Clears the contents of the calendar.

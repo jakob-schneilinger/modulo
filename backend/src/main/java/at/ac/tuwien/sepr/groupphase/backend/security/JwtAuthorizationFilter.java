@@ -36,7 +36,8 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         new AntPathRequestMatcher(basePath + "authentication"),
         new AntPathRequestMatcher(basePath + "user/register"),
         new AntPathRequestMatcher("/health"),
-        new AntPathRequestMatcher("/h2-console/**"), };
+        new AntPathRequestMatcher("/h2-console/**"),
+        new AntPathRequestMatcher("/ws/**"), };
 
     public JwtAuthorizationFilter(JwtUtils jwtUtils, SecurityProperties securityProperties) {
         this.jwtUtils = jwtUtils;

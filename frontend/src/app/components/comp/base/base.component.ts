@@ -39,11 +39,12 @@ export class BaseComponent<T extends Component> implements AfterViewInit {
   @Input() parentGridElInput!: ElementRef;
   @Input() homeGridElInput!: ElementRef;
   @Input() inEditMode: boolean;
+  @Input() readonlyMode: boolean = false;
 
   @Output() startDraggingContainer = new EventEmitter<{
     component: Component;
     preview: ElementRef;
-    event: MouseEvent;
+    event: MouseEvent | TouchEvent;
   }>();
   @Output() stopDraggingContainer = new EventEmitter<void>();
 
@@ -59,13 +60,15 @@ export class BaseComponent<T extends Component> implements AfterViewInit {
   currentHeight: number = this.self?.height ?? 1;
 
   @HostListener("mousedown", ["$event"])
-  onMouseDown(event: MouseEvent) {
+  @HostListener("touchstart", ["$event"])
+  onMouseDown(event: MouseEvent | TouchEvent) {
     if (!this.inEditMode) return;
     this.resizeService.startResize(event, this.self, this.cardEl, this.previewCardEl);
   }
 
   @HostListener("document:mousemove", ["$event"])
-  onMouseMove(event: MouseEvent) {
+  @HostListener("document:touchmove", ["$event"])
+  onMouseMove(event: MouseEvent | TouchEvent) {
     if (!this.inEditMode) return;
     this.resizeService.resize(
       event,
@@ -85,10 +88,10 @@ export class BaseComponent<T extends Component> implements AfterViewInit {
   }
 
   @HostListener("document:mouseup", ["$event"])
-  onMouseUp(event: MouseEvent) {
+  @HostListener("document:touchend", ["$event"])
+  onMouseUp(event: MouseEvent | TouchEvent) {
     if (!this.inEditMode) return;
     this.resizeService.stopResize(
-      event,
       this.self,
       this.currentWidth,
       this.currentHeight,
@@ -116,7 +119,7 @@ export class BaseComponent<T extends Component> implements AfterViewInit {
     hostEl.style.gridRow = `${this.self.row} / ${this.self.row + rows}`;
   }
 
-  startContainerDrag(component: Component, event: MouseEvent) {
+  startContainerDrag(component: Component, event: MouseEvent | TouchEvent) {
     if (!this.inEditMode) return;
     event.preventDefault();
     this.startDraggingContainer.emit({ component, preview: this.previewCardEl, event });
@@ -142,5 +145,14 @@ export class BaseComponent<T extends Component> implements AfterViewInit {
   ngAfterViewInit(): void {
     this.updateHeight(this.self.height);
     this.updateWidth(this.self.width);
+  }
+
+  public setData(data: Component) {
+    for (const key in data) {
+      if (!["id", "children", "parentId"].includes(key)) {
+        this.self[key] = data[key];
+      }
+    }
+    this.ngAfterViewInit();
   }
 }

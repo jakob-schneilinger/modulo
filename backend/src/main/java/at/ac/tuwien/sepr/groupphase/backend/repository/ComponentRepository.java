@@ -26,11 +26,11 @@ public interface ComponentRepository extends JpaRepository<Component, Long> {
 
     @Modifying
     @Query(value = "INSERT INTO container_children (id_container, id_child) VALUES (:parentId, :childId)", nativeQuery = true)
-    void link(@Param("parentId") Long parentId, @Param("childId") Long childId);
+    void link(@Param("parentId") long parentId, @Param("childId") long childId);
 
     @Modifying
     @Query(value = "DELETE FROM container_children WHERE id_child = :childId", nativeQuery = true)
-    void unlink(@Param("childId") Long childId);
+    void unlink(@Param("childId") long childId);
 
     @Query(value = """
             WITH RECURSIVE parent_tree(id, depth) AS (

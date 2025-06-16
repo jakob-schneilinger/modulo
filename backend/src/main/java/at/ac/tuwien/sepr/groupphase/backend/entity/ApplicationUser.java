@@ -8,21 +8,38 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.Objects;
 
 @Entity
 @Table(name = "users")
 public class ApplicationUser {
+    @Getter
+    @Setter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Getter
+    @Setter
     private String username;
+
+    @Setter
     private String displayName;
+
+    @Getter
+    @Setter
     private String email;
 
+    @Getter
+    @Setter
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Password password;
 
+    @Getter
+    @Setter
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Salt salt;
 
@@ -38,51 +55,15 @@ public class ApplicationUser {
         this.password = new Password();
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String name) {
-        this.username = name;
-    }
-
     public String getDisplayName() {
         return displayName != null ? displayName : getUsername();
     }
 
-    public void setDisplayName(String name) {
-        this.displayName = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public Password getPassword() {
-        return password;
-    }
-
-    public void setPassword(Password password) {
-        this.password = password;
-    }
-
-    public Salt getSalt() {
-        return salt;
-    }
-
-    public void setSalt(Salt salt) {
-        this.salt = salt;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getId() {
-        return id;
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof ApplicationUser other) {
+            return Objects.equals(other.getId(), this.getId());
+        }
+        return false;
     }
 }
