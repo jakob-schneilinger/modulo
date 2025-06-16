@@ -10,7 +10,9 @@ import {
   Task,
   Label,
   CalendarCreate,
-  Calendar
+  Calendar,
+  Video,
+  VideoCreate,
 } from "../dtos/component";
 import { Observable } from "rxjs";
 import { HttpClient } from "@angular/common/http";
@@ -63,6 +65,26 @@ export class ComponentService {
     return this.httpClient.put<Image>(this.componentBaseUri + "/image", form);
   }
 
+  createVideo(video: VideoCreate, data?: Blob) {
+    console.log("Create Video: ", video);
+
+    const form = new FormData();
+    form.append("component", new Blob([JSON.stringify(video)], { type: "application/json" }));
+    if (data) form.append("video", data);
+    return this.httpClient.post<Video>(this.componentBaseUri + "/video", form);
+  }
+
+  getVideoContent(video: Video) {
+    return this.httpClient.get(this.componentBaseUri + "/video/" + video.id, { responseType: "blob" });
+  }
+
+  setVideoContent(video: Video, data: Blob) {
+    const form = new FormData();
+    form.append("component", new Blob([JSON.stringify(video)], { type: "application/json" }));
+    form.append("video", data);
+    return this.httpClient.put<Video>(this.componentBaseUri + "/video", form);
+  }
+
   createCalendar(calendar: CalendarCreate) {
     console.log("Create calendar: ", calendar);
     return this.httpClient.post<Calendar>(this.componentBaseUri + "/calendar", calendar);
@@ -76,7 +98,7 @@ export class ComponentService {
     return this.httpClient.put<Calendar>(this.componentBaseUri + "/calendar/url/" + calendar.id, { url });
   }
 
-  refreshCalendar(calendar: Calendar){
+  refreshCalendar(calendar: Calendar) {
     return this.httpClient.put<Calendar>(this.componentBaseUri + "/calendar/refresh/" + calendar.id, {});
   }
 
@@ -85,8 +107,8 @@ export class ComponentService {
   }
 
   setCalendarFile(calendar: Calendar, file: Blob) {
-    const form = new FormData()
-    form.append('file', new Blob([file], { type: 'text/calendar' }), 'event.ics');
+    const form = new FormData();
+    form.append("file", new Blob([file], { type: "text/calendar" }), "event.ics");
     return this.httpClient.put<Calendar>(this.componentBaseUri + "/calendar/file/" + calendar.id, form);
   }
 
@@ -121,7 +143,7 @@ export class ComponentService {
 
   changeBoardDepth(id: number, depth: number) {
     console.log("Update depth of board: ", id, " with depth ", depth);
-    return this.httpClient.patch<Board>(this.componentBaseUri + "/board", {id, depth});
+    return this.httpClient.patch<Board>(this.componentBaseUri + "/board", { id, depth });
   }
 
   // TODO: maybe not needed

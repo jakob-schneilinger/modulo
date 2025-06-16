@@ -35,6 +35,10 @@ export interface Image extends Container<"image"> {
   type: "image";
 }
 
+export interface Video extends Container<"video"> {
+  type: "video";
+}
+
 export interface Calendar extends Component<"calendar"> {
   type: "calendar";
   entries: CalendarEntry[];
@@ -72,8 +76,8 @@ export interface Label {
   color?: string;
 }
 
-/** DTO used for creating an image component */
-export interface ImageCreate {
+/** DTO used for creating a component base */
+export interface ComponentCreate {
   parentId: number;
   width: number;
   height: number;
@@ -81,14 +85,14 @@ export interface ImageCreate {
   row: number;
 }
 
+/** DTO used for creating an image component */
+export interface ImageCreate extends ComponentCreate {}
+
+/** DTO used for creating a video component */
+export interface VideoCreate extends ComponentCreate {}
+
 /** DTO used for creating a calendar component */
-export interface CalendarCreate {
-  parentId: number;
-  width: number;
-  height: number;
-  column: number;
-  row: number;
-}
+export interface CalendarCreate extends ComponentCreate {}
 
 export interface CalendarEntry {
   startDate: Date;

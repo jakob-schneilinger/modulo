@@ -11,12 +11,14 @@ import { ContextMenuComponent } from "./context-menu/context-menu.component";
 import { TaskComponent } from "./containers/task/task.component";
 import { CalendarComponent } from "./calendar/calendar.component";
 import { PromptComponent } from "../prompt/prompt.component";
+import { VideoComponent } from "./video/video.component";
 
 @NgModule({
   declarations: [
     BaseComponent, //
     ContainerComponent,
     ImageComponent,
+    VideoComponent,
     CalendarComponent,
     NoteComponent,
     TextComponent,
@@ -34,6 +36,7 @@ import { PromptComponent } from "../prompt/prompt.component";
     ContainerComponent,
     BoardComponent,
     ImageComponent,
+    VideoComponent,
     CalendarComponent,
     NoteComponent,
     TextComponent,

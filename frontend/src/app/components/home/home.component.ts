@@ -54,7 +54,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   inEditMode: boolean = false;
 
-  readonlyMode : boolean = true;
+  readonlyMode: boolean = true;
   isOwner: boolean = false;
 
   private subscriptions: Subscription[] = [];
@@ -71,7 +71,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   createBoard() {
     const width = Math.floor(gridVar.columns / 4);
     const height = Math.floor(gridVar.columns / 4);
-    const {column, row} = this.findFirstFreeSpace(width, height);
+    const { column, row } = this.findFirstFreeSpace(width, height);
 
     const newBoard: Board = {
       children: [],
@@ -93,7 +93,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   createText() {
     const width = Math.floor(gridVar.columns / 4);
     const height = Math.floor(gridVar.columns / 8);
-    const {column, row} = this.findFirstFreeSpace(width, height);
+    const { column, row } = this.findFirstFreeSpace(width, height);
 
     const newText: Text = {
       column,
@@ -114,32 +114,38 @@ export class HomeComponent implements OnInit, OnDestroy {
   createImage(isSketch: boolean = false) {
     const width = Math.floor(gridVar.columns / 4);
     const height = Math.floor(gridVar.columns / 4);
-    const {column, row} = this.findFirstFreeSpace(width, height);
-    this.compService
-      .createImage({ parentId: this.component.id, column, row, width, height }, null)
-      .subscribe({
-        next: (comp) => this.addChild({ ...comp, sketch: isSketch } as Comp),
-        error: (e) => console.error(e),
-      });
+    const { column, row } = this.findFirstFreeSpace(width, height);
+    this.compService.createImage({ parentId: this.component.id, column, row, width, height }, null).subscribe({
+      next: (comp) => this.addChild({ ...comp, sketch: isSketch } as Comp),
+      error: (e) => console.error(e),
+    });
+  }
+
+  createVideo() {
+    const width = Math.floor(gridVar.columns / 2);
+    const height = Math.floor(gridVar.columns / 4);
+    const { column, row } = this.findFirstFreeSpace(width, height);
+    this.compService.createVideo({ parentId: this.component.id, column, row, width, height }, null).subscribe({
+      next: (comp) => this.addChild(comp),
+      error: (e) => console.error(e),
+    });
   }
 
   createCalendar() {
     const width = Math.floor(gridVar.columns / 4);
     const height = Math.floor(gridVar.columns / 4);
-    const {column, row} = this.findFirstFreeSpace(width, height);
-    this.compService
-      .createCalendar({ parentId: this.component.id, column, row, width, height })
-      .subscribe({
-        next: (comp) => this.addChild(comp),
-        error: (e) => console.error(e),
-      });
+    const { column, row } = this.findFirstFreeSpace(width, height);
+    this.compService.createCalendar({ parentId: this.component.id, column, row, width, height }).subscribe({
+      next: (comp) => this.addChild(comp),
+      error: (e) => console.error(e),
+    });
   }
 
   createNote() {
     const neighbors = this.component.children;
     const width = Math.floor(gridVar.columns / 4);
     const height = Math.floor(gridVar.columns / 4);
-    const {column, row} = this.findFirstFreeSpace(width, height);
+    const { column, row } = this.findFirstFreeSpace(width, height);
 
     const createDto: Partial<Note> = {
       type: "note",
@@ -161,7 +167,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   createTask() {
     const width = Math.floor(gridVar.columns / 4);
     const height = Math.floor(gridVar.columns / 8);
-    const {column, row} = this.findFirstFreeSpace(width, height);
+    const { column, row } = this.findFirstFreeSpace(width, height);
 
     const newTask: Task = {
       children: [],
@@ -274,6 +280,9 @@ export class HomeComponent implements OnInit, OnDestroy {
       case "image":
         this.createImage();
         break;
+      case "video":
+        this.createVideo();
+        break;
       case "task":
         this.createTask();
         break;
@@ -303,12 +312,11 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
   }
 
-  private findFirstFreeSpace(width: number, height: number): {column: number, row: number} {
-    const children= this.component.children;
+  private findFirstFreeSpace(width: number, height: number): { column: number; row: number } {
+    const children = this.component.children;
     let row = 1;
     while (true) {
       for (let i = 1; i <= gridVar.columns + 1 - width; i++) {
-
         const newArea = {
           left: i,
           right: i + width,
@@ -333,7 +341,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         });
 
         if (!collision) {
-          return {column: i, row}
+          return { column: i, row };
         }
       }
       row++;
@@ -429,16 +437,16 @@ export class HomeComponent implements OnInit, OnDestroy {
   incrementDepth() {
     if (this.currentDepth < this.maxAllowedDepth) {
       this.currentDepth++;
-      this.compService.changeBoardDepth(this.component.id, this.currentDepth).subscribe()
+      this.compService.changeBoardDepth(this.component.id, this.currentDepth).subscribe();
     }
   }
 
   decrementDepth() {
     if (this.currentDepth > this.minAllowedDepth && this.getContainerDepth(this.component) < this.currentDepth) {
       this.currentDepth--;
-      this.compService.changeBoardDepth(this.component.id, this.currentDepth).subscribe()
+      this.compService.changeBoardDepth(this.component.id, this.currentDepth).subscribe();
     } else {
-      console.error("Can't decrease board depth, check your board!")
+      console.error("Can't decrease board depth, check your board!");
     }
   }
 
@@ -450,10 +458,10 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   sanitizeDepth() {
     const containerDepth = this.getContainerDepth(this.component);
-    if (typeof this.currentDepth !== 'number' || isNaN(this.component.depth)) {
+    if (typeof this.currentDepth !== "number" || isNaN(this.component.depth)) {
       this.currentDepth = containerDepth;
     } else {
-      if(this.currentDepth < this.getContainerDepth(this.component)) {
+      if (this.currentDepth < this.getContainerDepth(this.component)) {
         this.currentDepth = containerDepth;
       } else if (this.component.depth < this.minAllowedDepth) {
         this.component.depth = this.minAllowedDepth;
@@ -461,7 +469,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.component.depth = this.maxAllowedDepth;
       }
     }
-    this.compService.changeBoardDepth(this.component.id, this.component.depth).subscribe()
+    this.compService.changeBoardDepth(this.component.id, this.component.depth).subscribe();
   }
 
   private getContainerDepth(component: Comp): number {
@@ -670,5 +678,4 @@ export class HomeComponent implements OnInit, OnDestroy {
   trackByGroupId(index: number, item: GroupWithPermission): number {
     return item.groupId;
   }
-
 }

@@ -10,21 +10,13 @@
   <div class="flex gap">
 
     <div class="flex flex-column justify-content-center align-items-center max-depth only-desktop">
-      <label >Depth:</label>
+      <label>Depth:</label>
       <div class="custom-number-input">
         <button (click)="decrementDepth()" class="chevron-btn">
           <i class="bi bi-chevron-left"></i>
         </button>
-        <input
-          type="number"
-          step="1"
-          [min]="minAllowedDepth"
-          [max]="maxAllowedDepth"
-          [(ngModel)]="component.depth"
-          (keydown)="preventInvalidInput($event)"
-          (blur)="sanitizeDepth()"
-          (keyup.enter)="sanitizeDepth()"
-        />
+        <input type="number" step="1" [min]="minAllowedDepth" [max]="maxAllowedDepth" [(ngModel)]="component.depth"
+          (keydown)="preventInvalidInput($event)" (blur)="sanitizeDepth()" (keyup.enter)="sanitizeDepth()" />
         <button (click)="incrementDepth()" class="chevron-btn">
           <i class="bi bi-chevron-right"></i>
         </button>
@@ -34,50 +26,48 @@
 
 
     @if (isOwner) {
-      <div style="position: relative">
-        <button class="primary" data-bs-toggle="dropdown" aria-expanded="false" title="Share this board">
-          <i class="bi bi-share-fill"></i>
-          <span class="m-1 only-desktop"> Share </span>
-        </button>
-        <div class="dropdown-menu dropdown-menu-end add-child-menu">
+    <div style="position: relative">
+      <button class="primary" data-bs-toggle="dropdown" aria-expanded="false" title="Share this board">
+        <i class="bi bi-share-fill"></i>
+        <span class="m-1 only-desktop"> Share </span>
+      </button>
+      <div class="dropdown-menu dropdown-menu-end add-child-menu">
 
-          <table class="table table-sm mb-0">
-            <thead>
+        <table class="table table-sm mb-0">
+          <thead>
             <tr>
               <th>Group</th>
               <th class="text-center">Read</th>
               <th class="text-center">Write</th>
             </tr>
-            </thead>
-            <tbody>
-              @for (myGroup of myGroups; track myGroup.groupId) {
-                <tr [class.text-muted]="!myGroup.permission.read && !myGroup.permission.write">
-                  <td>
-                    <span class="text-truncate d-inline-block" style="max-width: 10rem;" [title]="myGroup.name">
-                      {{ myGroup.name }}
-                    </span>
-                  </td>
-                  <td class="text-center">
-                    <input class="form-check-input" type="checkbox"
-                           [(ngModel)]="myGroup.permission.read"
-                           (change)="onReadChange(myGroup)">
-                  </td>
-                  <td class="text-center">
-                    <input class="form-check-input" type="checkbox"
-                           [(ngModel)]="myGroup.permission.write"
-                           (change)="onWriteChange(myGroup)">
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
+          </thead>
+          <tbody>
+            @for (myGroup of myGroups; track myGroup.groupId) {
+            <tr [class.text-muted]="!myGroup.permission.read && !myGroup.permission.write">
+              <td>
+                <span class="text-truncate d-inline-block" style="max-width: 10rem;" [title]="myGroup.name">
+                  {{ myGroup.name }}
+                </span>
+              </td>
+              <td class="text-center">
+                <input class="form-check-input" type="checkbox" [(ngModel)]="myGroup.permission.read"
+                  (change)="onReadChange(myGroup)">
+              </td>
+              <td class="text-center">
+                <input class="form-check-input" type="checkbox" [(ngModel)]="myGroup.permission.write"
+                  (change)="onWriteChange(myGroup)">
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
       </div>
+    </div>
     }
 
     <div style="position: relative">
-      <button class="primary" data-bs-toggle="dropdown" data-bs-boundary="viewport" data-bs-offset="0,8" aria-expanded="false" data-cy="create-sub-component"
-        title="Create new component">
+      <button class="primary" data-bs-toggle="dropdown" data-bs-boundary="viewport" data-bs-offset="0,8"
+        aria-expanded="false" data-cy="create-sub-component" title="Create new component">
         <i class="bi bi-plus-square-fill"></i>
         <span class="m-1 only-desktop"> Create </span>
       </button>
@@ -90,6 +80,7 @@
           <div><a class="dropdown-item text-dark" (click)="createChild('text')" data-cy="create-sub-text">Text</a></div>
           <div><a class="dropdown-item text-dark" (click)="createChild('image')" data-cy="create-sub-image">Image</a>
           </div>
+          <div><a class="dropdown-item text-dark" (click)="createChild('video')">Video</a></div>
           <div><a class="dropdown-item text-dark" (click)="createChild('note')">Note</a></div>
           <div><a class="dropdown-item text-dark" (click)="createChild('task')">Task</a></div>
           <div><a class="dropdown-item text-dark" (click)="createChild('sketch')">Sketch</a></div>
@@ -99,11 +90,11 @@
     </div>
 
     @if (isOwner) {
-      <button type="button" class="primary" (click)="openDeleteModal(this.component)" data-cy="home-board-delete-modal"
-              title="Delete Board">
-        <i class="bi bi-trash-fill"></i>
-        <span class="m-1 only-desktop">Delete Board </span>
-      </button>
+    <button type="button" class="primary" (click)="openDeleteModal(this.component)" data-cy="home-board-delete-modal"
+      title="Delete Board">
+      <i class="bi bi-trash-fill"></i>
+      <span class="m-1 only-desktop">Delete Board </span>
+    </button>
     }
 
     <div class="form-check form-switch only-desktop" title="Enable edit mode to drag and resize components">
@@ -114,9 +105,9 @@
 
   </div>
   } @else {
-    <div class="flex board-title">
-      <input disabled [(ngModel)]="component.name" name="title" #name style="width: auto">
-    </div>
+  <div class="flex board-title">
+    <input disabled [(ngModel)]="component.name" name="title" #name style="width: auto">
+  </div>
   }
 
 </nav>
@@ -147,8 +138,8 @@
         All existing sub-components in this component will also be deleted!
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" (click)="finishDeleteModal()" data-bs-dismiss="modal"
+        <button type="button" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="primary" (click)="finishDeleteModal()" data-bs-dismiss="modal"
           data-cy="home-board-delete-modal-confirm">Delete</button>
       </div>
     </div>

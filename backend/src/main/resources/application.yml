@@ -2,6 +2,7 @@ global:
   location:
     avatars: res/avatars/
     image: res/images/
+    video: res/videos/
     calendar: res/calendar/
 
 logging:
@@ -32,6 +33,10 @@ spring:
     # is disabled since it breaks the principle of least astonishment and leads to bad performance. To learn more,
     # follow this link: https://bit.ly/2LaX9ku
     open-in-view: false
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
 
 security:
   auth:

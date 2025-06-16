@@ -71,16 +71,26 @@ function mdToHtml(content: string) {
   content = content.replace(/>/g, "&gt");
   let html = "";
   const lines = content.split("\n");
-  let lastIdent = 0;
-  let ident = 0;
+  let ident = [];
+  let inCode = false;
   for (const l of lines) {
+    if (l.startsWith("```")) {
+      inCode = !inCode;
+      html += inCode ? "<code>" : "</code>";
+      continue;
+    }
+    if (inCode) {
+      html += l + "<br>";
+      continue;
+    }
+
     if (l.startsWith("#")) {
       let end = l.lastIndexOf("#", 5);
       html += `<h${end + 1}>${l.substring(end + 1)}</h${end + 1}>`;
       continue;
     }
 
-    let t = l;
+    let t = l.trim();
     let i = 0;
     while (t.includes("**")) t = t.replace("**", i++ % 2 == 0 ? "<i>" : "</i>");
     i = 0;
@@ -88,20 +98,19 @@ function mdToHtml(content: string) {
     i = 0;
     while (t.includes("`")) t = t.replace("`", i++ % 2 == 0 ? "<code>" : "</code>");
 
-    if (t.startsWith("-")) {
-      if (lastIdent == 0) {
-        ident++;
-        html += "<ul>";
-      }
-      let li = t.substring(t.indexOf("-") + 1).trim();
-      html += `<li>${li}</li>`;
-    } else if (lastIdent > 0) {
-      html += "</ul>";
-      ident == 0;
-    }
-    lastIdent = ident;
+    let leftSpacing = l.search(/[^\ \t]/g);
+    let isNumbering = /[0-9]+\./g.test(t);
 
-    if (ident == 0) html += `<p>${t}</p>`;
+    if (t.startsWith("-") || isNumbering) {
+      if (ident.length <= leftSpacing) {
+        ident.push(isNumbering ? "</ol>" : "</ul>");
+        html += isNumbering ? "<ol>" : "<ul>";
+      }
+      let li = t.substring(t.indexOf(" ")).trim();
+      if (ident.length - leftSpacing != 1) html += ident.pop();
+      html += `<li>${li}</li>`;
+    } else if (ident.length > 0 && ident.length - leftSpacing != 1) html += ident.pop();
+    if (ident.length == 0) html += `<p>${t}</p>`;
   }
   return html;
 }
