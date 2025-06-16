@@ -7,6 +7,7 @@ import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ImageDetailD
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.LabelDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.TaskDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.TextDetailDto;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.VideoDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Board;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Component;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.MyCalendar;
@@ -15,6 +16,7 @@ import at.ac.tuwien.sepr.groupphase.backend.entity.components.Note;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Task;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.NoteDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Text;
+import at.ac.tuwien.sepr.groupphase.backend.entity.components.Video;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +57,11 @@ public class ComponentEntityToDtoMapper {
     public static ImageDetailDto visit(Image image) {
         return new ImageDetailDto(image.getId(), getParentId(image), image.getWidth(), image.getHeight(), image.getColumn(),
                 image.getRow());
+    }
+
+    public static VideoDetailDto visit(Video video) {
+        return new VideoDetailDto(video.getId(), getParentId(video), video.getWidth(), video.getHeight(), video.getColumn(),
+                video.getRow());
     }
 
     public static NoteDetailDto visit(Note note, MappingDepth depth) {

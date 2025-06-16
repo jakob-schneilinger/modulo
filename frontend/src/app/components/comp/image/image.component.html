@@ -1,15 +1,47 @@
 <div #previewCard class="preview-card" [attr.data-preview-id]="self.id"></div>
 <div #card [ngClass]="{'card p-2': inEditMode || sketching, 'read-only-mode': readonlyMode}" class="borders"
-     [attr.data-cy]="'child-image'">
+  [attr.data-cy]="'child-image'">
 
+  <div class="content">
+    @if (sketching) {
+
+    <div style="margin-bottom: 0.25rem;">
+      <div>Colors:</div>
+      <div class="colorSelect">
+        @for (c of colors; track c) {
+        <span [style]="'background-color:' + c" (click)="color = c">
+          <span [ngClass]="{'selected': c === color}"></span>
+        </span>
+        }
+      </div>
+
+      <label for="rngBrushSize">Brush Size: </label>
+      <input class="form-control form-control-sm" type="range" id="rngBrushSize" min="1" max="20"
+        [(ngModel)]="brushSize" #brushSizeInput>
+    </div>
+
+    <div><canvas (mousemove)="movePencil($event)" #canvas></canvas></div>
+    <div class="flex">
+      <button (click)="save()" class="primary">Save</button>
+      <button (click)="end()">Cancel</button>
+    </div>
+    } @else {
+    <img #content (dblclick)="focusFileInput()" [attr.data-cy]="'image-content'">
+    <div class="no-img-msg" *ngIf="!content.src">
+      No image selected yet!
+      @if (!readonlyMode) {
+      <button (click)="focusFileInput()" [attr.data-cy]="'image-select-button'">Set image</button>
+      }
+    </div>
+    }
+    <input #input class="hidden" type="file" (change)="setImage($event.target.files[0])" accept=".gif,.jpg,.jpeg,.png"
+      [attr.data-cy]="'image-select-input'">
+
+    <!-- Show after to be on top of image -->
     @if (inEditMode) {
     <!-- Drag & Resize -->
-    <div class="top-right"
-         (mousedown)="startContainerDrag(self, $event)"
-         (mouseup)="stopContainerDrag()"
-         (touchstart)="startContainerDrag(self, $event)"
-         (touchend)="stopContainerDrag()"
-    >
+    <div class="top-right" (mousedown)="startContainerDrag(self, $event)" (mouseup)="stopContainerDrag()"
+      (touchstart)="startContainerDrag(self, $event)" (touchend)="stopContainerDrag()">
       <i class="bi bi-arrows-move grab"></i>
     </div>
     <div class="resizer bottom-right" [id]="'resizer-' + self.id">
@@ -18,40 +50,5 @@
     } @else {
     <app-context-menu class="top-right" [actions]="actions"></app-context-menu>
     }
-
-    <div class="content">
-        @if (sketching) {
-
-        <div style="margin-bottom: 0.25rem;">
-            <div>Colors:</div>
-            <div class="colorSelect">
-                @for (c of colors; track c) {
-                <span [style]="'background-color:' + c" (click)="color = c">
-                    <span [ngClass]="{'selected': c === color}"></span>
-                </span>
-                }
-            </div>
-
-            <label for="rngBrushSize">Brush Size: </label>
-            <input class="form-control form-control-sm" type="range" id="rngBrushSize" min="1" max="20"
-                [(ngModel)]="brushSize" #brushSizeInput>
-        </div>
-
-        <div><canvas (mousemove)="movePencil($event)" #canvas></canvas></div>
-        <div class="flex">
-            <button (click)="save()" class="primary">Save</button>
-            <button (click)="end()">Cancel</button>
-        </div>
-        } @else {
-        <img #content (dblclick)="focusFileInput()" [attr.data-cy]="'image-content'">
-        <div class="no-img-msg" *ngIf="!content.src">
-            No image selected yet!
-          @if (!readonlyMode) {
-            <button (click)="focusFileInput()" [attr.data-cy]="'image-select-button'">Set image</button>
-          }
-        </div>
-        }
-        <input #input class="hidden" type="file" (change)="setImage($event.target.files[0])"
-            accept=".gif,.jpg,.jpeg,.png" [attr.data-cy]="'image-select-input'">
-    </div>
+  </div>
 </div>

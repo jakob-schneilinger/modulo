@@ -83,7 +83,10 @@ export class ImageComponent extends BaseComponent<Image> implements OnInit, OnDe
   ngAfterViewInit(): void {
     super.ngAfterViewInit();
 
-    if ((this.self as any).sketch) setTimeout(() => this.sketch(), 0);
+    if ((this.self as any).sketch) {
+      (this.self as any).sketch = false;
+      setTimeout(() => this.sketch(), 0);
+    }
   }
 
   ngOnDestroy() {

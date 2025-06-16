@@ -1,0 +1,32 @@
+<div #previewCard class="preview-card" [attr.data-preview-id]="self.id"></div>
+<div #card [ngClass]="{'card p-2': inEditMode, 'read-only-mode': readonlyMode}" class="borders"
+  [attr.data-cy]="'child-video'">
+
+  <div class="content">
+    <video #content [attr.controls]="!inEditMode ? 'true' : null" (dblclick)="focusFileInput()"
+      [attr.data-cy]="'video-content'"></video>
+    <div class="no-video-msg" *ngIf="!content.src">
+      No video selected yet!
+      @if (!readonlyMode) {
+      <button (click)="focusFileInput()" [attr.data-cy]="'video-select-button'">Set video</button>
+      }
+    </div>
+
+    <input #input class="hidden" type="file" (change)="setVideo($event.target.files[0])" accept=".mp4,.mov"
+      [attr.data-cy]="'video-select-input'">
+
+    <!-- Show after to be on top of video -->
+    @if (inEditMode) {
+    <!-- Drag & Resize -->
+    <div class="top-right" (mousedown)="startContainerDrag(self, $event)" (mouseup)="stopContainerDrag()"
+      (touchstart)="startContainerDrag(self, $event)" (touchend)="stopContainerDrag()">
+      <i class="bi bi-arrows-move grab"></i>
+    </div>
+    <div class="resizer bottom-right" [id]="'resizer-' + self.id">
+      <i class="bi bi-arrows-angle-expand"></i>
+    </div>
+    } @else {
+    <app-context-menu class="top-right" [actions]="actions"></app-context-menu>
+    }
+  </div>
+</div>

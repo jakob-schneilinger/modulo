@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = TextDetailDto.class, name = "text"),
     @JsonSubTypes.Type(value = TaskDetailDto.class, name = "task"),
     @JsonSubTypes.Type(value = ImageDetailDto.class, name = "image"),
+    @JsonSubTypes.Type(value = VideoDetailDto.class, name = "video"),
     @JsonSubTypes.Type(value = NoteDetailDto.class, name = "note"),
     @JsonSubTypes.Type(value = CalendarDetailDto.class, name = "calendar")
 })

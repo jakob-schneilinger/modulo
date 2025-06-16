@@ -9,8 +9,8 @@
     @if (editingTitle) {
     <input class="title form-control form-control-sm mb-1" [(ngModel)]="titleBuffer" maxlength="255">
     <div class="d-flex gap-1">
-        <button class="btn btn-sm btn-primary" (click)="saveTitle()">Save</button>
-        <button class="btn btn-sm btn-outline-secondary" (click)="cancelTitle()">Cancel</button>
+        <button class="btn btn-sm primary" (click)="saveTitle()">Save</button>
+        <button class="btn btn-sm" (click)="cancelTitle()">Cancel</button>
     </div>
     } @else {
     <h5 [ngClass]="{'resizing': isResizing}" (dblclick)="startEditTitle()">
