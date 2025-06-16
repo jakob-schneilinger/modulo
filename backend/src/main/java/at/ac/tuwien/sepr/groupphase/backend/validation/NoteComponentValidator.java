@@ -29,14 +29,14 @@ public class NoteComponentValidator {
         List<String> errors = new ArrayList<>(componentValidator.validateComponent(note, selfId));
 
         if (selfId < 1) {
-            if (note.title() == null) {
+            if (note.name() == null) {
                 errors.add("Note title is null");
-            } else if (note.title().isEmpty()) {
+            } else if (note.name().isEmpty()) {
                 errors.add("Note title is empty");
             }
         }
 
-        if (note.title() != null && note.title().length() > 255) {
+        if (note.name() != null && note.name().length() > 255) {
             errors.add("Note title exceeds maximum length of 255 characters");
         }
 

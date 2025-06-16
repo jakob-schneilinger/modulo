@@ -2,6 +2,7 @@ package at.ac.tuwien.sepr.groupphase.backend.service;
 
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.user.UserDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.user.UserUpdateDto;
+import at.ac.tuwien.sepr.groupphase.backend.entity.ApplicationUser;
 
 public interface UserService {
 
@@ -42,9 +43,9 @@ public interface UserService {
     void removeAvatar(String username);
 
     /**
-     * Helper method to get userId.
+     * Helper method to get the current user.
      *
-     * @return userId
+     * @return user
      */
-    long getUserId();
+    ApplicationUser getUser();
 }

@@ -1,0 +1,81 @@
+<div class="container">
+
+  <div class="row align-self-center m-4 pt-2">
+    <div class="flex-row d-flex justify-content-between">
+      <h1>Your Groups:</h1>
+
+      <button class="primary" (click)="createGroup()" >
+        <i class="bi bi-plus-square-fill"></i>
+        <span class="m-1"> New Group </span>
+      </button>
+    </div>
+    <div class="mt-3">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th style="width: 40%;">Group Name</th>
+            <th style="width: 40%;">Owner</th>
+            <th style="width: 20%;">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="align-content-center align-items-center">
+          @for(group of groups; track group) {
+            <tr class="center-td" [ngClass]="{'table-success':(group.owner?.username === this.user.username)}">
+              <td>{{ group.name }}</td>
+              <td>{{ group.owner?.displayName }}</td>
+              <td>
+                <div class="btn-group">
+                  <a class="btn btn-sm responsive-success-button"
+                     aria-label="Details"
+                     routerLink="{{group.id}}">
+                    <i class="bi bi-sliders"></i>
+                  </a>
+
+
+
+                  @if (group.owner?.username === this.user.username) {
+                    <a class="btn btn-sm responsive-danger-button"
+                       (click)="deleteGroup(group)"
+                       aria-label="Delete Group">
+                      <i class="bi bi-trash"></i>
+                    </a>
+                  } @else {
+                    <a class="btn btn-sm responsive-warning-button"
+                       (click)="leaveGroup(group)"
+                       aria-label="Leave Group">
+                      <i class="bi bi-box-arrow-left"></i>
+                    </a>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true"
+     #modal>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">{{ capitalizeFirstLetter(this.modalMode) }} Group "{{this.modalGroup?.name}}"?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to {{this.modalMode}} "{{this.modalGroup?.name}}"?
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" (click)="modalAction()"
+                data-bs-dismiss="modal" data-cy="home-board-delete-modal-confirm">{{ capitalizeFirstLetter(this.modalMode) }}</button>
+      </div>
+    </div>
+  </div>
+</div>

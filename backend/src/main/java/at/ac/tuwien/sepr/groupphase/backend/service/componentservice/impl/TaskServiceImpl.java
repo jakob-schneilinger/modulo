@@ -2,7 +2,6 @@ package at.ac.tuwien.sepr.groupphase.backend.service.componentservice.impl;
 
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDetailDto;
-import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.TaskCreateDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.TaskDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.TaskDto;
@@ -11,10 +10,10 @@ import at.ac.tuwien.sepr.groupphase.backend.entity.ApplicationUser;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Component;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Task;
 import at.ac.tuwien.sepr.groupphase.backend.exception.NotFoundException;
-import at.ac.tuwien.sepr.groupphase.backend.mapper.MappingDepth;
 import at.ac.tuwien.sepr.groupphase.backend.repository.ComponentRepository;
 import at.ac.tuwien.sepr.groupphase.backend.repository.UserRepository;
 import at.ac.tuwien.sepr.groupphase.backend.security.JwtUtils;
+import at.ac.tuwien.sepr.groupphase.backend.service.componentservice.ComponentService;
 import at.ac.tuwien.sepr.groupphase.backend.service.componentservice.TaskService;
 import at.ac.tuwien.sepr.groupphase.backend.validation.TaskValidator;
 import jakarta.transaction.Transactional;
@@ -38,12 +37,15 @@ public class TaskServiceImpl implements TaskService {
     private final ComponentRepository componentRepository;
     private final TaskValidator taskValidator;
     private final UserRepository userRepository;
+    private final ComponentService componentService;
 
     @Autowired
-    public TaskServiceImpl(ComponentRepository componentRepository, TaskValidator taskValidator, JwtUtils jwtUtils, UserRepository userRepository) {
+    public TaskServiceImpl(ComponentRepository componentRepository, TaskValidator taskValidator,
+                           UserRepository userRepository, ComponentService componentService) {
         this.componentRepository = componentRepository;
         this.taskValidator = taskValidator;
         this.userRepository = userRepository;
+        this.componentService = componentService;
     }
 
     @Override
@@ -85,7 +87,7 @@ public class TaskServiceImpl implements TaskService {
             task.setCompleted(taskDto.completed());
             task.setRepeatable(taskDto.repeating());
         }
-        return setComponent(taskDto, task, userId);
+        return componentService.setComponent(taskDto, task);
     }
 
     private ComponentDetailDto setRepetition(TaskUpdateDto taskDto, Task task, long userId) {
@@ -101,23 +103,7 @@ public class TaskServiceImpl implements TaskService {
             task.setCompleted(false);
         }
 
-        return setComponent(taskDto, task, userId);
-    }
-
-    private ComponentDetailDto setComponent(ComponentDto componentDto, Component component, long userId) {
-        component.setWidth(componentDto.width());
-        component.setHeight(componentDto.height());
-        component.setColumn(componentDto.column());
-        component.setRow(componentDto.row());
-        component.setOwnerId(userId);
-
-        component = componentRepository.save(component);
-
-        if (componentDto.parentId() != null) {
-            componentRepository.link(componentDto.parentId(), component.getId());
-        }
-
-        return component.accept(MappingDepth.DEEP); //Should it be DEEP?
+        return componentService.setComponent(taskDto, task);
     }
 
     private void manageChildren(List<ComponentDetailDto> children, TaskUpdateDto rootTask) {

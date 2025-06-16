@@ -5,5 +5,5 @@ import java.util.List;
 /**
  * Dto for retrieving a note component.
  */
-public record NoteDetailDto(long id, String title, List<LabelDto> labels, long width, long height, long column, long row, List<ComponentDetailDto> children) implements ComponentDetailDto {
+public record NoteDetailDto(long id, Long parentId, String name, List<LabelDto> labels, long width, long height, long column, long row, List<ComponentDetailDto> children) implements ComponentDetailDto {
 }

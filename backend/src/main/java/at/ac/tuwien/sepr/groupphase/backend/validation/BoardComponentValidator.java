@@ -26,8 +26,21 @@ public class BoardComponentValidator {
      */
     public void validateBoardComponent(BoardDto board, long selfId) {
         LOG.trace("validateBoard({})", board);
+        List<String> errors = new ArrayList<>();
 
-        List<String> errors = new ArrayList<>(componentValidator.validateComponent(board, selfId));
+        if (!(board.depth() != null && board.name() == null && board.row() == null && board.column() == null && board.height() == null && board.width() == null)) {
+            errors = new ArrayList<>(componentValidator.validateComponent(board, selfId));
+        }
+
+        if (board.depth() != null) {
+            if (board.depth() < 2) {
+                errors.add("Board depth must be greater than 2");
+            }
+
+            if (board.depth() > 11) {
+                errors.add("Board depth must be smaller than 11");
+            }
+        }
 
         if (selfId < 1) {
             if (board.name() == null) {

@@ -1,5 +1,5 @@
 <div #previewCard [attr.data-preview-id]="self.id" class="preview-card"></div>
-<div #card [attr.data-id]="self.id" [ngClass]="{'card p-2':!!parentContainer}" [class.task-done]="self.completed"
+<div #card [attr.data-id]="self.id" [ngClass]="{'card p-2':!!parentContainer, 'read-only-mode': readonlyMode}" [class.task-done]="self.completed"
   [class.task-overdue]="taskOverdue()" [class.task-inProgress]="taskInProgress()">
 
   <!-- Title -->
@@ -22,7 +22,12 @@
   <!-- Controls -->
   @if (inEditMode) {
   <!-- Drag & Resize -->
-  <div class="top-right" (mousedown)="startContainerDrag(self, $event)" (mouseup)="stopContainerDrag()">
+  <div class="top-right"
+       (mousedown)="startContainerDrag(self, $event)"
+       (mouseup)="stopContainerDrag()"
+       (touchstart)="startContainerDrag(self, $event)"
+       (touchend)="stopContainerDrag()"
+  >
     <i class="bi bi-arrows-move grab"></i>
   </div>
   <div class="resizer bottom-right" [id]="'resizer-' + self.id">
@@ -42,17 +47,17 @@
 
   <!-- Task properties -->
   <ng-container *ngIf="self.type === 'task'">
-    <label class="task-date" *ngIf="!endDateEditable() && !editingEndDate " (click)="editingEndDate = true">
+    <label class="task-date" *ngIf="!endDateEditable() && !editingEndDate && !readonlyMode" (click)="editingEndDate = true">
       Add due date…
     </label>
     <div class="task-date">
       <ng-container *ngIf="editingEndDate || endDateEditable()">
         <i class="bi bi-clock"></i>
-        <input type="date" [(ngModel)]="endDateText" class="date-picker">
-        <button class="buttonDel" style="font-size:10px" (click)="deleteEndDate()"><i class="bi bi-trash-fill"></i>
+        <input type="date" [(ngModel)]="endDateText" [disabled]="readonlyMode" class="date-picker">
+        <button class="buttonDel hide-in-read-only-mode" style="font-size:10px" (click)="deleteEndDate()"><i class="bi bi-trash-fill"></i>
         </button>
-        <button title="Repeat this task after deadline!" class="buttonDel" style="font-size:12px"
-          (click)="setRepeating()" [class.Selected]="self.repeating" *ngIf="isNotChildOfTask">
+        <button title="Repeat this task after deadline!" class="buttonDel hide-in-read-only-mode" style="font-size:12px"
+                (click)="setRepeating()" [class.Selected]="self.repeating" *ngIf="isNotChildOfTask">
           <i class="bi bi-arrow-clockwise"> cached</i>
         </button>
       </ng-container>
@@ -60,13 +65,13 @@
     <div class="task-date-arrow">
       <ng-container *ngIf="editingStartDate || startDateEditable()">
         <i class="task-date-arrow">&#8613;</i>
-        <input type="date" [(ngModel)]="startDateText" class="date-picker">
-        <button class="buttonDel" style="font-size:10px" (click)="deleteStartDate()"><i
+        <input type="date" [(ngModel)]="startDateText" [disabled]="readonlyMode" class="date-picker">
+        <button class="buttonDel hide-in-read-only-mode" style="font-size:10px" (click)="deleteStartDate()"><i
             class="bi bi-trash-fill"></i></button>
       </ng-container>
     </div>
 
-    <label class="task-date" *ngIf="!startDateEditable() &&!editingStartDate && endDateEditable() "
+    <label class="task-date" *ngIf="!startDateEditable() &&!editingStartDate && endDateEditable() && !readonlyMode"
       (click)="editingStartDate = true">
       Add start date…
     </label>

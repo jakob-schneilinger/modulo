@@ -1,0 +1,79 @@
+
+<div class="group-detail">
+
+  <div>
+    <button class="primary" [routerLink]="['/group']">
+      <i class="bi bi-chevron-left"></i>
+      <span class="m-1"> Back </span>
+    </button>
+  </div>
+
+  <div class="flex">
+    <label>Name:</label>
+    @if (isOwner()) {
+      <input (blur)="updateGroupName()" [(ngModel)]="groupDetail.name" name="title" [maxLength]="30" #name>
+      <i (click)="name.focus()" class="bi bi-pencil-fill"></i>
+    } @else {
+      <p class="name-no-owner">{{groupDetail.name}}</p>
+    }
+  </div>
+
+  <div class="flex">
+    <label>Owner:</label>
+    <a [routerLink]="['/user', this.groupDetail?.owner?.username]">{{ this.groupDetail?.owner?.displayName }}</a>
+  </div>
+
+  <label>Members:</label>
+  <div class="flex">
+    <table class="member-table">
+      <tbody>
+        @for (member of groupDetail.members; track member.username) {
+          <tr>
+            <td>
+              -
+              <a [routerLink]="['/user', member.username]">
+                {{ member.displayName }}
+                @if (member.username === user.username) {
+                  <span>(You)</span>
+                }
+              </a>
+            </td>
+            <td *ngIf="isOwner() && member.username !== user.username">
+              <button (click)="setOwner(member)">Set Owner</button>
+              <button (click)="removeMember(member)">Remove</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div>
+    <button class="primary" (click)="deleteGroup()">
+      <span class="m-1"> {{ isOwner()? "Delete Group" : "Leave Group" }} </span>
+    </button>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true"
+     #modal>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel"> {{modalTitle()}} </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to do this action? It can no longer be reversed after completion!
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" (click)="modalAction()"
+                data-bs-dismiss="modal" data-cy="home-board-delete-modal-confirm">{{ this.modalMode }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+

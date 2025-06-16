@@ -9,9 +9,6 @@ html {
   background-color: white;
 }
 
-body {
-  background-color: $primary;
-}
 
 h1 {
   font-weight: bold;
@@ -29,7 +26,7 @@ button {
   background-color: $neutral;
   color: black;
 
-  &:hover {
+  &:hover:not([disabled]) {
     background-color: color.adjust($neutral, $lightness: -5%);
   }
 
@@ -44,7 +41,7 @@ button {
     background-color: $primary;
     border-color: $primary;
 
-    &:hover {
+    &:hover:not([disabled]) {
       background-color: color.adjust($primary, $lightness: -5%);
       border-color: color.adjust($primary, $lightness: -5%);
     }
@@ -81,7 +78,7 @@ span.error {
 }
 
 @media (max-width: 800px) {
-  .onlyDesktop {
+  .only-desktop {
     display: none;
   }
 }

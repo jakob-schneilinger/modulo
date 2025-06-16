@@ -61,12 +61,15 @@ export class AuthService {
   }
 
   getLoggedInUser(): User {
-    let token = jwtDecode(this.getToken());
-    return {
-      username: token.sub,
-      displayName: token["display_name"],
-      email: token["email"],
-    };
+    const encodedToken = this.getToken();
+    if (encodedToken) {
+      const token = jwtDecode(encodedToken);
+      return {
+        username: token.sub,
+        displayName: token["display_name"],
+        email: token["email"],
+      };
+    }
   }
 
   /**

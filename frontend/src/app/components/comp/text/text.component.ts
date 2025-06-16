@@ -32,6 +32,8 @@ export class TextComponent extends BaseComponent<Text> {
   @ViewChild("input") input: ElementRef<HTMLInputElement>;
 
   edit() {
+    if (this.readonlyMode) return;
+
     this.editBuffer = this.self.content;
     this.editing = true;
     setTimeout(() => {

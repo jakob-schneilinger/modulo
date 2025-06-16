@@ -48,4 +48,11 @@ public interface ComponentService {
      */
     ComponentDetailDto setComponent(ComponentDto componentDto, Component component);
 
+    /**
+     * Helper methode to get the root component of a component.
+     *
+     * @param component from where to get root component
+     * @return root component of the component
+     */
+    Component getRootComponent(Component component);
 }

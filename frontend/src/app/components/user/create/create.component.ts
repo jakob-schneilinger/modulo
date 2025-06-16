@@ -19,7 +19,6 @@ export class CreateComponent implements OnInit {
     private formBuilder: UntypedFormBuilder,
     private authService: AuthService,
     private router: Router,
-    private route: ActivatedRoute,
     private notification: NotificationService
   ) {
     this.createForm = this.formBuilder.group({

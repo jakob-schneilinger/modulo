@@ -25,12 +25,47 @@ export class NotificationsComponent implements OnInit {
 
   constructor(private not: NotificationService, private globals: Globals) {
     // inject console
-    const injectTo: NotificationType[] = globals.debugMode ? ["error"] : [];
+    const injectTo: NotificationType[] = globals.debugMode ? ["error", "warn"] : [];
     for (const type of injectTo) {
       const old = console[type];
       console[type] = (...params) => {
+        let e = params[0];
+
+        let message: string;
+        let status: string | number = 'console';
+        let location: string;
+
+        if (e instanceof ErrorEvent) {
+          location = 'Browser';
+          message = e.message;
+        } else if (e?.error instanceof ErrorEvent) {
+          location = 'Backend';
+          message = e.error.message;
+          status = e.status ?? status;
+        } else if (e?.error) {
+          location = 'Backend';
+          message = typeof e.error === 'string' ? e.error : JSON.stringify(e.error);
+          status = e.status ?? status;
+        } else {
+          if (params[1] && params[1].error) {
+            e = params[1]
+            status = e.status ?? status;
+            location = 'Backend';
+            message = typeof e.error === 'string' ? e.error : JSON.stringify(e.error);
+          } else {
+            location = 'Unknown';
+            message = params.join(', ');
+          }
+        }
+
         old(...params);
-        this.spawnNotification({ type, title: "Unhandled " + type + " (console)", message: params.join(", ") });
+
+        this.spawnNotification({
+          type,
+          title: `${location} ${type} (${status})`,
+          message,
+          closeAfter: 5000
+        });
       };
     }
 

@@ -39,7 +39,7 @@ export class CalendarComponent extends BaseComponent<Calendar> implements OnInit
   }
 
   setFile(calendarFile: File) {
-    if (!calendarFile) return;
+    if (!calendarFile || this.readonlyMode) return;
 
     this.componentService.setCalendarFile(this.self, calendarFile).subscribe({
       next: (value) => {
@@ -51,7 +51,7 @@ export class CalendarComponent extends BaseComponent<Calendar> implements OnInit
   }
 
   setUrl(url: string) {
-    if (!url) return;
+    if (!url || this.readonlyMode) return;
     this.componentService.setCalendarUrl(this.self, url).subscribe({
       next: (value) => {
         this.inputActive = false;

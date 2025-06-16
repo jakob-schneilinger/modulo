@@ -13,7 +13,7 @@
                     <label for="inputUsername">Username*</label>
                     <input type="text" name="username" formControlName="username" class="form-control"
                         id="inputUsername" aria-describedby="usernameHelp" placeholder="Enter username"
-                        pattern="[a-z0-9._-]+" required (input)="onUsernameInput($event)" data-cy="register-username">
+                        pattern="[a-z0-9._\-]+" required (input)="onUsernameInput($event)" data-cy="register-username">
                     <div *ngIf="(submitted || createForm.controls.username.touched) && createForm.controls.username.errors"
                         class="error">
                         <small class="form-text text-warning" *ngIf="createForm.controls.username.errors.required"
@@ -37,7 +37,7 @@
                 <!-- Email input -->
                 <div class="form-group">
                     <label for="inputEmail">Email*</label>
-                    <input type="text" name="email" formControlName="email" class="form-control" id="inputEmail"
+                    <input name="email" formControlName="email" class="form-control" id="inputEmail"
                         aria-describedby="emailHelp" placeholder="Enter email" required type="email"
                         data-cy="register-email">
                     <div *ngIf="(submitted || createForm.controls.email.touched) && createForm.controls.email.errors"

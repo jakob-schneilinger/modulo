@@ -67,7 +67,7 @@ public class UserManagementTest {
     @Autowired
     private AuthenticationManager authenticationManager;
 
-    //TODO: Hotfix
+
     @BeforeAll
     void setup() {
         userRepository.deleteAll();

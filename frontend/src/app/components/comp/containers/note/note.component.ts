@@ -42,7 +42,9 @@ export class NoteComponent extends ContainerComponent<Note> {
   }
 
   startEditTitle(): void {
-    this.titleBuffer = this.self.title;
+    if (this.readonlyMode) return;
+
+    this.titleBuffer = this.self.name;
     this.editingTitle = true;
   }
 
@@ -51,12 +53,12 @@ export class NoteComponent extends ContainerComponent<Note> {
   }
 
   saveTitle(): void {
-    const trimmedTitle = this.self.title.trim();
-    const changed = this.self.title !== trimmedTitle;
-    this.self.title = trimmedTitle;
+    const trimmedTitle = this.titleBuffer.trim();
+    const changed = this.self.name !== trimmedTitle;
+    this.self.name = trimmedTitle;
     this.editingTitle = false;
     if (changed) {
-      this.componentService.updateNote({ id: this.self.id, title: this.self.title }).subscribe();
+      this.componentService.updateNote({ id: this.self.id, name: this.self.name }).subscribe();
     }
   }
 

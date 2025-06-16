@@ -50,6 +50,8 @@ export class TaskComponent extends ContainerComponent<Task> implements OnInit, A
   }
 
   startEditTitle(): void {
+    if (this.readonlyMode) return;
+
     this.titleBuffer = this.self.name;
     this.editingTitle = true;
   }
@@ -163,6 +165,8 @@ export class TaskComponent extends ContainerComponent<Task> implements OnInit, A
   }
 
   available(): boolean {
+    if (this.readonlyMode) return true;
+
     if (this.self.startDate) {
       const date = new Date(this.self.startDate);
       const now = new Date();

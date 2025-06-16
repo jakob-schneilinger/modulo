@@ -36,7 +36,7 @@ public class Note extends Component {
 
     @Override
     public ComponentDetailDto accept(MappingDepth depth) {
-        return ComponentEntityToDtoMapper.visit(this);
+        return ComponentEntityToDtoMapper.visit(this, MappingDepth.DEEP);
     }
 
     @Override

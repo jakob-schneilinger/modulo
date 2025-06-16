@@ -21,6 +21,8 @@ export class BoardComponent extends ContainerComponent<Board> {
   ];
 
   startEditTitle(): void {
+    if (this.readonlyMode) return;
+
     this.titleBuffer = this.self.name;
     this.editingTitle = true;
   }

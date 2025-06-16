@@ -59,9 +59,13 @@ public class UserServiceImpl implements UserService {
 
         validator.validateUserUpdate(userUpdateDto);
 
+        if (!currentUserName().equals(username)) {
+            throw new ForbiddenException("You don't have permissions to update this user");
+        }
+
         Optional<ApplicationUser> user = userRepository.findByUsername(username);
 
-        if (user == null || !user.isPresent()) {
+        if (user == null || user.isEmpty()) {
             throw new NotFoundException("User doesn't exist");
         }
 
@@ -145,11 +149,10 @@ public class UserServiceImpl implements UserService {
         file.delete();
     }
 
-    public long getUserId() {
-        LOGGER.trace("getUserId");
+    public ApplicationUser getUser() {
+        LOGGER.trace("getUser");
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        ApplicationUser user = userRepository.findByUsername(username)
+        return userRepository.findByUsername(username)
             .orElseThrow(() -> new NotFoundException("User not found: " + username));
-        return user.getId();
     }
 }

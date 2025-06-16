@@ -1,9 +1,14 @@
 <div #previewCard class="preview-card" [attr.data-preview-id]="self.id"></div>
-<div #card  class="borders card p-2" [attr.data-id]="self.id"
-     [attr.data-cy]="'child-calendar'">
+<div #card  class="borders card p-2"
+     [attr.data-cy]="'child-calendar'" [ngClass]="{'read-only-mode': readonlyMode}">
   @if (inEditMode) {
     <!-- Drag & Resize -->
-    <div class="top-right" (mousedown)="startContainerDrag(self, $event)" (mouseup)="stopContainerDrag()">
+    <div class="top-right"
+         (mousedown)="startContainerDrag(self, $event)"
+         (mouseup)="stopContainerDrag()"
+         (touchstart)="startContainerDrag(self, $event)"
+         (touchend)="stopContainerDrag()"
+    >
       <i class="bi bi-arrows-move grab"></i>
     </div>
     <div class="resizer bottom-right" [id]="'resizer-' + self.id">
@@ -17,13 +22,13 @@
     @if (this.self.entries.length <= 0) {
       <div class="no-cal-msg">
         No calendar selected yet!
-        <button (click)="focusFileInput()">Set File</button>
-        <input #webCalUrlInput type="url" (keyup.enter)="setUrl(webCalUrlInput.value)" placeholder="Input WebCal-URL here:">
+        <button (click)="focusFileInput()" class="hide-in-read-only-mode">Set File</button>
+        <input #webCalUrlInput type="url" class="hide-in-read-only-mode" (keyup.enter)="setUrl(webCalUrlInput.value)" placeholder="Input WebCal-URL here:">
       </div>
-      <input #input class="hidden" type="file" (change)="setFile($event.target.files[0])"
-             accept=".ics">
+      <input #input class="hidden hide-in-read-only-mode" type="file" (change)="setFile($event.target.files[0])"
+           accept=".ics">
     } @else {
-      <button title="Refresh the Calendar!" class="buttonDel" style="font-size:16px"
+      <button title="Refresh the Calendar!" class="buttonDel hide-in-read-only-mode" style="font-size:16px"
               (click)="refresh()">
         <i class="bi bi-arrow-clockwise"></i>
       </button>

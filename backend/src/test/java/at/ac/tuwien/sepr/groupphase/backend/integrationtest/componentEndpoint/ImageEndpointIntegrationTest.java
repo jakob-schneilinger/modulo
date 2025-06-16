@@ -1,4 +1,4 @@
-package at.ac.tuwien.sepr.groupphase.backend.integrationtest.component;
+package at.ac.tuwien.sepr.groupphase.backend.integrationtest.componentEndpoint;
 
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.JwtResponseDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardCreateDto;
@@ -11,7 +11,6 @@ import at.ac.tuwien.sepr.groupphase.backend.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -90,7 +88,7 @@ public class ImageEndpointIntegrationTest {
         // TODO: add comment
         static void parentBoard(MockMvc mockMvc, ObjectMapper objectMapper) throws Exception {
                 // having a test datasource would of course help
-                BoardCreateDto boardParent = new BoardCreateDto("board test parent", null, 1L, 1L, 1L, 1L);
+                BoardCreateDto boardParent = new BoardCreateDto("board test parent", null, null, 1L, 1L, 1L, 1L);
 
                 var response = mockMvc.perform(
                                 post("/api/v1/component/board")
@@ -193,7 +191,7 @@ public class ImageEndpointIntegrationTest {
 
                 // Prepare image file
                 byte[] dummyImage = Files.readAllBytes(
-                                Path.of("src/test/java/at/ac/tuwien/sepr/groupphase/backend/integrationtest/component/img.png")); // minimal JPEG-like header
+                                Path.of("src/test/resources/img.png")); // minimal JPEG-like header
                 MockMultipartFile filePart = new MockMultipartFile(
                                 "image",
                                 "test.jpg",

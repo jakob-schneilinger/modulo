@@ -1,14 +1,19 @@
 <div #previewCard class="preview-card" [attr.data-preview-id]="self.id"></div>
-<div #card [ngClass]="{'card p-2': inEditMode || sketching}" class="borders" [attr.data-id]="self.id"
-    [attr.data-cy]="'child-image'">
+<div #card [ngClass]="{'card p-2': inEditMode || sketching, 'read-only-mode': readonlyMode}" class="borders"
+     [attr.data-cy]="'child-image'">
 
     @if (inEditMode) {
     <!-- Drag & Resize -->
-    <div class="top-right" (mousedown)="startContainerDrag(self, $event)" (mouseup)="stopContainerDrag()">
-        <i class="bi bi-arrows-move grab"></i>
+    <div class="top-right"
+         (mousedown)="startContainerDrag(self, $event)"
+         (mouseup)="stopContainerDrag()"
+         (touchstart)="startContainerDrag(self, $event)"
+         (touchend)="stopContainerDrag()"
+    >
+      <i class="bi bi-arrows-move grab"></i>
     </div>
     <div class="resizer bottom-right" [id]="'resizer-' + self.id">
-        <i class="bi bi-arrows-angle-expand"></i>
+      <i class="bi bi-arrows-angle-expand"></i>
     </div>
     } @else {
     <app-context-menu class="top-right" [actions]="actions"></app-context-menu>
@@ -41,7 +46,9 @@
         <img #content (dblclick)="focusFileInput()" [attr.data-cy]="'image-content'">
         <div class="no-img-msg" *ngIf="!content.src">
             No image selected yet!
+          @if (!readonlyMode) {
             <button (click)="focusFileInput()" [attr.data-cy]="'image-select-button'">Set image</button>
+          }
         </div>
         }
         <input #input class="hidden" type="file" (change)="setImage($event.target.files[0])"

@@ -12,9 +12,21 @@ export class ResizeService {
   private startHeight: number = 1;
 
 
-  startResize(event: MouseEvent, component: Comp, cardEl: ElementRef, previewCardEl: ElementRef) {
-    const target = event.target as HTMLElement;
+  startResize(event: MouseEvent | TouchEvent, component: Comp, cardEl: ElementRef, previewCardEl: ElementRef) {
+    let e;
+    if (typeof TouchEvent !== 'undefined' && event instanceof TouchEvent && 'touches' in event) {
+      if (event.touches.length === 1) {
+        e = event.touches[0];
+      } else {
+        return;
+      }
+    } else {
+      e = event;
+    }
+
+    const target = e.target as HTMLElement;
     if (target.classList.contains('resizer') && target.id === `resizer-${component.id}`) {
+      event.preventDefault();
       this.isResizing = true;
       this.activeResizerId = target.id;
       this.startWidth = component.width;
@@ -22,8 +34,21 @@ export class ResizeService {
     }
   }
 
-  resize(event: MouseEvent, component: Comp, currentWidth: number, cardEl: ElementRef, previewCardEl: ElementRef, parentContainer: Container, parentGridEl: ElementRef | null, homeGridEl: ElementRef | null, depth: number, callback: (columns: number, rows: number) => void) {
+  resize(event: MouseEvent | TouchEvent, component: Comp, currentWidth: number, cardEl: ElementRef, previewCardEl: ElementRef, parentContainer: Container, parentGridEl: ElementRef | null, homeGridEl: ElementRef | null, depth: number, callback: (columns: number, rows: number) => void) {
     if (!this.isResizing || this.activeResizerId !== `resizer-${component.id}`) return;
+
+    event.preventDefault();
+
+    let e;
+    if (typeof TouchEvent !== 'undefined' && event instanceof TouchEvent && 'touches' in event) {
+      if (event.touches.length === 1) {
+        e = event.touches[0];
+      } else {
+        return;
+      }
+    } else {
+      e = event;
+    }
 
     const body = document.querySelectorAll('body');
     body.forEach(b => (b.style.userSelect = 'none', b.style.webkitUserSelect = 'none'))
@@ -31,8 +56,8 @@ export class ResizeService {
     const card = cardEl.nativeElement as HTMLElement;
     const preview = previewCardEl.nativeElement as HTMLElement;
     const rect = card.getBoundingClientRect();
-    const deltaX = event.clientX - rect.left;
-    const deltaY = event.clientY - rect.top;
+    const deltaX = e.clientX - rect.left;
+    const deltaY = e.clientY - rect.top;
 
     const grid = depth > 1 ? (parentGridEl?.nativeElement ?? card) : (homeGridEl?.nativeElement ?? card);
     const columnWidth = grid.offsetWidth / gridVar.columns;
@@ -63,7 +88,7 @@ export class ResizeService {
     }
   }
 
-  stopResize(event: MouseEvent, component: Comp, currentWidth: number, currentHeight: number, previewCardEl: ElementRef, parentContainer: Container, callback: (columns: number, rows: number, changes: boolean) => void) {
+  stopResize(component: Comp, currentWidth: number, currentHeight: number, previewCardEl: ElementRef, parentContainer: Container, callback: (columns: number, rows: number, changes: boolean) => void) {
     if (!this.isResizing || this.activeResizerId !== `resizer-${component.id}`) return;
 
     this.isResizing = false;
@@ -73,7 +98,6 @@ export class ResizeService {
     body.forEach(b => (b.style.userSelect = '', b.style.webkitUserSelect = ''))
 
     const preview = previewCardEl.nativeElement as HTMLElement;
-
     preview.style.display = 'none';
 
     if (currentWidth !== component.width || currentHeight !== component.height) {

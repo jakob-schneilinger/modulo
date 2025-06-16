@@ -2,6 +2,9 @@ $primary: lightcoral;
 $error: firebrick;
 $neutral: rgba(255, 228, 225);
 
+$dropdown-active: rgba(240, 128, 128, 0.25);
+
+
 $nav-bg: #222;
 $nav-fg: white;
 $nav-bg-light: #333;
@@ -19,7 +22,12 @@ $gradient-light: linear-gradient(
   rgba(255, 179, 80, 0.69) 100%
 );
 
-$gradient: linear-gradient(150deg, rgba(255, 80, 80, 1) 0%, rgba(255, 127, 80, 1) 50%, rgba(255, 179, 80, 1) 100%);
+$gradient: linear-gradient(
+  150deg,
+  rgba(255, 80, 80, 1) 0%,
+  rgba(255, 127, 80, 1) 50%,
+  rgba(255, 179, 80, 1) 100%
+);
 
 :root {
   --columns: 8;
