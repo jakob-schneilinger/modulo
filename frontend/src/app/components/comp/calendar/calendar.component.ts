@@ -1,9 +1,9 @@
 import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
 import { BaseComponent } from "../base/base.component";
 import {Calendar, CalendarEntry} from "src/app/dtos/component";
-import { CommonModule } from "@angular/common";
 import ComponentFactory from "src/app/global/ComponentFactory";
 import type { ContextMenuAction } from "../context-menu/context-menu.component";
+
 
 @Component({
   selector: "app-calendar-component",
@@ -23,6 +23,17 @@ export class CalendarComponent extends BaseComponent<Calendar> implements OnInit
   ];
 
   inputActive: boolean = false;
+
+  createTask(entry:CalendarEntry):void {
+      this.eventService.emitTaskCreate(entry);
+  }
+
+  deleteEntry(entry: CalendarEntry):void{
+    this.componentService.deleteEntry(this.self.id, entry).subscribe({
+      next: value => this.self.entries = this.self.entries.filter(e => e.id !== entry.id),
+      error :(e) => console.error(e)
+    })
+  }
 
   clearCalendar():void {
     this.componentService.clearCalendar(this.self).subscribe({

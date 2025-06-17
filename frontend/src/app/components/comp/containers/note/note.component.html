@@ -35,7 +35,7 @@
 
     <!-- Labels -->
     <div class="flex gap-1">
-      @for (label of self.labels; track label) {
+      @for (label of self.labels; track $index) {
         <span class="label flex gap-1" [style]="'background-color:'+lblBGColor(label)+';color:'+lblColor(label)">
             {{label.name}}
         <i class="bi bi-x hide-in-read-only-mode" (click)="removeLbl(label)"></i>

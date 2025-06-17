@@ -95,6 +95,7 @@ export interface VideoCreate extends ComponentCreate {}
 export interface CalendarCreate extends ComponentCreate {}
 
 export interface CalendarEntry {
+  id: number;
   startDate: Date;
   endDate: Date;
   title: string;

@@ -52,8 +52,6 @@ public class MyCalendar extends Component {
     @Column(name = "ical_url")
     private String icalUrl;
 
-    private String etag;
-
     public static List<CalendarEntryDetailDto> getCalendarEntries(List<CalendarEntry> calendar) {
         List<CalendarEntryDetailDto> calendarDetails = new ArrayList<>();
         for (CalendarEntry entry : calendar) {
@@ -64,13 +62,13 @@ public class MyCalendar extends Component {
                 calendarDetails.addAll(
                     recurringEvents.stream()
                         .map(startDate ->
-                            new CalendarEntryDetailDto(startDate,
+                            new CalendarEntryDetailDto(entry.getId(), startDate,
                                 startDate.plus(Period.between(entry.getStartDate(),
                                     entry.getEndDate())), entry.getTitle(),
                                 entry.getDescription()))
                         .toList());
             } else {
-                calendarDetails.add(new CalendarEntryDetailDto(entry.getStartDate(), entry.getEndDate(), entry.getTitle(), entry.getDescription()));
+                calendarDetails.add(new CalendarEntryDetailDto(entry.getId(), entry.getStartDate(), entry.getEndDate(), entry.getTitle(), entry.getDescription()));
             }
         }
 

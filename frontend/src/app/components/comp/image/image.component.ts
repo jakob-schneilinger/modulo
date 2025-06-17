@@ -167,6 +167,10 @@ export class ImageComponent extends BaseComponent<Image> implements OnInit, OnDe
       const { x, y } = this.relMousePos(ev);
       this.ctx.beginPath();
       this.ctx.moveTo(x, y);
+
+      this.ctx.fillStyle = this.color;
+      this.ctx.strokeStyle = this.color;
+      this.ctx.lineWidth = this.brushSize;
     }
   }
 
@@ -190,10 +194,6 @@ export class ImageComponent extends BaseComponent<Image> implements OnInit, OnDe
     }
 
     if (this.drawing) {
-      this.ctx.fillStyle = this.color;
-      this.ctx.strokeStyle = this.color;
-      this.ctx.lineWidth = this.brushSize;
-
       const { x, y } = this.relMousePos(event);
       this.ctx.lineTo(x, y);
       this.ctx.stroke();

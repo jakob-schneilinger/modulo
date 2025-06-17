@@ -11,8 +11,7 @@ CREATE TABLE IF NOT EXISTS components (
 
 CREATE TABLE IF NOT EXISTS calendar_content (
     id INT NOT NULL PRIMARY KEY,
-    ical_url VARCHAR(255),
-    etag VARCHAR(63)
+    ical_url VARCHAR(255)
 );
 
 CREATE TABLE IF NOT EXISTS calendar_entries (
@@ -22,7 +21,8 @@ CREATE TABLE IF NOT EXISTS calendar_entries (
     end_date DATE,
     description TEXT,
     title VARCHAR(255),
-    rrule TEXT
+    rrule TEXT,
+    from_task BOOLEAN
 );
 
 CREATE TABLE IF NOT EXISTS task_content (

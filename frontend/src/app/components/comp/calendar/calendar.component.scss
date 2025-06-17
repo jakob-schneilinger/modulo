@@ -52,11 +52,7 @@ button.buttonDel.Selected {
   margin-bottom: 6px;
   background-color: #f9f9f9;
   transition: background-color 0.2s ease;
-  overflow: hidden;
-}
 
-.calendar-entry:hover {
-  background-color: rgba(240, 128, 128, 0.3);
 }
 
 .description {
@@ -114,4 +110,25 @@ label {
   font-size: 0.9em;
   color: #666;
 }
+
+.point {
+  cursor: pointer;
+}
+
+.dropdown-menu {
+  z-index: 999;
+  padding: 0.1rem 0;
+}
+
+.dropdown-menu .dropdown-item {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  margin: 0.1rem 0;
+  font-size: 0.875rem;
+}
+
+.dropdown-menu .dropdown-divider {
+  margin: 0rem 0;
+}
+
 

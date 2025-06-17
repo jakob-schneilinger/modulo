@@ -1,5 +1,6 @@
 package at.ac.tuwien.sepr.groupphase.backend.validation;
 
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.TaskDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.TaskUpdateDto;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Component;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Task;
@@ -7,7 +8,6 @@ import at.ac.tuwien.sepr.groupphase.backend.exception.NotFoundException;
 import at.ac.tuwien.sepr.groupphase.backend.repository.ComponentRepository;
 import at.ac.tuwien.sepr.groupphase.backend.repository.PermissionRepository;
 import at.ac.tuwien.sepr.groupphase.backend.service.UserService;
-import at.ac.tuwien.sepr.groupphase.backend.service.componentservice.ComponentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +28,19 @@ public class TaskValidator extends ComponentValidator  {
     public TaskValidator(ComponentRepository componentRepository, UserService userService, PermissionRepository permissionRepository) {
         super(componentRepository, userService, permissionRepository);
         this.componentRepository = componentRepository;
+    }
+
+    public void validateForCalendar(TaskDetailDto taskUpdateDto) {
+        LOG.trace("validateForCalendar({})", taskUpdateDto);
+        List<String> errors = new ArrayList<>();
+
+        if (taskUpdateDto.endDate() == null) {
+            errors.add("due date is required");
+        }
+
+        if (!errors.isEmpty()) {
+            throw new at.ac.tuwien.sepr.groupphase.backend.exception.ValidationException("Validation for inserting a task into a calendar", errors);
+        }
     }
 
     public void validateTaskForUpdate(TaskUpdateDto taskUpdateDto, Component task, long userId) {

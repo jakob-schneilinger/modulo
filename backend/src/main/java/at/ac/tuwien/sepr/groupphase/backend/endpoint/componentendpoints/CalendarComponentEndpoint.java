@@ -2,7 +2,10 @@ package at.ac.tuwien.sepr.groupphase.backend.endpoint.componentendpoints;
 
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.UrlDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.CalendarCreateDto;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.CalendarEntryDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDetailDto;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.TaskDetailDto;
+import at.ac.tuwien.sepr.groupphase.backend.entity.components.CalendarEntry;
 import at.ac.tuwien.sepr.groupphase.backend.service.componentservice.CalendarService;
 import jakarta.annotation.security.PermitAll;
 import jakarta.validation.Valid;
@@ -109,5 +112,39 @@ public class CalendarComponentEndpoint {
     ) {
         return new ResponseEntity<>(calendarService.checkAndUpdateCalendar(id), HttpStatus.OK);
     }
+
+    /**
+     * Adds a task to an existing calendar.
+     *
+     * @param id the id of the calendar to witch the task should be added
+     * @param dto the dto of the task that should be added
+     * @return the updated calendar
+     */
+    @PermitAll
+    @PostMapping("/createEntry/{id}")
+    public ResponseEntity<ComponentDetailDto> createEntryFromTask(
+        @PathVariable(name = "id") long id,
+        @RequestBody TaskDetailDto dto
+    ) {
+        return new ResponseEntity<>(calendarService.addTaskToCalendar(id, dto), HttpStatus.OK);
+    }
+
+    /**
+     * Delete the entry with the given id from the calendar.
+     *
+     * @param id the id of the calendar
+     * @param entry the entry to be removed
+     * @return the updated calendar
+     */
+    @PermitAll
+    @PutMapping("/delete/{id}")
+    public ResponseEntity<ComponentDetailDto> deleteEntry(
+        @PathVariable(name = "id") long id,
+        @RequestBody CalendarEntryDetailDto entry
+    ) {
+        return new ResponseEntity<>(calendarService.deleteEntry(id, entry), HttpStatus.OK);
+    }
+
+
 
 }
