@@ -1,8 +1,10 @@
 package at.ac.tuwien.sepr.groupphase.backend.service.componentservice.impl;
 
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.CalendarCreateDto;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.CalendarEntryDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.CalendarUpdateDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDetailDto;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.TaskDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.CalendarEntry;
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.MyCalendar;
 import at.ac.tuwien.sepr.groupphase.backend.exception.ConflictException;
@@ -12,10 +14,11 @@ import at.ac.tuwien.sepr.groupphase.backend.mapper.MappingDepth;
 import at.ac.tuwien.sepr.groupphase.backend.repository.ComponentRepository;
 import at.ac.tuwien.sepr.groupphase.backend.service.componentservice.CalendarService;
 import at.ac.tuwien.sepr.groupphase.backend.service.componentservice.ComponentService;
+import at.ac.tuwien.sepr.groupphase.backend.service.componentservice.TaskService;
+import at.ac.tuwien.sepr.groupphase.backend.validation.TaskValidator;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
@@ -47,8 +50,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -56,7 +57,7 @@ import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 
 @Service
@@ -65,6 +66,8 @@ public class CalendarServiceImpl implements CalendarService {
     private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private final ComponentRepository componentRepository;
     private final ComponentService componentService;
+    private final TaskService taskService;
+    private final TaskValidator componentValidator;
 
     @Value("${global.location.calendar}")
     private String icsPath;
@@ -72,10 +75,12 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Autowired
     public CalendarServiceImpl(ComponentRepository componentRepository,
-                               ComponentService componentService) {
+                               ComponentService componentService, TaskService taskService, TaskValidator componentValidator) {
         this.componentRepository = componentRepository;
         this.componentService = componentService;
+        this.taskService = taskService;
         this.client = HttpClient.newBuilder().build();
+        this.componentValidator = componentValidator;
     }
 
 
@@ -104,15 +109,12 @@ public class CalendarServiceImpl implements CalendarService {
             throw new ConflictException("The server could not be reached", Arrays.asList(e.getMessage()));
         }
 
-        String etag = null;
         storeIcs(id, data);
         MyCalendar calendar = getCalendar(id);
         Calendar ical = icalBuilder(data);
-        etag = calendarHash(ical);
         calendar.getEntries().clear();
         calendar.getEntries().addAll(getCalendarEntries(ical));
         calendar.setIcalUrl(url);
-        calendar.setEtag(etag);
         componentService.setComponent(new CalendarUpdateDto(id, null, null, null, null, null), calendar);
         return calendar.accept(MappingDepth.SHALLOW);
     }
@@ -127,7 +129,6 @@ public class CalendarServiceImpl implements CalendarService {
             Calendar ical = icalBuilder(file.getBytes());
             if (calendar.getIcalUrl() != null) {
                 calendar.setIcalUrl(null);
-                calendar.setEtag(null);
             }
             calendar.getEntries().clear();
             calendar.getEntries().addAll(getCalendarEntries(ical));
@@ -161,10 +162,9 @@ public class CalendarServiceImpl implements CalendarService {
     @Transactional
     public ComponentDetailDto checkAndUpdateCalendar(long id) {
         MyCalendar calendar = getCalendar(id);
-        if (calendar.getEtag() == null || calendar.getIcalUrl() == null) {
+        if (calendar.getIcalUrl() == null) {
             throw new NotFoundException("No Link has been given for this calendar!");
         }
-        String etag = calendar.getEtag();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(calendar.getIcalUrl()))
             .GET()
             .build();
@@ -182,31 +182,42 @@ public class CalendarServiceImpl implements CalendarService {
         }
 
         Calendar ical = icalBuilder(data);
-        String hash = calendarHash(ical);
-        if (hash.equals(etag)) {
-            return null;
-        }
         storeIcs(calendar.getId(), data);
+        List<CalendarEntry> tasks = calendar.getEntries().stream().filter(e -> e.isFromTask()).toList();
         calendar.getEntries().clear();
         calendar.getEntries().addAll(getCalendarEntries(ical));
-        calendar.setEtag(hash);
+        calendar.getEntries().addAll(tasks);
         componentService.setComponent(new CalendarUpdateDto(id, null, null, null, null, null), calendar);
         return calendar.accept(MappingDepth.SHALLOW);
     }
 
-    private String calendarHash(Calendar cal) {
-        try {
-            String hash = cal.getComponents(Component.VEVENT).stream()
-                .map(ev -> ev.getUid().orElse(null)
-                    + ev.getProperty(Property.LAST_MODIFIED).toString())             // … SEQUENCE bump
-                .sorted()                                  // order-insensitive
-                .collect(Collectors.joining(";"));
-            MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-            messageDigest.update(hash.getBytes());
-            return new String(messageDigest.digest());
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
+    @Override
+    @Transactional
+    public ComponentDetailDto addTaskToCalendar(long id, TaskDetailDto dto) {
+        componentValidator.validateForCalendar(dto);
+        CalendarEntry toAdd = new CalendarEntry();
+        MyCalendar calendar = getCalendar(id);
+        toAdd.setTitle(dto.name());
+        toAdd.setStartDate(dto.startDate() != null ?  dto.startDate() : dto.endDate());
+        toAdd.setEndDate(dto.endDate());
+        toAdd.setFromTask(true);
+        List<CalendarEntry> entries = calendar.getEntries();
+        entries.add(toAdd);
+        calendar.setEntries(entries);
+        componentService.setComponent(new CalendarUpdateDto(id, null, null, null, null, null), calendar);
+        return calendar.accept(MappingDepth.SHALLOW);
+    }
+
+    @Transactional
+    @Override
+    public ComponentDetailDto deleteEntry(long id, CalendarEntryDetailDto dto) {
+        MyCalendar calendar = getCalendar(id);
+        List<CalendarEntry> entries = calendar.getEntries();
+        entries = entries.stream().filter(e -> e.getId() != dto.id()).toList();
+        calendar.getEntries().clear();
+        calendar.getEntries().addAll(entries);
+        componentService.setComponent(new CalendarUpdateDto(id, null, null, null, null, null), calendar);
+        return calendar.accept(MappingDepth.SHALLOW);
     }
 
     private void storeIcs(long calendarId, byte[] file) {
@@ -294,14 +305,6 @@ public class CalendarServiceImpl implements CalendarService {
     private MyCalendar getCalendar(long id) {
         at.ac.tuwien.sepr.groupphase.backend.entity.components.Component component = componentRepository.findById(id).orElseThrow(() -> new NotFoundException("Calendar with given ID does not exist"));
         MyCalendar calendar = (MyCalendar) component;
-
         return calendar;
-
-        /*
-        return componentRepository.findById(id)
-            .filter(c -> c instanceof MyCalendar)
-            .map(c -> (MyCalendar) c)
-            .orElseThrow(() -> new NotFoundException("Calendar with given ID does not exist"));
-        */
     }
 }

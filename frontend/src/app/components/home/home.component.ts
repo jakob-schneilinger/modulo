@@ -8,6 +8,7 @@ import {
   Calendar,
   isType,
   isContainer,
+  CalendarEntry
 } from "../../dtos/component";
 import { ComponentService } from "../../services/component.service";
 import { DragService } from "../../interaction-services/drag.service";
@@ -189,6 +190,58 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
   }
 
+  createTaskFromCalendar(id: number){
+    const width = Math.floor(gridVar.columns / 2);
+    const height = Math.floor(gridVar.columns / 3);
+    const {column, row} = this.findFirstFreeSpace(width, height);
+
+    const newTask: Task = {
+      children: [],
+      column,
+      completed: false,
+      height,
+      name: "New Task",
+      row,
+      repeating: false,
+      startDate: undefined,
+      type: "task",
+      width,
+      parentId: this.component.id,
+    };
+
+    this.compService.createTaskFromCalendar(newTask, id).subscribe({
+      next: (created) => this.addChild(created),
+      error: (err) => console.error(err),
+    });
+
+  }
+
+  createTaskFromCalendarEntry(entry: CalendarEntry){
+    const width = Math.floor(gridVar.columns / 4);
+    const height = Math.floor(gridVar.columns / 3);
+    const {column, row} = this.findFirstFreeSpace(width, height);
+
+    const newTask: Task = {
+      children: [],
+      column,
+      completed: false,
+      height,
+      name: entry.title,
+      row,
+      repeating: false,
+      startDate: entry.startDate,
+      type: "task",
+      width,
+      parentId: this.component.id,
+      endDate: entry.endDate ? entry.endDate : undefined
+    };
+
+    this.compService.createTask(newTask).subscribe({
+      next: (created) => this.addChild(created),
+      error: (err) => console.error(err),
+    });
+  }
+
   addChild(comp: Comp) {
     this.component.children.push(comp);
     this.component = { ...this.component };
@@ -361,16 +414,29 @@ export class HomeComponent implements OnInit, OnDestroy {
   stopDragging(event: MouseEvent | TouchEvent) {
     if (!this.dragging) return;
     this.dragging = false;
-    this.dragService.stopDragging(event, <Container>this.component, (container, targetContainer) => {
+    this.dragService.stopDragging(event, <Container>this.component, (container, targetComponent) => {
       //container.parentId = targetContainer.id;
-      this.compService.updatePosAndSize({ ...container, parentId: targetContainer.id } as any).subscribe({
-        next: (value) => {
-          console.log("Drag/Resize success");
-        },
-        error: (err) => {
-          console.error("Error on dragging", err);
-        },
-      });
+
+      if (targetComponent.type === "calendar") {
+        this.compService.addTaskToCalendar(container, targetComponent.id).subscribe({
+          next: (value) => {
+            this.findAndPatch(this.component.children, value);
+            console.log("Added Task to Calendar");
+          },
+          error: (err) => {
+            console.error("Failed  to add Task to Calendar", err);
+          },
+        })
+      } else {
+        this.compService.updatePosAndSize({ ...container, parentId: targetComponent.id } as any).subscribe({
+          next: (value) => {
+            console.log("Drag/Resize success");
+          },
+          error: (err) => {
+            console.error("Error on dragging", err);
+          },
+        });
+      }
     });
   }
 
@@ -552,6 +618,12 @@ export class HomeComponent implements OnInit, OnDestroy {
         });
       },
     });
+
+    this.subscriptions.push(
+      this.eventService.calendarToTask$.subscribe(({ entry }) => {
+        this.createTaskFromCalendarEntry(entry);
+      })
+    )
 
     this.subscriptions.push(
       this.eventService.widthChanged$.subscribe(({ component }) => {

@@ -1,16 +1,10 @@
 package at.ac.tuwien.sepr.groupphase.backend.service.componentservice;
 
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.CalendarCreateDto;
-import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.CalendarDetailDto;
-import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.CalendarUpdateDto;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.CalendarEntryDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDetailDto;
-import at.ac.tuwien.sepr.groupphase.backend.entity.components.MyCalendar;
-import net.fortuna.ical4j.data.ParserException;
+import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.TaskDetailDto;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.management.ServiceNotFoundException;
-import java.io.IOException;
-import java.net.UnknownServiceException;
 
 public interface CalendarService {
 
@@ -53,4 +47,24 @@ public interface CalendarService {
      * @return a CalendarDetailDto that reflects the remote changes
      */
     ComponentDetailDto checkAndUpdateCalendar(long id);
+
+
+    /**
+     * Adds the task to the calendar specified in id.
+     *
+     * @param id the id of the calendar to which the task should be added
+     * @param dto the task to add to the calendar
+     * @return the updated calendar
+     */
+    ComponentDetailDto addTaskToCalendar(long id, TaskDetailDto dto);
+
+    /**
+     * Delete the entry from the calendar.
+     *
+     * @param id the calendar from witch to delete
+     * @param dto the entry to delete
+     * @return the updated calendar
+     */
+    ComponentDetailDto deleteEntry(long id, CalendarEntryDetailDto dto);
 }
+

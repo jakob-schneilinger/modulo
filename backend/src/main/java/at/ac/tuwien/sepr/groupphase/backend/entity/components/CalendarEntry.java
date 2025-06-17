@@ -38,6 +38,9 @@ public class CalendarEntry {
 
     private String rrule;
 
+    @Column(name = "from_task")
+    private boolean fromTask;
+
 
 
 }

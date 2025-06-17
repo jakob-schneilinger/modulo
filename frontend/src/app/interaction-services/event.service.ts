@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Subject } from "rxjs";
-import { Component as Comp } from "../dtos/component";
+import {CalendarEntry, Component as Comp} from "../dtos/component";
 
 @Injectable({
   providedIn: "root",
@@ -12,9 +12,14 @@ export class EventService {
   deleteComponent$ = new Subject<{ component: Comp }>();
   taskChanged$ = new Subject<{ component: Comp }>();
   taskRepeated$ = new Subject<{ component: Comp }>();
+  calendarToTask$ = new Subject<{ entry: CalendarEntry }>();
 
   emitWidthChanged(component: Comp) {
     this.widthChanged$.next({ component });
+  }
+
+  emitTaskCreate(entry: CalendarEntry) {
+    this.calendarToTask$.next({ entry });
   }
 
   emitTextChanged(component: Comp) {

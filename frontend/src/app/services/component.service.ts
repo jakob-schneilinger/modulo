@@ -11,8 +11,9 @@ import {
   Label,
   CalendarCreate,
   Calendar,
+  CalendarEntry,
   Video,
-  VideoCreate,
+  VideoCreate
 } from "../dtos/component";
 import { Observable } from "rxjs";
 import { HttpClient } from "@angular/common/http";
@@ -39,6 +40,10 @@ export class ComponentService {
   updateText(component: Partial<Text>): Observable<Text> {
     console.log("Updated Text Component: ", component);
     return this.httpClient.patch<Text>(this.componentBaseUri + "/text", component);
+  }
+
+  deleteEntry(id: number, entry: CalendarEntry) {
+    return this.httpClient.put<Calendar>(this.componentBaseUri + "/calendar/delete/" + id, entry);
   }
 
   createTask(task: Task): Observable<Task> {
@@ -88,6 +93,14 @@ export class ComponentService {
   createCalendar(calendar: CalendarCreate) {
     console.log("Create calendar: ", calendar);
     return this.httpClient.post<Calendar>(this.componentBaseUri + "/calendar", calendar);
+  }
+
+  createTaskFromCalendar(task: Task, id: number): Observable<Task> {
+    return this.httpClient.post<Task>(this.componentBaseUri+"/calendar/createTask/"+id, task);
+  }
+
+  addTaskToCalendar(task: Component, id: number): Observable<Calendar> {
+    return this.httpClient.post<Calendar>(this.componentBaseUri+"/calendar/createEntry/"+id, task);
   }
 
   getCalendarContent(calendar: Calendar) {

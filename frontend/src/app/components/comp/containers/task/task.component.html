@@ -57,8 +57,8 @@
         <button class="buttonDel hide-in-read-only-mode" style="font-size:10px" (click)="deleteEndDate()"><i class="bi bi-trash-fill"></i>
         </button>
         <button title="Repeat this task after deadline!" class="buttonDel hide-in-read-only-mode" style="font-size:12px"
-                (click)="setRepeating()" [class.Selected]="self.repeating" *ngIf="isNotChildOfTask">
-          <i class="bi bi-arrow-clockwise"> cached</i>
+                (click)="setRepeating()" [class.Selected]="self.repeating">
+          <i class="bi bi-arrow-clockwise"></i>
         </button>
       </ng-container>
     </div>

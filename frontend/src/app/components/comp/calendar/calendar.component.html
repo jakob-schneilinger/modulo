@@ -1,5 +1,5 @@
 <div #previewCard class="preview-card" [attr.data-preview-id]="self.id"></div>
-<div #card  class="borders card p-2"
+<div #card  class="borders card p-2" [attr.data-calendar-id]="self.id"
      [attr.data-cy]="'child-calendar'" [ngClass]="{'read-only-mode': readonlyMode}">
   @if (inEditMode) {
     <!-- Drag & Resize -->
@@ -52,7 +52,19 @@
 
         @for (entry of entries; track $index) {
           <div class="calendar-entry">
-            <div class="title">{{ entry.title }}</div>
+            <div style="display: flex; align-items: center;justify-content: space-between;" >
+              <div class="title">{{ entry.title }}</div>
+              <div class="three-dots dropdown point">
+                <i class="bi bi-three-dots text-secondary" data-bs-toggle="dropdown" aria-expanded="true" data-cy="manage-dropdown"></i>
+
+                <ul class="dropdown-menu">
+                  <li>
+                    <a class="dropdown-item" (click)="createTask(entry)"> Create a Task form this entry</a>
+                    <a class="dropdown-item" (click)="deleteEntry(entry)"> Delete this entry from the calendar</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
             <div class="date">{{ formatDate(entry.startDate, entry.endDate) }}</div>
             <div class="description">{{ entry.description }}</div>
           </div>
