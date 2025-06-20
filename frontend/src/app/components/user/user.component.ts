@@ -6,6 +6,7 @@ import { FriendDto, User, UserUpdateDto } from "src/app/dtos/user";
 import { UserService } from "src/app/services/user.service";
 import { AuthService } from "../../services/auth.service";
 import { NotificationService } from "src/app/services/notification.service";
+import { Globals } from "../../global/globals";
 
 @Component({
   selector: "app-user",
@@ -52,7 +53,8 @@ export class UserComponent implements OnInit {
     private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute,
-    private notification: NotificationService
+    private notification: NotificationService,
+    private globals: Globals
   ) {
     this.updateForm = this.formBuilder.group({
       displayName: [],
@@ -177,7 +179,8 @@ export class UserComponent implements OnInit {
       const file = input.files.item(0);
 
       if (file.size > 1 * 1000 * 1000) {
-        console.warn("Avatar bigger than 1mb");
+        this.notification.warn("Image to big!", "The avatar image can not be bigger than 1\xa0MB.", 5000)
+        console.warn();
         input.value = "";
         return;
       }
@@ -230,8 +233,31 @@ export class UserComponent implements OnInit {
     }
   }
 
+  shareLink: boolean = false;
+
+  copyLink() {
+    this.shareLink = true;
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(this.getLink())
+        .then(() => {
+          this.notification.success("Share Link", "Successfully copied link to clipboard!", 5000)
+        })
+        .catch(() => {});
+    }
+  }
+
+  getLink() {
+    return `${this.globals.shareLinkUri}/${this.user.username}`;
+  }
+
+  selectInput(event: MouseEvent) {
+    const input = event.target as HTMLInputElement;
+    input.select();
+  }
+
   addAsFriend() {
     if (this.friendInfo) {
+      this.router.navigate(["/friends"])
       return;
     }
     this.friendInfo = { accepted: false, email: "", requesterName: "", username: "" };

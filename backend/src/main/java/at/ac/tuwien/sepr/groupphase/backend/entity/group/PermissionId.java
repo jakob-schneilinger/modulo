@@ -9,16 +9,26 @@ import lombok.Setter;
 import java.io.Serializable;
 import java.util.Objects;
 
+/**
+ * Represents the permission id entity.
+ */
 @Embeddable
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class PermissionId implements Serializable {
+
+    /**
+     * Group part of the id.
+     */
     private long groupId;
+
+    /**
+     * Component part of the id.
+     */
     private long componentId;
 
-    // equals and hashCode unbedingt überschreiben!
     @Override
     public boolean equals(Object o) {
         if (this == o) {

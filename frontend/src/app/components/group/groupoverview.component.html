@@ -2,7 +2,10 @@
 
   <div class="row align-self-center m-4 pt-2">
     <div class="flex-row d-flex justify-content-between">
-      <h1>Your Groups:</h1>
+      <div class="col">
+        <h1>Groups</h1>
+        <span>🤝</span>
+      </div>
 
       <button class="primary" (click)="createGroup()" >
         <i class="bi bi-plus-square-fill"></i>
@@ -74,7 +77,7 @@
       <div class="modal-footer">
         <button type="button" class="btn" data-bs-dismiss="modal">Close</button>
         <button type="button" class="btn primary" (click)="modalAction()"
-                data-bs-dismiss="modal" data-cy="home-board-delete-modal-confirm">{{ capitalizeFirstLetter(this.modalMode) }}</button>
+                data-bs-dismiss="modal" data-cy="group-overview-delete-modal-confirm">{{ capitalizeFirstLetter(this.modalMode) }}</button>
       </div>
     </div>
   </div>

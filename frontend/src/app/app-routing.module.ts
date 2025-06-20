@@ -13,15 +13,16 @@ import {HomepageComponent} from "./components/homepage/homepage.component";
 import {GroupoverviewComponent} from "./components/group/groupoverview.component";
 import {FriendlistComponent} from "./components/friendlist/friendlist.component";
 import {GroupdetailComponent} from "./components/group/detail/groupdetail.component";
+import {TemplateComponent} from "./components/template/template.component";
 
 const routes: Routes = [
-  //{ path: "", component: HomeComponent, canActivate: [AuthGuard] },
   { path: "component/:id", component: HomeComponent, canActivate: [AuthGuard] },
   { path: "login", component: LoginComponent },
   { path: "signup", component: CreateComponent },
   { path: "user/:name", component: UserComponent, canActivate: [AuthGuard] },
   { path: "friends", component: FriendlistComponent, canActivate: [AuthGuard] },
   { path: "", component: HomepageComponent, canActivate: [AuthGuard] },
+  { path: "template", component: TemplateComponent, canActivate: [AuthGuard] },
   { path: "group", component: GroupoverviewComponent, canActivate: [AuthGuard] },
   { path: "group/:id", component: GroupdetailComponent, canActivate: [AuthGuard] },
   { path: "**", component: NotFoundComponent, canActivate: [AuthGuard] },

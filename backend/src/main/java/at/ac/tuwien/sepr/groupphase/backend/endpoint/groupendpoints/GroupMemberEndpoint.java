@@ -2,7 +2,7 @@ package at.ac.tuwien.sepr.groupphase.backend.endpoint.groupendpoints;
 
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.group.GroupMemberDto;
 import at.ac.tuwien.sepr.groupphase.backend.service.groupservice.GroupMemberService;
-import jakarta.annotation.security.PermitAll;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,7 +28,6 @@ public class GroupMemberEndpoint {
      * @param dto member and group info
      * @return void
      */
-    @PermitAll //TODO: fix this
     @PostMapping()
     public ResponseEntity<Void> addGroupMember(@RequestBody GroupMemberDto dto) {
         service.addGroupMember(dto);
@@ -41,7 +40,6 @@ public class GroupMemberEndpoint {
      * @param dto member and group info
      * @return void
      */
-    @PermitAll //TODO: fix this
     @DeleteMapping()
     public ResponseEntity<Void> deleteGroupMember(@RequestBody GroupMemberDto dto) {
         service.deleteGroupMember(dto);
@@ -54,7 +52,6 @@ public class GroupMemberEndpoint {
      * @param id of group to leave
      * @return void
      */
-    @PermitAll // TODO: fix this
     @PostMapping("leave/{id}")
     public ResponseEntity<Void> leaveGroup(@PathVariable("id") long id) {
         service.leaveGroup(id);

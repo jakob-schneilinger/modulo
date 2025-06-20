@@ -77,12 +77,17 @@ th {
 }
 
 .add-child-header{
+  overflow: hidden;
   padding-left: 5%;
   cursor: default;
 }
 
 .add-child-items {
   cursor: pointer;
+}
+
+.dropdown-menu {
+  max-width: 18rem;
 }
 
 .preview-board {
@@ -146,6 +151,43 @@ th {
     &:hover {
       background-color: $nav-bg;
     }
+  }
+}
+
+/* Custom large modal size */
+.template-modal .modal-dialog {
+  width: 75vw;
+  max-width: none;
+  height: 75vh;
+  margin: 5vh auto 0 auto;
+  display: flex;
+  align-items: flex-start;
+}
+
+.template-modal .modal-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.template-modal .modal-body {
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .template-modal .modal-dialog {
+    width: 85vw;
+    height: 85vh;
+  }
+}
+
+@media (max-width: 768px) {
+  .template-modal .modal-dialog {
+    width: 95vw;
+    height: 95vh;
+    margin: 10px auto;
   }
 }
 

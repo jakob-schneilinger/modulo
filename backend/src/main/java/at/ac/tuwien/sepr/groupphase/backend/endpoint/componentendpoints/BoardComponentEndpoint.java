@@ -4,7 +4,7 @@ import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardCreateD
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardUpdateDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.service.componentservice.BoardService;
-import jakarta.annotation.security.PermitAll;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +35,6 @@ public class BoardComponentEndpoint {
      * @param board information to add
      * @return component detail of created board
      */
-    @PermitAll // TODO: fix this
     @PostMapping("")
     public ResponseEntity<ComponentDetailDto> createBoardComponent(
             @RequestBody BoardCreateDto board) {
@@ -48,7 +47,6 @@ public class BoardComponentEndpoint {
      * @param board information to update
      * @return component detail of updated board
      */
-    @PermitAll // TODO: fix this
     @PatchMapping("")
     public ResponseEntity<ComponentDetailDto> updateBoardComponent(
             @RequestBody BoardUpdateDto board) {

@@ -38,6 +38,11 @@ button.buttonDel.Selected {
 
 .no-cal-msg {
   padding: 2rem 1rem;
+
+  & span {
+    word-break: break-all;
+  }
+
 }
 
 .no-entry-msg {
@@ -129,6 +134,10 @@ label {
 
 .dropdown-menu .dropdown-divider {
   margin: 0rem 0;
+}
+
+.url-input, .set-file-btn {
+  max-width: 100%;
 }
 
 

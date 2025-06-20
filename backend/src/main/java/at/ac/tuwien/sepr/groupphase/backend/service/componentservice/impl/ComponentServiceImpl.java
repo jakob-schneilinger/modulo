@@ -174,14 +174,14 @@ public class ComponentServiceImpl implements ComponentService {
         return rootComponent;
     }
 
-    public void fireComponentUpdateEvent(Long rootId, Long selfId) {
+    private void fireComponentUpdateEvent(Long rootId, Long selfId) {
         LOG.info("Sending update message to listening clients");
 
         var dto = new ComponentUpdateWsDto(rootId, selfId, ComponentUpdateWsType.changed);
         updateNotifier.notifyComponentUpdate(dto);
     }
 
-    public void fireComponentDeleteEvent(Long rootId, Long selfId) {
+    private void fireComponentDeleteEvent(Long rootId, Long selfId) {
         LOG.info("Sending delete message to listening clients");
 
         var dto = new ComponentUpdateWsDto(rootId, selfId, ComponentUpdateWsType.deleted);

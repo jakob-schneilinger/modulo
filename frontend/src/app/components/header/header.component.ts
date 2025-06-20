@@ -39,9 +39,9 @@ export class HeaderComponent implements OnInit {
   }
 
   ngOnInit() {
-    const user = this.authService.getLoggedInUser();
-    if (!user) return;
+    if (!this.authService.isLoggedIn()) return;
 
+    const user = this.authService.getLoggedInUser();
     this.userService.getAvatarSrc(user).subscribe({
       next: (src) => (this.profileImgSrc = src),
       error: (e) => console.error(e),
@@ -72,8 +72,13 @@ export class HeaderComponent implements OnInit {
 
     window.addEventListener("board-delete", (event) => {
       const { id, name } = (event as any).detail;
-      const i = this.roots.findIndex((i) => i.id == id);
-      if (i >= 0) this.roots.splice(i, 1);
+      let i = this.roots.findIndex((i) => i.id == id);
+      if (i == -1) {
+        i = this.sharedRoots.findIndex((i) => i.id == id);
+        if (i >= 0) this.sharedRoots.splice(i, 1);
+      } else {
+        if (i >= 0) this.roots.splice(i, 1);
+      }
     });
 
     window.addEventListener("board-created", (event) => {

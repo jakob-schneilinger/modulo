@@ -30,11 +30,6 @@ export class ImageComponent extends BaseComponent<Image> implements OnInit, OnDe
     if (v) this._canvas = v;
   }
 
-  private _brushSizeInput: ElementRef<HTMLInputElement>;
-  @ViewChild("canvas") set brushSizeInput(v: ElementRef<HTMLInputElement>) {
-    if (v) this._brushSizeInput = v;
-  }
-
   sketching: boolean = false;
   brushSize: number = 4;
   colors: string[] = ["black", "red", "green", "blue", "yellow", "white"];
@@ -102,7 +97,10 @@ export class ImageComponent extends BaseComponent<Image> implements OnInit, OnDe
         this.inputActive = false;
         this.showImage(image);
       },
-      error: (e) => console.error(e),
+      error: (e) => {
+        this.notification.warn("Image incompatible!", "Check that your image is not bigger than 4\xa0MB and has the correct file type (png, jpg or gif).", 5000)
+        console.error(e)
+      },
     });
   }
 

@@ -11,6 +11,11 @@
   grid-auto-flow: row dense;
   overflow: visible;
   height: 100%;
+
+  & ng-container {
+    min-width: 0;
+  }
+
 }
 
 h5 {

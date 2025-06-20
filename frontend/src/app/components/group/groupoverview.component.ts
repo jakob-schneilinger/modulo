@@ -53,10 +53,10 @@ export class GroupoverviewComponent implements OnInit {
   modalAction() {
     if (this.modalMode == "delete") {
       console.log("Delete Group");
-      this.groupService.deleteGroup(this.modalGroup?.id);
+      this.groupService.deleteGroup(this.modalGroup?.id).subscribe();
     } else {
       console.log("Leave Group");
-      this.groupService.leaveGroup(this.modalGroup?.id);
+      this.groupService.leaveGroup(this.modalGroup?.id).subscribe();
     }
     this.groups = this.groups.filter((group) => group.id !== this.modalGroup.id);
   }

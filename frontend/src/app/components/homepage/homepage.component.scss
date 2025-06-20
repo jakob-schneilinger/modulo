@@ -44,3 +44,11 @@ div.dropdown-menu {
   background-color: #eee;
 }
 
+h1{
+  display: inline;
+
+  + span {
+    font-size: 2rem;
+  }
+}
+

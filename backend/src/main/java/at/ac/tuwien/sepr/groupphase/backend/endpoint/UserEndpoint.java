@@ -32,7 +32,7 @@ import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.user.UserUpdateDto;
 import at.ac.tuwien.sepr.groupphase.backend.service.AuthService;
 import at.ac.tuwien.sepr.groupphase.backend.service.UserService;
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.security.PermitAll;
+
 
 //@CrossOrigin
 @RestController
@@ -60,13 +60,11 @@ public class UserEndpoint {
         }
     }
 
-    @PermitAll
     @PostMapping("register")
     public ResponseEntity<JwtResponseDto> register(@RequestBody UserCreateDto userCreateDto) {
         return ResponseEntity.ok(new JwtResponseDto(authService.create(userCreateDto)));
     }
 
-    @PermitAll // TODO: don't permit all?
     @GetMapping("{username}")
     public ResponseEntity<UserDto> getUser(
             @PathVariable(name = "username") String username,
@@ -74,7 +72,6 @@ public class UserEndpoint {
         return ResponseEntity.ok(userService.get(username));
     }
 
-    @PermitAll // TODO: don't permit all?
     @PatchMapping("{username}")
     public ResponseEntity<UserDto> updateUser(
             @PathVariable(name = "username") String username,
@@ -84,7 +81,6 @@ public class UserEndpoint {
         return ResponseEntity.ok().build();
     }
 
-    @PermitAll // TODO: don't permit all?
     @DeleteMapping("{username}")
     public ResponseEntity<Void> deleteUser(
             @PathVariable(name = "username") String username,
@@ -93,7 +89,6 @@ public class UserEndpoint {
         return ResponseEntity.ok().build();
     }
 
-    @PermitAll // TODO: don't permit all?
     @GetMapping("{username}/avatar")
     public ResponseEntity<FileSystemResource> getAvatar(@PathVariable(name = "username") String username) {
         File image = new File(avatarPath + username);
@@ -107,7 +102,6 @@ public class UserEndpoint {
         return ResponseEntity.ok().headers(headers).body(resource);
     }
 
-    @PermitAll // TODO: don't permit all?
     @PostMapping("{username}/avatar")
     public ResponseEntity<Void> setAvatar(
             @PathVariable(name = "username") String username,
@@ -120,14 +114,12 @@ public class UserEndpoint {
         return ResponseEntity.ok().build();
     }
 
-    @PermitAll // TODO: don't permit all?
     @DeleteMapping("{username}/avatar")
     public ResponseEntity<Void> removeAvatar(@PathVariable(name = "username") String username) {
         userService.removeAvatar(username);
         return ResponseEntity.ok().build();
     }
 
-    @PermitAll
     @PostMapping("{username}/friends")
     public ResponseEntity<Void> requestFriendship(@PathVariable(name = "username") String username,
                                                   @RequestParam(name = "friendName") String friendName) {
@@ -135,7 +127,6 @@ public class UserEndpoint {
         return ResponseEntity.ok().build();
     }
 
-    @PermitAll
     @PutMapping("{username}/friends")
     public ResponseEntity<Void> acceptFriendship(@PathVariable(name = "username") String username,
                                                  @RequestParam(name = "friendName") String friendName) {
@@ -143,7 +134,6 @@ public class UserEndpoint {
         return ResponseEntity.ok().build();
     }
 
-    @PermitAll
     @DeleteMapping("{username}/friends")
     public ResponseEntity<Void> deleteFriendship(@PathVariable(name = "username") String username,
                                                  @RequestParam(name = "friendName") String friendName) {
@@ -151,21 +141,18 @@ public class UserEndpoint {
         return ResponseEntity.ok().build();
     }
 
-    @PermitAll
     @GetMapping("{username}/friends")
     public ResponseEntity<List<FriendDto>> getAllFriends(@PathVariable(name = "username") String username,
                                                          @RequestParam(name = "onlyfriends", defaultValue = "false") boolean onlyFriends) {
         return ResponseEntity.ok(friendService.getAllFriends(username, onlyFriends));
     }
 
-    @PermitAll
     @RequestMapping(value = "{username}/friends/isfriend", method = RequestMethod.GET)
     public ResponseEntity<Boolean> isFriend(@PathVariable(name = "username") String username,
                                             @RequestParam(name = "friendName") String friendName) {
         return ResponseEntity.ok(friendService.isFriend(username, friendName));
     }
 
-    @PermitAll
     @RequestMapping(value = "{username}/friends/friend", method = RequestMethod.GET)
     public ResponseEntity<FriendDto> getFriend(@PathVariable(name = "username") String username,
                                             @RequestParam(name = "friendName") String friendName) {

@@ -10,8 +10,6 @@
       <h6 class="ms-2">Here is the list of your friends and friend requests</h6>
     </div>
 
-
-
     <hr>
     @if (friends.length > 0){
     <div class="row row-cols-auto justify-content-start" id="filtering"> <!-- consider group of radio-->
@@ -54,7 +52,7 @@
               <div class="col-auto align-content-center pe-5 " style="">
                 <div class="buttons">
                   @if(!friend.accepted && friend.username === friend.requesterName){
-                    <button type="button" class="primary p-1" (click)="acceptFriend(friend)">accept</button>
+                    <button type="button" class="primary p-1" (click)="acceptFriend(friend)">Accept</button>
                   }
                   @if(!friend.accepted && friend.username !== friend.requesterName){
                     <button type="button" class="primary" disabled>pending</button>
@@ -111,7 +109,7 @@
       <div class="modal-footer">
         <button type="button" class="btn" data-bs-dismiss="modal">Close</button>
         <button type="button" class="btn primary" (click)="removeFriend(forRemoval)" data-bs-dismiss="modal"
-                data-cy="home-board-delete-modal-confirm">Remove</button>
+                data-cy="friend-list-delete-modal-confirm">Remove</button>
       </div>
     </div>
   </div>

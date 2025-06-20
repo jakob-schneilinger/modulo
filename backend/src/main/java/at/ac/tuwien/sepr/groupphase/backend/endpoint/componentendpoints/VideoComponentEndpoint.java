@@ -3,7 +3,7 @@ package at.ac.tuwien.sepr.groupphase.backend.endpoint.componentendpoints;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.VideoCreateDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.VideoUpdateDto;
 import at.ac.tuwien.sepr.groupphase.backend.service.componentservice.VideoService;
-import jakarta.annotation.security.PermitAll;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
@@ -43,7 +43,6 @@ public class VideoComponentEndpoint {
      * @param id of the component to get
      * @return video file of component
      */
-    @PermitAll // TODO: fix this
     @GetMapping("{id}")
     public ResponseEntity<FileSystemResource> getVideo(
             @PathVariable(name = "id") long id) {
@@ -59,7 +58,6 @@ public class VideoComponentEndpoint {
      * @param file video file data
      * @return component detail of created video
      */
-    @PermitAll // TODO: fix this
     @PostMapping("")
     public ResponseEntity<ComponentDetailDto> createImageComponent(
             @RequestPart(name = "component", required = true) VideoCreateDto video,
@@ -84,7 +82,6 @@ public class VideoComponentEndpoint {
      * @param file video file data
      * @return component detail of updated video
      */
-    @PermitAll // TODO: fix this
     @PutMapping("")
     public ResponseEntity<ComponentDetailDto> updateVideoComponent(
             @RequestPart(name = "component", required = true) VideoUpdateDto video,

@@ -64,30 +64,17 @@ label {
   -webkit-background-clip: text;
 }
 
-label {
-  font-weight: 600;
-  color: transparent;
-  background-clip: text;
-  background: $gradient;
-  -webkit-background-clip: text;
-}
-
-label {
-  font-weight: 600;
-  color: transparent;
-  background-clip: text;
-  background: $gradient;
-  -webkit-background-clip: text;
-}
-
 nav {
   background-color: $nav-bg;
   height: 100%;
   padding: 1rem;
+  display: flex;
+  flex-direction: column;
 }
 
 ul {
   padding-left: 0;
+  margin: 0;
 }
 
 .logout-wrapper {
@@ -159,10 +146,11 @@ li {
 hr {
   border: 2px solid $nav-separator;
   border-radius: 8px;
+  margin: 1rem 0;
 }
 
 .control {
-  margin: 1rem 0;
+  margin-bottom: 1rem;
 
   button {
     width: 100%;
@@ -177,3 +165,12 @@ hr {
 .logo {
   cursor: pointer;
 }
+
+.boards {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 8px;
+  scrollbar-color: #636364 #171717;
+  scrollbar-width: thin;
+}
+

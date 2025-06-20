@@ -15,6 +15,7 @@ import { Component, Container } from "src/app/dtos/component";
 import { EventService } from "src/app/interaction-services/event.service";
 import { ResizeService } from "src/app/interaction-services/resize.service";
 import { ComponentService } from "src/app/services/component.service";
+import {NotificationService} from "../../../services/notification.service";
 
 @NgComponent({
   selector: "app-base-component",
@@ -30,7 +31,8 @@ export class BaseComponent<T extends Component> implements AfterViewInit {
     protected eventService: EventService,
     protected resizeService: ResizeService,
     protected componentService: ComponentService,
-    protected viewContainer: ViewContainerRef
+    protected viewContainer: ViewContainerRef,
+    protected notification: NotificationService
   ) {}
 
   @Input() depth!: number;
@@ -111,6 +113,7 @@ export class BaseComponent<T extends Component> implements AfterViewInit {
     this.currentWidth = columns;
     const hostEl = this.elementRef.nativeElement as HTMLElement;
     hostEl.style.gridColumn = `${this.self.column} / ${this.self.column + columns}`;
+    hostEl.style.minWidth = `0`;
   }
 
   updateHeight(rows: number) {
@@ -131,6 +134,10 @@ export class BaseComponent<T extends Component> implements AfterViewInit {
 
   deleteComponent() {
     this.eventService.emitDelete(this.self);
+  }
+
+  createTemplate() {
+    this.eventService.emitCreateTemplate(this.self);
   }
 
   enableEditMode() {

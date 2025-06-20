@@ -6,6 +6,7 @@ import { environment } from "src/environments/environment";
 })
 export class Globals {
   readonly backendUri: string = this.findBackendUrl();
+  readonly shareLinkUri: string = `${environment.apiUrl}:4200/#/user`;
   readonly socketUri: string = `${environment.apiUrl}:8080/ws`;
 
   readonly debugMode: boolean = true;

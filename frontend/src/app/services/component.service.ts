@@ -1,4 +1,3 @@
-import { Injectable } from "@angular/core";
 import {
   Board,
   Component,
@@ -13,11 +12,13 @@ import {
   Calendar,
   CalendarEntry,
   Video,
+  TemplateCreateDto,
   VideoCreate
 } from "../dtos/component";
 import { Observable } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import { Globals } from "../global/globals";
+import {Injectable} from "@angular/core";
 
 @Injectable({
   providedIn: "root",
@@ -25,7 +26,8 @@ import { Globals } from "../global/globals";
 export class ComponentService {
   private componentBaseUri: string = this.globals.backendUri + "/component";
 
-  constructor(private httpClient: HttpClient, private globals: Globals) {}
+  constructor(private httpClient: HttpClient, private globals: Globals) {
+  }
 
   createBoard(board: Board): Observable<Board> {
     console.log("Create Board: ", board);
@@ -54,18 +56,18 @@ export class ComponentService {
     console.log("Create Image: ", image);
 
     const form = new FormData();
-    form.append("component", new Blob([JSON.stringify(image)], { type: "application/json" }));
+    form.append("component", new Blob([JSON.stringify(image)], {type: "application/json"}));
     if (data) form.append("image", data);
     return this.httpClient.post<Image>(this.componentBaseUri + "/image", form);
   }
 
   getImageContent(image: Image) {
-    return this.httpClient.get(this.componentBaseUri + "/image/" + image.id, { responseType: "blob" });
+    return this.httpClient.get(this.componentBaseUri + "/image/" + image.id, {responseType: "blob"});
   }
 
   setImageContent(image: Image, data: Blob) {
     const form = new FormData();
-    form.append("component", new Blob([JSON.stringify(image)], { type: "application/json" }));
+    form.append("component", new Blob([JSON.stringify(image)], {type: "application/json"}));
     form.append("image", data);
     return this.httpClient.put<Image>(this.componentBaseUri + "/image", form);
   }
@@ -136,11 +138,11 @@ export class ComponentService {
   }
 
   updatePosAndSize<T extends Component>(comp: T): Observable<T> {
-    const { column, height, width, row, id, parentId } = comp;
-    return this.httpClient.patch<T>(this.componentBaseUri, { column, height, width, row, id, parentId });
+    const {column, height, width, row, id, parentId} = comp;
+    return this.httpClient.patch<T>(this.componentBaseUri, {column, height, width, row, id, parentId});
   }
 
-  updateTask(task: Partial<Task>) {
+  updateTask(task: Component) {
     return this.httpClient.put<Component>(this.componentBaseUri + "/task", task);
   }
 
@@ -174,5 +176,25 @@ export class ComponentService {
 
   setLabel(label: Label) {
     return this.httpClient.post<Label>(this.componentBaseUri + "/label", label);
+  }
+
+  createTemplate(component: Component): Observable<void> {
+    return this.httpClient.post<void>(this.componentBaseUri + "/template/" + component.id, {});
+  }
+
+  getTemplates(): Observable<Board[]> {
+    return this.httpClient.get<Board[]>(this.componentBaseUri + "/template");
+  }
+
+  createComponentFromTemplate(template: TemplateCreateDto): Observable<void> {
+    return this.httpClient.post<void>(this.componentBaseUri + "/template", template);
+  }
+
+  deleteTemplate(templateId: number): Observable<void> {
+    return this.httpClient.delete<void>(this.componentBaseUri + "/template/" + templateId);
+  }
+
+  shareTemplates(templateId: number, friendsToShareWith: string[]): Observable<void> {
+    return this.httpClient.post<void>(this.componentBaseUri + "/template/share/" + templateId, {friendsToShareWith: friendsToShareWith});
   }
 }

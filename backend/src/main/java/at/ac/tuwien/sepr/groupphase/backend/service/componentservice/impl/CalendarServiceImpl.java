@@ -114,6 +114,7 @@ public class CalendarServiceImpl implements CalendarService {
         Calendar ical = icalBuilder(data);
         calendar.getEntries().clear();
         calendar.getEntries().addAll(getCalendarEntries(ical));
+        validateCalendarTitle(calendar);
         calendar.setIcalUrl(url);
         componentService.setComponent(new CalendarUpdateDto(id, null, null, null, null, null), calendar);
         return calendar.accept(MappingDepth.SHALLOW);
@@ -132,6 +133,7 @@ public class CalendarServiceImpl implements CalendarService {
             }
             calendar.getEntries().clear();
             calendar.getEntries().addAll(getCalendarEntries(ical));
+            validateCalendarTitle(calendar);
             componentService.setComponent(new CalendarUpdateDto(id, null, null, null, null, null), calendar);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -187,6 +189,7 @@ public class CalendarServiceImpl implements CalendarService {
         calendar.getEntries().clear();
         calendar.getEntries().addAll(getCalendarEntries(ical));
         calendar.getEntries().addAll(tasks);
+        validateCalendarTitle(calendar);
         componentService.setComponent(new CalendarUpdateDto(id, null, null, null, null, null), calendar);
         return calendar.accept(MappingDepth.SHALLOW);
     }
@@ -204,6 +207,7 @@ public class CalendarServiceImpl implements CalendarService {
         List<CalendarEntry> entries = calendar.getEntries();
         entries.add(toAdd);
         calendar.setEntries(entries);
+        validateCalendarTitle(calendar);
         componentService.setComponent(new CalendarUpdateDto(id, null, null, null, null, null), calendar);
         return calendar.accept(MappingDepth.SHALLOW);
     }
@@ -306,5 +310,18 @@ public class CalendarServiceImpl implements CalendarService {
         at.ac.tuwien.sepr.groupphase.backend.entity.components.Component component = componentRepository.findById(id).orElseThrow(() -> new NotFoundException("Calendar with given ID does not exist"));
         MyCalendar calendar = (MyCalendar) component;
         return calendar;
+    }
+
+    private void validateCalendarTitle(MyCalendar calendar) {
+        List<CalendarEntry> entries = calendar.getEntries();
+        for (CalendarEntry entry : entries) {
+            String title = entry.getTitle();
+            if (title != null && title.length() > 255) {
+                throw new ValidationException(
+                    "Entry title too long: max. 255 characters",
+                    List.of("Event name: " + title)
+                );
+            }
+        }
     }
 }

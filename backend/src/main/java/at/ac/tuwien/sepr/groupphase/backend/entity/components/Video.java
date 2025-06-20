@@ -7,6 +7,9 @@ import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
+/**
+ * Represents a video component entity.
+ */
 @Entity
 @DiscriminatorValue("video")
 @Table(name = "video_content")

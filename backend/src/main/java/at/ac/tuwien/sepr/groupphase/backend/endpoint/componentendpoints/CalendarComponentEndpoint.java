@@ -5,9 +5,8 @@ import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.CalendarCrea
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.CalendarEntryDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.TaskDetailDto;
-import at.ac.tuwien.sepr.groupphase.backend.entity.components.CalendarEntry;
 import at.ac.tuwien.sepr.groupphase.backend.service.componentservice.CalendarService;
-import jakarta.annotation.security.PermitAll;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +45,6 @@ public class CalendarComponentEndpoint {
      * @param dto of the component to create
      * @return component detail of component
      */
-    @PermitAll // TODO: fix this
     @PostMapping()
     public ResponseEntity<ComponentDetailDto> createCalendar(
         @RequestBody CalendarCreateDto dto
@@ -60,7 +58,6 @@ public class CalendarComponentEndpoint {
      * @param file of the component to set
      * @return component detail of component
      */
-    @PermitAll
     @PutMapping("/file/{id}")
     public ResponseEntity<ComponentDetailDto> updateCalendarWithIcs(
             @PathVariable(name = "id") long id,
@@ -76,7 +73,6 @@ public class CalendarComponentEndpoint {
      * @param dto The URL dto of the calendar
      * @return the Updated calendar with the date from the URL
      */
-    @PermitAll
     @PutMapping("/url/{id}")
     public ResponseEntity<ComponentDetailDto> updateCalendarWithUrl(
         @PathVariable(name = "id") long id,
@@ -91,7 +87,6 @@ public class CalendarComponentEndpoint {
      * @param id the id of the calendar to be cleared
      * @return the detail representation of the cleared calendar
      */
-    @PermitAll
     @PutMapping("/clear/{id}")
     public ResponseEntity<ComponentDetailDto> clearCalendar(
         @PathVariable(name = "id") long id
@@ -105,7 +100,6 @@ public class CalendarComponentEndpoint {
      * @param id the id of the calendar to update
      * @return ComponentDetailDto of the calendar that has been updated or null if no changes have been detected
      */
-    @PermitAll
     @PutMapping("/refresh/{id}")
     public ResponseEntity<ComponentDetailDto> refreshCalendar(
         @PathVariable(name = "id") long id
@@ -120,7 +114,6 @@ public class CalendarComponentEndpoint {
      * @param dto the dto of the task that should be added
      * @return the updated calendar
      */
-    @PermitAll
     @PostMapping("/createEntry/{id}")
     public ResponseEntity<ComponentDetailDto> createEntryFromTask(
         @PathVariable(name = "id") long id,
@@ -136,7 +129,6 @@ public class CalendarComponentEndpoint {
      * @param entry the entry to be removed
      * @return the updated calendar
      */
-    @PermitAll
     @PutMapping("/delete/{id}")
     public ResponseEntity<ComponentDetailDto> deleteEntry(
         @PathVariable(name = "id") long id,

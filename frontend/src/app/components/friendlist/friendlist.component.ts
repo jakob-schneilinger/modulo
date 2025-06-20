@@ -5,6 +5,7 @@ import {FriendDto, User} from "../../dtos/user";
 import {AuthService} from "../../services/auth.service";
 import {Group} from "../../dtos/group";
 import {GroupService} from "../../services/group.service";
+import {generateAvatar} from "../user/user.component";
 
 declare var bootstrap: any;
 
@@ -88,7 +89,11 @@ export class FriendlistComponent implements OnInit{
         for (let friend of friends){
           this.userService.getAvatarSrc(friend).subscribe({
             next: (src) => {
-              this.user_pfp.set(friend.username, src);
+              if (src){
+                this.user_pfp.set(friend.username, src);
+              } else {
+                this.user_pfp.set(friend.username, generateAvatar(friend.username));
+              }
             },
             error: (e) => console.error(e),
           });

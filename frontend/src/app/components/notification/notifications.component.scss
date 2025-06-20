@@ -4,6 +4,10 @@
   right: 0;
   padding: 1rem 1rem;
   z-index: 100;
+
+  &:not(* .notification) {
+    padding: 0;
+  }
 }
 
 .notification {
@@ -16,7 +20,6 @@
     width: 1rem;
     height: 1rem;
     border-radius: 50%;
-    background-color: white;
     cursor: pointer;
     line-height: 1rem;
     text-align: center;

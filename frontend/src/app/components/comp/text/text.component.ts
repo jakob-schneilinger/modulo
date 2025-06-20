@@ -25,6 +25,7 @@ export class TextComponent extends BaseComponent<Text> {
   contextMenuActions: ContextMenuAction[] = [
     { label: "Edit Text", action: () => this.edit() },
     { label: "Enable Edit Mode", action: () => this.enableEditMode() },
+    { label: "Create Template", action: () => this.createTemplate() },
     { label: "Delete Text", action: () => this.deleteComponent() },
   ];
 

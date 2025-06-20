@@ -33,7 +33,6 @@
         </div>
       </div>
 
-
       <div style="position: relative">
         <button class="primary" data-bs-toggle="dropdown" aria-expanded="false" title="Share this board">
           <i class="bi bi-share-fill"></i>
@@ -41,36 +40,40 @@
         </button>
         <div class="dropdown-menu dropdown-menu-end add-child-menu">
 
-          <table class="table table-sm mb-0">
-            <thead>
-            <tr>
-              <th>Group</th>
-              <th class="text-center">Read</th>
-              <th class="text-center">Write</th>
-            </tr>
-            </thead>
-            <tbody>
-              @for (myGroup of myGroups; track myGroup.groupId) {
-                <tr [class.text-muted]="!myGroup.permission.read && !myGroup.permission.write">
-                  <td>
-                    <span class="text-truncate d-inline-block" style="max-width: 10rem;" [title]="myGroup.name">
-                      {{ myGroup.name }}
-                    </span>
-                  </td>
-                  <td class="text-center">
-                    <input class="form-check-input" type="checkbox"
-                           [(ngModel)]="myGroup.permission.read"
-                           (change)="onReadChange(myGroup)">
-                  </td>
-                  <td class="text-center">
-                    <input class="form-check-input" type="checkbox"
-                           [(ngModel)]="myGroup.permission.write"
-                           (change)="onWriteChange(myGroup)">
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
+          @if (myGroups.length > 0) {
+            <table class="table table-sm mb-0">
+              <thead>
+              <tr>
+                <th>Group</th>
+                <th class="text-center">Read</th>
+                <th class="text-center">Write</th>
+              </tr>
+              </thead>
+              <tbody>
+                @for (myGroup of myGroups; track myGroup.groupId) {
+                  <tr [class.text-muted]="!myGroup.permission.read && !myGroup.permission.write">
+                    <td>
+                      <span class="text-truncate d-inline-block" style="max-width: 10rem;" [title]="myGroup.name">
+                        {{ myGroup.name }}
+                      </span>
+                    </td>
+                    <td class="text-center">
+                      <input class="form-check-input" type="checkbox"
+                             [(ngModel)]="myGroup.permission.read"
+                             (change)="onReadChange(myGroup)">
+                    </td>
+                    <td class="text-center">
+                      <input class="form-check-input" type="checkbox"
+                             [(ngModel)]="myGroup.permission.write"
+                             (change)="onWriteChange(myGroup)">
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          } @else {
+            No groups found!
+          }
         </div>
       </div>
     }
@@ -82,7 +85,7 @@
         <span class="m-1 only-desktop"> Create </span>
       </button>
       <div class="dropdown-menu dropdown-menu-end add-child-menu">
-        <div class="h6 add-child-header">Add to {{this.component?.name}}</div>
+        <div class="h6 add-child-header">Add&nbsp;to&nbsp;{{this.component?.name}}</div>
         <hr class="m-0 p-0">
         <div class="add-child-items m-0 p-0">
           <div><a class="dropdown-item text-dark" (click)="createChild('board')" data-cy="create-sub-board">Board</a>
@@ -95,6 +98,7 @@
           <div><a class="dropdown-item text-dark" (click)="createChild('task')">Task</a></div>
           <div><a class="dropdown-item text-dark" (click)="createChild('sketch')">Sketch</a></div>
           <div><a class="dropdown-item text-dark" (click)="createChild('calendar')">Calendar</a> </div>
+          <div><a class="dropdown-item text-dark" (click)="createChild('template')">Template</a></div>
         </div>
       </div>
     </div>
@@ -107,10 +111,10 @@
       </button>
     }
 
-    <div class="form-check form-switch only-desktop" title="Enable edit mode to drag and resize components">
+    <div class="form-check form-switch" title="Enable edit mode to drag and resize components">
       <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" [(ngModel)]="inEditMode"
         [attr.data-cy]="'home-edit-mode'">
-      <label class="form-check-label" for="flexSwitchCheckDefault">Edit</label>
+      <label class="form-check-label only-desktop" for="flexSwitchCheckDefault">Edit</label>
     </div>
 
   </div>
@@ -151,6 +155,27 @@
         <button type="button" data-bs-dismiss="modal">Close</button>
         <button type="button" class="primary" (click)="finishDeleteModal()" data-bs-dismiss="modal"
           data-cy="home-board-delete-modal-confirm">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for selecting template -->
+<div class="modal template-modal fade" id="selectTemplateModal" tabindex="-1" aria-labelledby="selectTemplateModalLabel"
+     aria-hidden="true" #selectTemplateModal>
+  <div class="modal-dialog modal-lg modal-xl modal-dialog-centered">
+    <div class="modal-content h-75">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="selectTemplateModalLabel">Select Template</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <app-template-component
+            [isSelectable]="true"
+            (templateSelected)="onTemplateSelected($event)">
+          </app-template-component>
+        </div>
       </div>
     </div>
   </div>

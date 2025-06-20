@@ -109,6 +109,13 @@ export interface Text extends Component<"text"> {
   // fontSize: number;
 }
 
+export interface TemplateCreateDto extends Component {
+  templateRootId: number;
+  column: number;
+  row: number;
+  parentId: number;
+}
+
 export interface GroupComponent<T extends ComponentType = any> {
   id?: number;
   type: T;
@@ -118,6 +125,11 @@ export interface GroupComponent<T extends ComponentType = any> {
   height: number;
   column: number;
   row: number;
+}
+
+export interface TemplateCreateDto extends Component {
+  templateRootId: number;
+  parentId: number;
 }
 
 export function isText(component: Component): component is Text {

@@ -4,7 +4,7 @@ import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDet
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.NoteCreateDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.NoteUpdateDto;
 import at.ac.tuwien.sepr.groupphase.backend.service.componentservice.NoteService;
-import jakarta.annotation.security.PermitAll;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +35,6 @@ public class NoteComponentEndpoint {
      * @param note information to add
      * @return Component detail of created note
      */
-    @PermitAll // TODO: fix this
     @PostMapping("")
     public ResponseEntity<ComponentDetailDto> createBoard(
         @RequestBody NoteCreateDto note) {
@@ -48,7 +47,6 @@ public class NoteComponentEndpoint {
      * @param note information to update
      * @return Component detail of updated note
      */
-    @PermitAll // TODO: fix this
     @PatchMapping("")
     public ResponseEntity<ComponentDetailDto> updateBoard(
         @RequestBody NoteUpdateDto note) {

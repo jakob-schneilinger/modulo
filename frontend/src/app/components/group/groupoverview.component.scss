@@ -1,2 +1,11 @@
 @use "src/styles/global.scss" as *;
 @use "src/styles/variables.scss" as *;
+
+h1{
+  display: inline;
+
+  + span {
+    font-size: 2rem;
+  }
+}
+

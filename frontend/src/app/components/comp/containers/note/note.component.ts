@@ -24,6 +24,7 @@ export class NoteComponent extends ContainerComponent<Note> {
   actions: ContextMenuAction[] = [
     { label: "Edit Title", action: () => this.startEditTitle() },
     { label: "Enable Edit Mode", action: () => this.enableEditMode() },
+    { label: "Create Template", action: () => this.createTemplate() },
     { label: "Delete Board", action: () => this.deleteComponent() },
   ];
 

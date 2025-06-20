@@ -12,6 +12,7 @@ export class EventService {
   deleteComponent$ = new Subject<{ component: Comp }>();
   taskChanged$ = new Subject<{ component: Comp }>();
   taskRepeated$ = new Subject<{ component: Comp }>();
+  createTemplate$ = new Subject<{ component: Comp }>();
   calendarToTask$ = new Subject<{ entry: CalendarEntry }>();
 
   emitWidthChanged(component: Comp) {
@@ -40,5 +41,9 @@ export class EventService {
 
   emitTaskRepeated(component: Comp) {
     this.taskRepeated$.next({ component });
+  }
+
+  emitCreateTemplate(component: Comp) {
+    this.createTemplate$.next({component});
   }
 }

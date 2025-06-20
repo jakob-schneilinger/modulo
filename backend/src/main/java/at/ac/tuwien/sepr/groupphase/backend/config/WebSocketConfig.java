@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.lang.NonNull;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
@@ -55,8 +56,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         }
 
         @Override
-        public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
-                WebSocketHandler wsHandler, Map<String, Object> attributes) {
+        public boolean beforeHandshake(@NonNull ServerHttpRequest request, @NonNull ServerHttpResponse response,
+                                       @NonNull WebSocketHandler wsHandler, @NonNull Map<String, Object> attributes) {
 
             if (request instanceof ServletServerHttpRequest servletRequest) {
                 HttpServletRequest req = servletRequest.getServletRequest();
@@ -70,8 +71,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         }
 
         @Override
-        public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response,
-                WebSocketHandler wsHandler, Exception ex) {
+        public void afterHandshake(@NonNull ServerHttpRequest request, @NonNull ServerHttpResponse response,
+                                   @NonNull WebSocketHandler wsHandler, Exception ex) {
         }
     }
 }

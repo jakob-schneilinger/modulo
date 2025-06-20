@@ -30,6 +30,12 @@ public class TaskValidator extends ComponentValidator  {
         this.componentRepository = componentRepository;
     }
 
+    /**
+     * Validates a task for insertion into a calendar.
+     *
+     * @param taskUpdateDto the task to be inserted
+     *
+     */
     public void validateForCalendar(TaskDetailDto taskUpdateDto) {
         LOG.trace("validateForCalendar({})", taskUpdateDto);
         List<String> errors = new ArrayList<>();
@@ -43,6 +49,13 @@ public class TaskValidator extends ComponentValidator  {
         }
     }
 
+    /**
+     * Validates the task that should be updated.
+     *
+     * @param taskUpdateDto the dto with witch to update the task
+     * @param task the task that has to be updated.
+     * @param userId the user that owns the Task.
+     */
     public void validateTaskForUpdate(TaskUpdateDto taskUpdateDto, Component task, long userId) {
         LOG.trace("validateTaskForUpdate({}, {}, {})", taskUpdateDto, task, userId);
         List<String> errors = new ArrayList<>();
@@ -76,6 +89,11 @@ public class TaskValidator extends ComponentValidator  {
                 if (tightestEndDate != null && taskDto.endDate() != null && taskDto.endDate().isAfter(tightestEndDate)) {
                     errors.add("Task end date is after parent task end date");
                 }
+
+                if (taskDto.repeating() && taskDto.endDate() == null) {
+                    errors.add("Repeating task end date is required");
+                }
+
                 if (((Task) parentComponent).isRepeatable() && taskDto.repeating()) {
                     errors.add("Only Parent task can be repeatable");
                 }

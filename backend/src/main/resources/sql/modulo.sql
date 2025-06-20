@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS components (
     height INT NOT NULL,
     component_column INT NOT NULL,
     component_row INT NOT NULL,
+    is_template BOOLEAN NOT NULL DEFAULT FALSE,
 	PRIMARY KEY(id)
 );
 
@@ -86,8 +87,6 @@ CREATE TABLE IF NOT EXISTS users (
 	display_name VARCHAR(255),
 	email VARCHAR(255) NOT NULL UNIQUE,
 	description VARCHAR(4095),
-	avatar VARCHAR(255),
-	avatar_type ENUM('jpg', 'png', 'gif'),
 	PRIMARY KEY(id)
 );
 

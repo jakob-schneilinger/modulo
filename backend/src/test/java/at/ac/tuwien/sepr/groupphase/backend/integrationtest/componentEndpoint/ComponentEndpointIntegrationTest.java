@@ -6,18 +6,24 @@ import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardCreateD
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.BoardUpdateDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.user.UserCreateDto;
+import at.ac.tuwien.sepr.groupphase.backend.entity.ApplicationUser;
+import at.ac.tuwien.sepr.groupphase.backend.entity.Password;
+import at.ac.tuwien.sepr.groupphase.backend.entity.Salt;
+import at.ac.tuwien.sepr.groupphase.backend.entity.components.Board;
 import at.ac.tuwien.sepr.groupphase.backend.repository.ComponentRepository;
 import at.ac.tuwien.sepr.groupphase.backend.repository.UserRepository;
+import at.ac.tuwien.sepr.groupphase.backend.security.JwtTokenizer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -27,7 +33,6 @@ import java.nio.file.Path;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -44,8 +49,12 @@ public class ComponentEndpointIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private JwtTokenizer jwtTokenizer;
 
     private static String userToken;
+    private final String myUsername = "rin";
+    private final String otherUsername = "emiya";
 
     private static Long parentId;
     private static String otherUserToken;
@@ -54,69 +63,69 @@ public class ComponentEndpointIntegrationTest {
     @Autowired
     private ComponentRepository componentRepository;
 
+    private ApplicationUser testUser(String username){
+        var user =  new ApplicationUser();
+
+        user.setUsername(username);
+        user.setDisplayName(username);
+        user.setEmail(username + "@mail.com");
+
+        Password password = new Password();
+        password.setUser(user);
+        password.setHash("hash");
+        user.setPassword(password);
+
+        Salt salt = new Salt();
+        salt.setUser(user);
+        salt.setSalt("salt");
+        user.setSalt(salt);
+
+        return user;
+    }
+
 
     // set up a user to be able to interact with components, as we need it for auth and rest methods
     // -> maybe do a config for test or mock some data temporarily
-    @BeforeAll
+    @BeforeEach
     void setup()
         throws Exception {
 
         userRepository.deleteAll();
         componentRepository.deleteAll();
 
-        var dto = createUserDto("seb_01", "Sebi", "sebi@ibes.oarg", "1234567890");
+        ApplicationUser me = userRepository.save(testUser(myUsername));
+        ApplicationUser other = userRepository.save(testUser(otherUsername));
 
-        var mvcResponse = mockMvc.perform(post("/api/v1/user/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto).getBytes()))
-            .andReturn()
-            .getResponse();
+        parentId = componentRepository.save(parentBoard(me.getId())).getId();
+        componentRepository.flush();
 
-        JwtResponseDto tokenDto = objectMapper.readerFor(JwtResponseDto.class)
-            .<JwtResponseDto>readValue(mvcResponse.getContentAsByteArray());
-
-        userToken = tokenDto.token();
-
-        var otherDto = createUserDto("othername", "other", "other@other.other", "1234567890");
-
-        var otherMvcResponse = mockMvc.perform(post("/api/v1/user/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(otherDto).getBytes()))
-            .andReturn()
-            .getResponse();
-
-        JwtResponseDto otherTokenDto = objectMapper.readerFor(JwtResponseDto.class)
-            .<JwtResponseDto>readValue(otherMvcResponse.getContentAsByteArray());
-
-        otherUserToken = otherTokenDto.token();
-
-        parentBoard(mockMvc, objectMapper);
+        userToken = jwtTokenizer.getAuthToken(me.getUsername(), me.getDisplayName(), me.getEmail());
+        otherUserToken = jwtTokenizer.getAuthToken(other.getUsername(), other.getDisplayName(), other.getEmail());
     }
 
-    static void parentBoard(MockMvc mockMvc, ObjectMapper objectMapper) throws Exception {
+    @AfterEach
+    void cleanup() {
+        userRepository.deleteAll();
+        userRepository.flush();
+
+        componentRepository.deleteAll();
+        componentRepository.flush();
+    }
+
+
+    Board parentBoard(Long ownerId) throws Exception {
         // having a test datasource would of course help
-        BoardCreateDto boardParent = new BoardCreateDto("board test parent", null, null, 1L,1L,1L,1L);
+        Board root = new Board();
+        root.setBoardName("root");
+        root.setRow(1L);
+        root.setColumn(1L);
+        root.setWidth(1L);
+        root.setHeight(1L);
+        root.setOwnerId(ownerId);
 
-        var response = mockMvc.perform(
-            post("/api/v1/component/board")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsBytes(boardParent))
-                .header("Authorization", userToken)
-        );
-        response.andExpect(status().isCreated());
-
-        parentId = objectMapper.
-            readerFor(BoardDetailDto.class).
-                <BoardDetailDto>readValue(response
-                .andReturn()
-                .getResponse()
-                .getContentAsByteArray()).id();
+        return root;
     }
 
-    @AfterAll
-    static void cleanup() throws Exception {
-        Files.deleteIfExists(Path.of("database/testdb.mv.db"));
-    }
 
     public static UserCreateDto createUserDto(String username, String displayName, String email, String password) {
         var dto = new UserCreateDto();
@@ -132,7 +141,6 @@ public class ComponentEndpointIntegrationTest {
     }
 
     @Test
-    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     void canCreateBoardWithoutParentReturns201() throws Exception {
         BoardCreateDto boardCreateDto = new BoardCreateDto("new board", null, null, 1L,1L,2L,2L);
 
@@ -171,7 +179,6 @@ public class ComponentEndpointIntegrationTest {
     }
 
     @Test
-    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     void createWithParentCorrectly() throws Exception {
 
         BoardCreateDto boardChild = new BoardCreateDto("board test child", null, parentId, 1L,1L,4L,4L);
@@ -208,7 +215,6 @@ public class ComponentEndpointIntegrationTest {
     }
 
     @Test
-    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     void createOnPositionOfExistingBoardReturns409() throws Exception {
         BoardCreateDto boardCreateDto = new BoardCreateDto("new board", null, parentId, 1L,1L,6L,6L);
 
@@ -238,14 +244,12 @@ public class ComponentEndpointIntegrationTest {
     }
 
     @Test
-    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     void deleteExistingBoardAndReturn200() throws Exception {
         var response = mockMvc.perform(
             delete("/api/v1/component/" + parentId)
                 .header("Authorization", userToken)
         );
         response.andExpect(status().isOk());
-        parentBoard(mockMvc, objectMapper);
     }
 
     @Test
@@ -265,7 +269,6 @@ public class ComponentEndpointIntegrationTest {
     }
 
     @Test
-    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     void updateExistingBoardAndReturn200() throws Exception {
         BoardUpdateDto boardChild = new BoardUpdateDto(parentId, "new name", null, null, 1L,1L,7L,7L);
         var response = mockMvc.perform(
@@ -326,7 +329,6 @@ public class ComponentEndpointIntegrationTest {
     }
 
     @Test
-    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     void updateBoardAssignParentBoardAndReturn200() throws Exception {
 
         BoardCreateDto boardChild = new BoardCreateDto("new board", null, null, 1L, 1L, 11L, 11L);

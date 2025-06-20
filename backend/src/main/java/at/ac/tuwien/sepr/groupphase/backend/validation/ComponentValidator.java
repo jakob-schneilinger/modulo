@@ -1,5 +1,6 @@
 package at.ac.tuwien.sepr.groupphase.backend.validation;
 
+
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentUpdateDto;
 import at.ac.tuwien.sepr.groupphase.backend.entity.ApplicationUser;
@@ -198,7 +199,7 @@ public class ComponentValidator {
         return false;
     }
 
-    public Component getRootComponent(Component component) {
+    private Component getRootComponent(Component component) {
         Component rootComponent = component;
         while (!rootComponent.getParents().isEmpty()) {
             rootComponent = rootComponent.getParents().getFirst();

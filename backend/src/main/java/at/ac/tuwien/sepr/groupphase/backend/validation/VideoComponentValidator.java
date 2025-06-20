@@ -12,7 +12,7 @@ import java.util.List;
 @org.springframework.stereotype.Component
 public class VideoComponentValidator {
 
-    private static final long MAX_VIDEO_SIZE_BYTES = 4 * 1024 * 1024;
+    private static final long MAX_VIDEO_SIZE_BYTES = 20 * 1024 * 1024;
 
     private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private final ComponentValidator componentValidator;

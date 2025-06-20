@@ -21,6 +21,7 @@ import { DragService } from "./interaction-services/drag.service";
 import { CommonModule } from "@angular/common";
 import { ComponentsModule } from "./components/comp/components.module";
 import { FriendlistComponent } from "./components/friendlist/friendlist.component";
+import {TemplateComponent} from "./components/template/template.component";
 import { NotificationsComponent } from "./components/notification/notifications.component";
 
 @NgModule({
@@ -33,7 +34,9 @@ import { NotificationsComponent } from "./components/notification/notifications.
     UserLoginComponent,
     UserCreateComponent,
     UserComponent,
+    TemplateComponent,
     NotificationsComponent,
+    TemplateComponent,
   ],
   bootstrap: [AppComponent],
   imports: [
@@ -46,6 +49,7 @@ import { NotificationsComponent } from "./components/notification/notifications.
     FormsModule,
     RouterLink,
   ],
+  exports: [TemplateComponent],
   providers: [httpInterceptorProviders, provideHttpClient(withInterceptorsFromDi()), ResizeService, DragService],
 })
 export class AppModule {}

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ViewContainerRef } from "@angular/core";
+import { Component, Input, OnInit, ViewChild, ViewContainerRef } from "@angular/core";
 import { ContainerComponent } from "../container.component";
 import { Board } from "src/app/dtos/component";
 import ComponentFactory from "src/app/global/ComponentFactory";
@@ -14,9 +14,12 @@ export class BoardComponent extends ContainerComponent<Board> {
   editingTitle = false;
   titleBuffer = "";
 
+  @Input("forceCard") forceCard: boolean = false;
+
   actions: ContextMenuAction[] = [
     { label: "Edit Title", action: () => this.startEditTitle() },
     { label: "Enable Edit Mode", action: () => this.enableEditMode() },
+    { label: "Create Template", action: () => this.createTemplate() },
     { label: "Delete Board", action: () => this.deleteComponent() },
   ];
 

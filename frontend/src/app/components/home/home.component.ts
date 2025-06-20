@@ -19,10 +19,9 @@ import { EventService } from "../../interaction-services/event.service";
 import { Subscription } from "rxjs";
 import { gridVar } from "../../dtos/grid";
 import { GroupService } from "../../services/group.service";
-import { Group, GroupWithPermission } from "../../dtos/group";
+import { GroupWithPermission } from "../../dtos/group";
 import { type ComponentUpdate, WebsocketService } from "../../services/websocket.service";
 import { ContainerComponent } from "../comp/containers/container.component";
-import { update } from "lodash";
 
 // for delete modal
 declare var bootstrap: any;
@@ -51,6 +50,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
   private _board: ContainerComponent<Board>;
   @ViewChild("deleteModal") deleteModal: ElementRef;
+  @ViewChild("selectTemplateModal") templateModal: ElementRef;
   @ViewChild("preview", { static: false }) previewEl!: ElementRef;
 
   inEditMode: boolean = false;
@@ -243,8 +243,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   addChild(comp: Comp) {
-    this.component.children.push(comp);
-    this.component = { ...this.component };
+    console.log("Child created:", comp)
   }
 
   updateName() {
@@ -300,7 +299,17 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.setRecursiveParentId(this.component);
     this.compService.updateTask(event.component as any).subscribe({
       next: (data) => this.findAndPatch(this.component.children, data),
-      error: (err) => console.error("Update failed", err),
+      error: (err) => {
+        this.compService.getComponent(event.component.id).subscribe({
+          next: (e) => {
+            this.findAndPatch(this.component.children, e);
+          },
+          error: (er) => {
+            console.log("this should not happen");
+          }
+        })
+        console.error("Failed to update task", err);
+      }
     });
   }
 
@@ -341,6 +350,9 @@ export class HomeComponent implements OnInit, OnDestroy {
         break;
       case "note":
         this.createNote();
+        break;
+      case "template":
+        this.openTemplateModal();
         break;
       case "sketch":
         this.createImage(true);
@@ -427,6 +439,23 @@ export class HomeComponent implements OnInit, OnDestroy {
             console.error("Failed  to add Task to Calendar", err);
           },
         })
+      } else if(container.type === "task"){
+        this.compService.updateTask({ ...container, parentId: targetComponent.id}).subscribe({
+          next: (value) => {
+            console.log("Drag/Resize success");
+          },
+          error: (err) => {
+            this.compService.getComponent(container.id).subscribe({
+                next: (e) => {
+                  this.findAndPatch(this.component.children, e);
+                },
+                error: (er) => {
+                  console.log("this should not happen");
+            }
+            })
+            console.error("Failed  to add Task to Calendar", err);
+          }
+        })
       } else {
         this.compService.updatePosAndSize({ ...container, parentId: targetComponent.id } as any).subscribe({
           next: (value) => {
@@ -491,6 +520,33 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   }
 
+  openTemplateModal() {
+    const modal = new bootstrap.Modal(this.templateModal.nativeElement);
+    modal.show();
+  }
+
+  onTemplateSelected(template: Board) {
+    const { column, row } = this.findFirstFreeSpace(template.children[0].width, template.children[0].height);
+    this.compService
+      .createComponentFromTemplate({
+        height: 0,
+        type: undefined,
+        width: 0,
+        templateRootId: template.id,
+        column: column,
+        row: row,
+        parentId: this.component.id
+      })
+      .subscribe({
+        next: (created) => {
+          console.log("Created: ", created);
+          const modal = bootstrap.Modal.getInstance(this.templateModal.nativeElement);
+          modal.hide();
+        },
+        error: (err) => console.error(err),
+      });
+  }
+
   logOut() {
     this.authService.logoutUser();
     this.router.navigate(["/login"]);
@@ -503,6 +559,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   incrementDepth() {
     if (this.currentDepth < this.maxAllowedDepth) {
       this.currentDepth++;
+      this.component.depth++;
       this.compService.changeBoardDepth(this.component.id, this.currentDepth).subscribe();
     }
   }
@@ -510,6 +567,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   decrementDepth() {
     if (this.currentDepth > this.minAllowedDepth && this.getContainerDepth(this.component) < this.currentDepth) {
       this.currentDepth--;
+      this.component.depth--;
       this.compService.changeBoardDepth(this.component.id, this.currentDepth).subscribe();
     } else {
       console.error("Can't decrease board depth, check your board!");
@@ -567,6 +625,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.compService.getComponent(id).subscribe({
           next: (comp) => {
             this.component = comp as any;
+            this.currentDepth = (comp as Board)?.depth ?? 5;
 
             this.groupService.getBoardPermission(this.component.id).subscribe({
               next: (value) => {

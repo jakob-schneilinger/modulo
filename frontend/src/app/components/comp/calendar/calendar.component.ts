@@ -57,7 +57,10 @@ export class CalendarComponent extends BaseComponent<Calendar> implements OnInit
         this.inputActive = false;
         this.self.entries = value.entries;
       },
-      error: (e) => console.error(e),
+      error: (e) => {
+        this.notification.warn("Calendar incompatible!", "Check that your entry titels bigger than 255\xa0characters and has a correct file type (ics).", 5000)
+        console.error(e)
+      },
     });
   }
 
@@ -68,7 +71,10 @@ export class CalendarComponent extends BaseComponent<Calendar> implements OnInit
         this.inputActive = false;
         this.self.entries = value.entries;
         },
-      error: (e) => console.error(e),
+      error: (e) => {
+        this.notification.warn("Calendar incompatible!", "Check that your entry titels bigger than 255\xa0characters and the url has the correct format (webcal:// or http://).", 5000)
+        console.error(e)
+      },
     });
   }
 

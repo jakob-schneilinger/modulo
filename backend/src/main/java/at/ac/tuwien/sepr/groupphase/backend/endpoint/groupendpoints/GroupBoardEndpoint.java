@@ -3,7 +3,7 @@ package at.ac.tuwien.sepr.groupphase.backend.endpoint.groupendpoints;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDetailDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.group.GroupBoardDto;
 import at.ac.tuwien.sepr.groupphase.backend.service.groupservice.GroupBoardService;
-import jakarta.annotation.security.PermitAll;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,7 +33,6 @@ public class GroupBoardEndpoint {
      * @param dto info
      * @return void
      */
-    @PermitAll // TODO: fix this
     @PostMapping()
     public ResponseEntity<Void> addGroupToBoard(@RequestBody GroupBoardDto dto) {
         service.addGroupToBoard(dto);
@@ -46,7 +45,6 @@ public class GroupBoardEndpoint {
      * @param dto info
      * @return void
      */
-    @PermitAll // TODO: fix this
     @DeleteMapping()
     public ResponseEntity<Void> removeGroupFromBoard(@RequestBody GroupBoardDto dto) {
         service.removeGroupFromBoard(dto);
@@ -59,7 +57,6 @@ public class GroupBoardEndpoint {
      * @param dto info
      * @return void
      */
-    @PermitAll // TODO: fix this
     @PutMapping()
     public ResponseEntity<Void> updateBoardPermission(@RequestBody GroupBoardDto dto) {
         service.updateBoardPermission(dto);
@@ -71,7 +68,6 @@ public class GroupBoardEndpoint {
      *
      * @return All shared root boards with group infos
      */
-    @PermitAll // TODO: fix this
     @GetMapping()
     public ResponseEntity<List<ComponentDetailDto>> getGroupRoots() {
         return new ResponseEntity<>(service.getGroupRoots(), HttpStatus.OK);
@@ -83,7 +79,6 @@ public class GroupBoardEndpoint {
      * @param id of the board
      * @return List of groups
      */
-    @PermitAll // TODO: fix this
     @GetMapping("{id}")
     public ResponseEntity<List<GroupBoardDto>> getGroupsByBoardId(@PathVariable("id") long id) {
         return new ResponseEntity<>(service.getGroupsByBoardId(id), HttpStatus.OK);
@@ -95,7 +90,6 @@ public class GroupBoardEndpoint {
      * @param id of the board
      * @return null if owner, true if write permission, else false
      */
-    @PermitAll // TODO: fix this
     @GetMapping("permission/{id}")
     public ResponseEntity<Boolean> hasWritePermission(@PathVariable("id") long id) {
         return new ResponseEntity<>(service.hasWritePermission(id), HttpStatus.OK);

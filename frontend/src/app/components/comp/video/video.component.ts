@@ -65,7 +65,10 @@ export class VideoComponent extends BaseComponent<Video> implements OnInit {
         this.inputActive = false;
         this.showVideo(video);
       },
-      error: (e) => console.error(e),
+      error: (e) => {
+        this.notification.warn("Video incompatible!", "Check that your video is not bigger than 20\xa0MB and has the correct file type (mp4 or mov).", 5000)
+        console.error(e)
+      },
     });
   }
 

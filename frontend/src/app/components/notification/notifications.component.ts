@@ -25,7 +25,7 @@ export class NotificationsComponent implements OnInit {
 
   constructor(private not: NotificationService, private globals: Globals) {
     // inject console
-    const injectTo: NotificationType[] = globals.debugMode ? ["error", "warn"] : [];
+    const injectTo: NotificationType[] = globals.debugMode ? ["error"] : [];
     for (const type of injectTo) {
       const old = console[type];
       console[type] = (...params) => {

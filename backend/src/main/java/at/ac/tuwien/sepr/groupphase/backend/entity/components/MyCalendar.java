@@ -23,7 +23,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-
+/**
+ * Represents a calendar component entity.
+ */
 @Entity
 @Table(name = "calendar_content")
 @DiscriminatorValue("calendar")
@@ -32,11 +34,9 @@ import java.util.List;
 @PrimaryKeyJoinColumn(name = "id")
 public class MyCalendar extends Component {
 
-    @Override
-    public ComponentDetailDto accept(MappingDepth depth) {
-        return ComponentEntityToDtoMapper.visit(this);
-    }
-
+    /**
+     * Entries of this calendar component.
+     */
     @OneToMany(
         cascade       = CascadeType.ALL,
         orphanRemoval = true,
@@ -49,9 +49,18 @@ public class MyCalendar extends Component {
     )
     private List<CalendarEntry> entries;
 
+    /**
+     * Url of optional extern calendar.
+     */
     @Column(name = "ical_url")
     private String icalUrl;
 
+    /**
+     * Maps all given Entries to the corresponding dto.
+     *
+     * @param calendar entries
+     * @return list of entries dto
+     */
     public static List<CalendarEntryDetailDto> getCalendarEntries(List<CalendarEntry> calendar) {
         List<CalendarEntryDetailDto> calendarDetails = new ArrayList<>();
         for (CalendarEntry entry : calendar) {
@@ -75,5 +84,9 @@ public class MyCalendar extends Component {
         calendarDetails.sort(Comparator.comparing(CalendarEntryDetailDto::startDate));
         return calendarDetails;
     }
-}
 
+    @Override
+    public ComponentDetailDto accept(MappingDepth depth) {
+        return ComponentEntityToDtoMapper.visit(this);
+    }
+}

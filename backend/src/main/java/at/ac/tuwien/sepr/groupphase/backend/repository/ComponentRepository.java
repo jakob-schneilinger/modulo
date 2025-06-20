@@ -2,9 +2,9 @@ package at.ac.tuwien.sepr.groupphase.backend.repository;
 
 import at.ac.tuwien.sepr.groupphase.backend.entity.components.Component;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,6 +17,7 @@ public interface ComponentRepository extends JpaRepository<Component, Long> {
             SELECT c.id
             FROM components c
             WHERE c.owner_id = :ownerId
+        AND c.is_template = false
               AND c.id NOT IN (
                   SELECT cc.id_child
                   FROM container_children cc
@@ -51,4 +52,16 @@ public interface ComponentRepository extends JpaRepository<Component, Long> {
     Long getParentId(@Param("childId") Long childId);
 
     Optional<Component> findByChildren_Id(Long childId);
+
+    @Query(nativeQuery = true, value = """
+        SELECT c.id
+        FROM components c
+        WHERE c.owner_id = :ownerId
+          AND c.is_template = true
+          AND c.id NOT IN (
+              SELECT cc.id_child
+              FROM container_children cc
+          )
+        """)
+    List<Long> findAllRootTemplateIdsByOwnerId(@Param("ownerId") long ownerId);
 }

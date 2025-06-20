@@ -4,7 +4,7 @@ import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDet
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.TextCreateDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.TextUpdateDto;
 import at.ac.tuwien.sepr.groupphase.backend.service.componentservice.TextService;
-import jakarta.annotation.security.PermitAll;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +35,6 @@ public class TextComponentEndpoint {
      * @param textComponent information to add
      * @return component detail of created text component
      */
-    @PermitAll
     @PostMapping("")
     public ResponseEntity<ComponentDetailDto> createTextComponent(
         @RequestBody TextCreateDto textComponent) {
@@ -48,7 +47,6 @@ public class TextComponentEndpoint {
      * @param textComponent information to add
      * @return component detail of updated text component
      */
-    @PermitAll
     @PatchMapping("")
     public ResponseEntity<ComponentDetailDto> updateTextComponent(
         @RequestBody TextUpdateDto textComponent) {

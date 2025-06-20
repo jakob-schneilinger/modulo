@@ -23,11 +23,12 @@ export class TaskComponent extends ContainerComponent<Task> implements OnInit, A
   actions: ContextMenuAction[] = [
     { label: "Edit Title", action: () => this.startEditTitle() },
     { label: "Enable Edit Mode", action: () => this.enableEditMode() },
+    { label: "Create Template", action: () => this.createTemplate() },
     { label: "Delete Task", action: () => this.deleteComponent() },
   ];
 
   isTask = false;
-  @Input() isNotChildOfTask!: boolean;
+  isNotChildOfTask: boolean = false;
   parent: ElementRef;
   editingStartDate = false;
   editingEndDate = false;
@@ -60,7 +61,7 @@ export class TaskComponent extends ContainerComponent<Task> implements OnInit, A
     this.self.name = trimmedTitle;
     this.editingTitle = false;
     if (changed) {
-      this.componentService.updateTask({ id: this.self.id, name: this.self.name, parentId: this.self.parentId }).subscribe();
+      this.componentService.updateTask(this.self).subscribe();
     }
   }
 
@@ -82,13 +83,16 @@ export class TaskComponent extends ContainerComponent<Task> implements OnInit, A
 
   private countCompletedTasks(children: Comp[]): number {
     return children.reduce((sum, child) => {
-      if (!isType(child, "task") && ((isType(child, "board") || (isType(child, "note"))))) return this.countCompletedTasks(child.children);
-      if (!isType(child, "task")) return 0;
-      const completed = child.completed ? 1 : 0;
-      const childCompleted = child.children ? this.countCompletedTasks(child.children) : 0;
-      return completed + childCompleted + sum;
+      const nestedCompleted = (isType(child,"note") || isType(child, "board")) && child.children ? this.countCompletedTasks(child.children) : 0;
+      let isCompletedTask = 0
+      if(isType(child, "task")) {
+        const completed = child.completed ? 1 : 0;
+        isCompletedTask = child.children ? this.countCompletedTasks(child.children) + completed : completed;
+      }
+      return sum + isCompletedTask + nestedCompleted;
     }, 0);
   }
+
 
   getTotalTasks(): number {
     return this.self.children ? this.countTasks(this.self.children) : 0;
@@ -96,10 +100,9 @@ export class TaskComponent extends ContainerComponent<Task> implements OnInit, A
 
   private countTasks(children: Comp[]): number {
     return children.reduce((sum, child) => {
-      if (!isType(child, "task") && ((isType(child, "board") || (isType(child, "note"))))) return this.countTasks(child.children);
-      if (!isType(child, "task")) return 0;
-      const sumTasks = child.children ? this.countTasks(child.children) : 0;
-      return 1 + sumTasks + sum;
+      const nestedTasks = (isType(child,"note") || isType(child, "board")) && child.children ? this.countTasks(child.children) : 0;
+      const isTask = isType(child, "task") ? this.countTasks(child.children) + 1  : 0;
+      return sum + isTask + nestedTasks;
     }, 0);
   }
 
@@ -117,8 +120,11 @@ export class TaskComponent extends ContainerComponent<Task> implements OnInit, A
     return false;
   }
 
+  isRepeateable():boolean{
+    return !isType(this.parentContainer,"task");
+  }
+
   private handleRepeatable() {
-   // if (this.isNotChildOfTask) {
       if (this.self.repeating === true) {
         if (this.self.startDate) {
           const date = new Date(this.self.endDate);
@@ -127,8 +133,7 @@ export class TaskComponent extends ContainerComponent<Task> implements OnInit, A
             this.eventService.emitTaskRepeated(this.self);
           }
         }
-    //  }
-    }
+      }
   }
 
   endDateEditable(): boolean {
@@ -153,23 +158,24 @@ export class TaskComponent extends ContainerComponent<Task> implements OnInit, A
 
   setRepeating() {
     if (this.self.repeating) {
-      this.timerSub = this.timerService.tick$.subscribe(() => {
-        this.handleRepeatable();
-        console.log("TEST");
-      });
-      this.self.startDate = null;
+      if(this.timerSub){
+        this.timerSub.unsubscribe();
+      }
       this.self.repeating = false;
       this.save();
     } else {
-      if (!this.self.startDate) this.self.startDate = new Date();
-      this.self.repeating = true;
-      this.save();
+      if (this.self.endDate && this.self.startDate) {
+        this.timerSub = this.timerService.tick$.subscribe(() => {
+          this.handleRepeatable();
+        });
+        this.self.repeating = true;
+        this.save();
+      }
     }
   }
 
   available(): boolean {
     if (this.readonlyMode) return true;
-
     if (this.self.startDate) {
       const date = new Date(this.self.startDate);
       const now = new Date();
@@ -178,7 +184,6 @@ export class TaskComponent extends ContainerComponent<Task> implements OnInit, A
       }
     }
     if (this.getCompletedTasks() < this.getTotalTasks()) {
-      this.self.completed = false;
       return true;
     }
     return false;

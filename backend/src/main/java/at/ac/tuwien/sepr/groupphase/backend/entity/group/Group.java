@@ -5,7 +5,6 @@ import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.group.GroupDetailWithMe
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.group.GroupDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.user.UserDto;
 import at.ac.tuwien.sepr.groupphase.backend.entity.ApplicationUser;
-import at.ac.tuwien.sepr.groupphase.backend.entity.components.Component;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -26,23 +25,38 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Represents a group entity.
+ */
 @Entity
 @Getter
 @Setter
 @Table(name = "groups")
 public class Group {
 
+    /**
+     * ID of this group.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * Name of this group.
+     */
     @Column(name = "name")
     private String name;
 
+    /**
+     * Owner if this group.
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
     private ApplicationUser owner;
 
+    /**
+     * Members of this group.
+     */
     @ManyToMany
     @JoinTable(
         name = "group_members",
@@ -51,20 +65,37 @@ public class Group {
     )
     private Set<ApplicationUser> members;
 
+    /**
+     * Permissions of this group.
+     */
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Permission> permissions = new HashSet<>();
 
+    /**
+     * Maps this group to a GroupDto.
+     *
+     * @return GroupDto of this group
+     */
     public GroupDto getGroupDto() {
         return new GroupDto(id, name);
     }
 
+    /**
+     * Maps this group to a GroupDetailDto.
+     *
+     * @return GroupDetailDto of this group
+     */
     public GroupDetailDto getGroupDetailDto() {
         return new GroupDetailDto(id, name, new UserDto(owner.getUsername(), owner.getDisplayName(), null));
     }
 
+    /**
+     * Maps this group to a GroupDetailWithMembersDto.
+     *
+     * @return GroupDetailWithMembersDto of this group
+     */
     public GroupDetailWithMembersDto getGroupDetailWithMembersDto() {
         return new GroupDetailWithMembersDto(id, name, new UserDto(owner.getUsername(), owner.getDisplayName(), null),
             members.stream().map(member -> new UserDto(member.getUsername(), member.getDisplayName(), null)).collect(Collectors.toSet()));
     }
 }
-

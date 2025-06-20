@@ -3,7 +3,7 @@ package at.ac.tuwien.sepr.groupphase.backend.endpoint.componentendpoints;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ImageCreateDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ImageUpdateDto;
 import at.ac.tuwien.sepr.groupphase.backend.service.componentservice.ImageService;
-import jakarta.annotation.security.PermitAll;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
@@ -43,7 +43,6 @@ public class ImageComponentEndpoint {
      * @param id of the component to get
      * @return image file of component
      */
-    @PermitAll // TODO: fix this
     @GetMapping("{id}")
     public ResponseEntity<FileSystemResource> getImage(
             @PathVariable(name = "id") long id) {
@@ -59,7 +58,6 @@ public class ImageComponentEndpoint {
      * @param file image file data
      * @return component detail of created image
      */
-    @PermitAll // TODO: fix this
     @PostMapping("")
     public ResponseEntity<ComponentDetailDto> createImageComponent(
             @RequestPart(name = "component", required = true) ImageCreateDto image,
@@ -84,7 +82,6 @@ public class ImageComponentEndpoint {
      * @param file image file data
      * @return component detail of updated image
      */
-    @PermitAll // TODO: fix this
     @PutMapping("")
     public ResponseEntity<ComponentDetailDto> updateImageComponent(
             @RequestPart(name = "component", required = true) ImageUpdateDto image,

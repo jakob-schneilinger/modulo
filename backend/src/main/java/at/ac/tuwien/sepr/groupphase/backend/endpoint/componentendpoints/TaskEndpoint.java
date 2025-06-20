@@ -4,11 +4,10 @@ import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.ComponentDet
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.TaskCreateDto;
 import at.ac.tuwien.sepr.groupphase.backend.endpoint.dto.components.TaskUpdateDto;
 import at.ac.tuwien.sepr.groupphase.backend.service.componentservice.TaskService;
-import jakarta.annotation.security.PermitAll;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,7 +36,6 @@ public class TaskEndpoint {
      * @param dto the task to be created
      * @return component detail of the task
      */
-    @PermitAll
     @PostMapping("")
     public ResponseEntity<ComponentDetailDto> createTask(
         @RequestBody TaskCreateDto dto) {
@@ -50,7 +48,6 @@ public class TaskEndpoint {
      * @param dto the task to be updated
      * @return component detail of the task
      */
-    @PermitAll
     @PutMapping("")
     public ResponseEntity<ComponentDetailDto> updateTask(
         @RequestBody TaskUpdateDto dto) {
@@ -63,7 +60,6 @@ public class TaskEndpoint {
      * @param dto the task to repeat
      * @return component detail of the task
      */
-    @PermitAll
     @PutMapping("/repeat")
     public ResponseEntity<ComponentDetailDto> repeatTask(
         @RequestBody TaskUpdateDto dto

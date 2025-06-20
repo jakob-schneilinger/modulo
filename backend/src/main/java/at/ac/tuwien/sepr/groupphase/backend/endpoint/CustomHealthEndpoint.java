@@ -1,6 +1,6 @@
 package at.ac.tuwien.sepr.groupphase.backend.endpoint;
 
-import jakarta.annotation.security.PermitAll;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.availability.AvailabilityChangeEvent;
 import org.springframework.boot.availability.LivenessState;
@@ -26,7 +26,6 @@ public class CustomHealthEndpoint {
     }
 
 
-    @PermitAll
     @GetMapping
     public ResponseEntity<String> getHealth() {
         if (status) {
@@ -39,7 +38,6 @@ public class CustomHealthEndpoint {
      * Before the shutdown of a pod this url will be called. Afterwards the health probes fail. Therefore the pod
      * is removed from the healthy pods which are exposed. This way a zero downtime upgrade is possible.
      */
-    @PermitAll
     @GetMapping("/prepareShutdown")
     public void preShutdown() {
         AvailabilityChangeEvent.publish(applicationContext, LivenessState.BROKEN);

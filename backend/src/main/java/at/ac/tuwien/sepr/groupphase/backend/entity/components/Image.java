@@ -7,6 +7,9 @@ import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
+/**
+ * Represents an image component entity.
+ */
 @Entity
 @DiscriminatorValue("image")
 @Table(name = "image_content")

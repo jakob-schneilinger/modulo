@@ -21,9 +21,11 @@
   <div class="content">
     @if (this.self.entries.length <= 0) {
       <div class="no-cal-msg">
-        No calendar selected yet!
-        <button (click)="focusFileInput()" class="hide-in-read-only-mode">Set File</button>
-        <input #webCalUrlInput type="url" class="hide-in-read-only-mode" (keyup.enter)="setUrl(webCalUrlInput.value)" placeholder="Input WebCal-URL here:">
+        <span>
+          No calendar selected yet!
+        </span>
+        <button (click)="focusFileInput()" class="set-file-btn hide-in-read-only-mode">Set File</button>
+        <input #webCalUrlInput type="url" class="hide-in-read-only-mode url-input" (keyup.enter)="setUrl(webCalUrlInput.value)" placeholder="Input WebCal-URL here:">
       </div>
       <input #input class="hidden hide-in-read-only-mode" type="file" (change)="setFile($event.target.files[0])"
            accept=".ics">
